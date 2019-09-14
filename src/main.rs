@@ -1,16 +1,12 @@
+mod read_csv;
+
 use std::env;
-use std::fs;
 
 fn main() {
-    // print args
-    for argument in env::args() {
-        println!("{}", argument);
-    }
-    // read contents of CSV and print
-    read_csv();
-}
+    // collect args into a Vector and assign them to vars
+    let args: Vec<String> = env::args().collect();
+    let filename = &args[1];
 
-fn read_csv() {
-    let file_string = fs::read_to_string("test.csv").expect("Unable to read file");
-    println!("{:?}", file_string);
+    // read contents of CSV and print
+    read_csv::read_csv_to_string(filename);
 }
