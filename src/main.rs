@@ -3,6 +3,7 @@ mod balance;
 mod error;
 
 use std::env;
+use std::io::{Error, ErrorKind};
 
 fn main() -> Result<(), std::io::Error> {
     // collect args into a Vector and assign them to vars
@@ -11,11 +12,14 @@ fn main() -> Result<(), std::io::Error> {
     let command;
 
     // check for command args - return if none provided
-    // if args.len() < 3 {
-    //     return;
-    // } else {
+    if args.len() < 3 {
+        return Err(Error::new(
+            ErrorKind::InvalidInput,
+            "invalid input: please provide a command",
+        ));
+    } else {
         command = &args[2];
-    // }
+    }
 
     // match ledger commands
     match command.as_ref() {
