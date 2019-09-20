@@ -3,7 +3,6 @@ mod balance;
 mod error;
 
 use std::env;
-use std::io::{Error, ErrorKind};
 
 fn main() -> Result<(), std::io::Error> {
     // collect args into a Vector and assign them to vars
@@ -13,10 +12,7 @@ fn main() -> Result<(), std::io::Error> {
 
     // check for command args - return if none provided
     if args.len() < 3 {
-        return Err(Error::new(
-            ErrorKind::InvalidInput,
-            "invalid input: please provide a command",
-        ));
+        return error::error();
     } else {
         command = &args[2];
     }
