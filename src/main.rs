@@ -15,6 +15,7 @@ fn main() {
         command = &args[2];
     }
 
+    // match ledger commands
     match command.as_ref() {
         // read contents of CSV and print
         "accounts" => accounts::read_csv_to_string(filename),

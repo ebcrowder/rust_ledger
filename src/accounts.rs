@@ -4,10 +4,11 @@ use std::fs;
 
 pub fn read_csv_to_string(filename: &str) {
     let file_string = fs::read_to_string(filename).expect("Unable to read ledger file");
-    println!("{:?}", file_string);
 
     // split words by separate lines
-    let word_collection: Vec<&str> = file_string.split_ascii_whitespace().collect();
+    let mut word_collection: Vec<&str> = file_string.split_ascii_whitespace().collect();
+    word_collection.sort();
+    word_collection.dedup();
 
     for word in word_collection {
         if word.contains(':') {
