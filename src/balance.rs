@@ -1,29 +1,25 @@
 // returns balances of all general ledger accounts
 
-// use std::fs;
-
 use std::fs::File;
 use std::io::{self, prelude::*, BufReader};
 
 pub fn balance(filename: &str) -> io::Result<()> {
-    // let file_string = fs::read_to_string(filename).expect("Unable to read ledger file");
-
-    // // split words by separate lines and collect them into a Vector
-    // let mut ledger_vec: Vec<&str> = file_string.lines().collect();
-
-    // for line in ledger_vec {
-    //     println!("{:?}", line)
-
-    //   line.contains()
-
-    // }
-
-    let mut file = File::open(filename).unwrap(); // fail if the file doesn't exist
-    let reader = BufReader::new(file);
-
-    for line in reader.lines() {
-        println!("{}", line?);
+    // edit this eventually
+    #[allow(dead_code)]
+    struct AccountSum {
+        account: String,
+        balance: i32,
     }
+
+    let file = File::open(filename).unwrap(); // fail if the file doesn't exist
+    let reader = BufReader::new(file);
+    let accounts: Vec<String> = reader
+        .lines()
+        .filter_map(|line_result| line_result)
+        // .filter_map(|line| line.parse().ok())
+        .collect();
+
+    println!("accounts {:?}", accounts);
 
     Ok(())
 }
