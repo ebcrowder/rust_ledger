@@ -18,13 +18,21 @@ pub fn balance(filename: &str) -> Result<(), Error> {
     for line in reader.lines() {
         let line_unwrap = line.unwrap();
 
-        let line_vec: Vec<&str> = line_unwrap.split_terminator("$").collect();
+        let line_vec: Vec<_> = line_unwrap.split_terminator("$").collect();
 
         accounts_vec.push(AccountSum {
-            account: line_vec[0].parse().unwrap(),
+            account: line_vec[0].parse::<String>().unwrap(),
             balance: line_vec[1].parse::<i32>().unwrap(),
         });
+
+        println!("{:?}", line_vec);
+
+
     }
+
+    // for account in accounts_vec {
+    //     println!("{:?}", account.account)
+    // }
 
     Ok(())
 }
