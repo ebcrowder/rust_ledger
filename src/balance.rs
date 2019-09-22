@@ -4,7 +4,6 @@ use std::fs::File;
 use std::io::{BufRead, BufReader, Error};
 
 pub fn balance(filename: &str) -> Result<(), Error> {
-    // edit this eventually
     #[allow(dead_code)]
     struct AccountSum {
         account: String,
@@ -14,17 +13,18 @@ pub fn balance(filename: &str) -> Result<(), Error> {
     let file = File::open(filename)?;
     let reader = BufReader::new(file);
 
-    let mut accountsVec: Vec<AccountSum>;
+    let mut accounts_vec: Vec<AccountSum> = Vec::new();
 
     for line in reader.lines() {
-        for word in line.unwrap().split_terminator("$").collect() {
-            println!("{:?}", word);
+        let line_unwrap = line.unwrap();
 
-            accountsVec.push(AccountSum {
-                account: word.swap_remove(0),
-                balance: word.to_string(),
-            });
-        }
+        let line_vec: Vec<&str> = line_unwrap.split_terminator("$").collect();
+
+        accounts_vec.push(AccountSum {
+            account: line_vec[0].parse().unwrap(),
+            balance: line_vec[1].parse::<i32>().unwrap(),
+        });
     }
+
     Ok(())
 }
