@@ -5,7 +5,7 @@ mod error;
 use std::env;
 
 fn main() -> Result<(), std::io::Error> {
-    // collect args into a Vector and assign them to vars
+    // collect args into a vector and assign them to vars
     let args: Vec<String> = env::args().collect();
     let (filename, command) = parse_args(&args);
 
@@ -20,7 +20,6 @@ fn main() -> Result<(), std::io::Error> {
     match command {
         "accounts" => accounts::accounts(filename),
         "balance" => balance::balance(filename),
-        // return a message to prompt user for command
         _ => error::error(),
     }
 }

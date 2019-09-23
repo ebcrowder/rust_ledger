@@ -1,6 +1,5 @@
 // returns balances of all general ledger accounts
 
-// use regex::Regex;
 use std::fs;
 
 pub fn balance(filename: &str) -> Result<(), std::io::Error> {
@@ -10,11 +9,12 @@ pub fn balance(filename: &str) -> Result<(), std::io::Error> {
 
     struct Accounts {
         account: String,
-        amount: String,
+        amount: f32,
     }
 
     let mut transactions_vec: Vec<Accounts> = Vec::new();
 
+    // iterate through text file and push transactions into vector
     for line in account_vec {
         if line.contains(':') {
             let line_vec: Vec<&str> = line.split('\t').collect();
@@ -22,17 +22,18 @@ pub fn balance(filename: &str) -> Result<(), std::io::Error> {
 
             if transaction.len() > 1 {
                 let account = transaction[0].to_string();
-                let amount = transaction[1].to_string();
-
-                println!("account {:?}", account);
-                println!("amount {:?}", amount);
+                let amount = transaction[1].parse::<f32>().unwrap();
 
                 transactions_vec.push(Accounts { account, amount })
             }
         }
     }
 
-    println!("{:?}", transactions_vec);
+    // iterate through transactions vector and print totals
+    // TODO roll up accounts and print by transaction category
+    let transactions_sum: f32 = transactions_vec.iter().map(|s| s.amount).sum();
+
+    println!("{:?}", transactions_sum);
 
     Ok(())
 }
