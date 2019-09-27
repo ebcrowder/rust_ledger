@@ -33,7 +33,11 @@ pub fn balance(filename: &str) -> Result<(), std::io::Error> {
     // TODO roll up accounts and print by transaction category
     let transactions_sum: f32 = transactions_vec.iter().map(|s| s.amount).sum();
 
-    println!("{:?}", transactions_sum);
+    for transaction in transactions_vec {
+        println!("{:?}", transaction);
+    }
+
+    println!("total {:.2}", transactions_sum);
 
     Ok(())
 }
