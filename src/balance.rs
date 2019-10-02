@@ -29,12 +29,16 @@ pub fn balance(filename: &str) -> Result<(), std::io::Error> {
         }
     }
 
-    // iterate through transactions vector and print totals
-    // TODO roll up accounts and print by transaction category
     let transactions_sum: f32 = transactions_vec.iter().map(|s| s.amount).sum();
 
     for transaction in transactions_vec {
-        println!("{:?}", transaction);
+        // TODO make this a bit more dynamic
+        // such as checking transactions against a command line arg
+        if transaction.account.contains("Expenses") {
+            println!("{:?}", transaction);
+        } else {
+            println!("bananas")
+        }
     }
 
     println!("total {:.2}", transactions_sum);
