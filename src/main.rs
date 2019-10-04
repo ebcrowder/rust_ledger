@@ -1,6 +1,7 @@
 mod accounts;
 mod balance;
 mod error;
+mod register;
 
 use std::env;
 
@@ -20,6 +21,7 @@ fn main() -> Result<(), std::io::Error> {
     match command {
         "accounts" => accounts::accounts(filename),
         "balance" => balance::balance(filename),
+        "register" => register::register(filename),
         _ => error::error(),
     }
 }
