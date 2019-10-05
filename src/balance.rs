@@ -1,5 +1,6 @@
 // returns balances of all general ledger accounts
 
+use std::collections::HashMap;
 use std::fs;
 
 pub fn balance(filename: &str) -> Result<(), std::io::Error> {
@@ -29,8 +30,11 @@ pub fn balance(filename: &str) -> Result<(), std::io::Error> {
         }
     }
 
-    let transactions_sum: f32 = transactions_vec.iter().map(|s| s.amount).sum();
+    let mut occurrences = HashMap::new();
+    for transaction in transactions_vec {
+        *occurrences.entry(transaction.account).or_insert(0.00) += transaction.amount;
+    }
 
-    println!("total {:.2}", transactions_sum);
+    println!("total {:?}", occurrences);
     Ok(())
 }
