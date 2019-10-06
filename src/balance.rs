@@ -25,16 +25,52 @@ pub fn balance(filename: &str) -> Result<(), std::io::Error> {
                 let account = transaction[0].to_string();
                 let amount = transaction[1].parse::<f32>().unwrap();
 
-                transactions_vec.push(Accounts { account, amount })
+                transactions_vec.push(Accounts { account, amount });
             }
         }
     }
 
+    // summarize totals by account and place into HashMap
     let mut occurrences = HashMap::new();
     for transaction in transactions_vec {
         *occurrences.entry(transaction.account).or_insert(0.00) += transaction.amount;
     }
 
-    println!("total {:?}", occurrences);
+    // create output
+
+    let mut assets_sum: f32 = 0.00;
+    let mut liabilities_sum: f32 = 0.00;
+    let mut equity_sum: f32 = 0.00;
+    let mut income_sum: f32 = 0.00;
+    let mut expenses_sum: f32 = 0.00;
+
+    for (key, val) in occurrences.iter() {
+        if key.contains("Assets") {
+            assets_sum += val;
+        }
+
+        if key.contains("Liabilities") {
+            liabilities_sum += val;
+        }
+
+        if key.contains("Equity") {
+            equity_sum += val;
+        }
+
+        if key.contains("Expenses") {
+            expenses_sum += val;
+        }
+
+        if key.contains("Income") {
+            income_sum += val;
+        }
+    }
+
+    println!("Assets: {}", assets_sum);
+    println!("Liabilities: {}", liabilities_sum);
+    println!("Equity: {}", equity_sum);
+    println!("Income: {}", income_sum);
+    println!("Expenses: {}", expenses_sum);
+
     Ok(())
 }
