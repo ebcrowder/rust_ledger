@@ -82,9 +82,13 @@ fn balances_test() -> Result<(), Box<dyn std::error::Error>> {
 
     let mut cmd = Command::new("./target/debug/rust-ledger");
     cmd.arg(file.path()).arg("balance");
-    cmd.assert()
-        .success()
-        .stdout(predicate::str::contains("total -35.25"));
+    cmd.assert().success().stdout(predicate::str::contains(
+        "Assets: 0
+Liabilities: 0
+Equity: 0
+Income: 0
+Expenses: -35.25",
+    ));
 
     Ok(())
 }
