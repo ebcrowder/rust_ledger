@@ -63,12 +63,12 @@ fn balances_test() -> Result<(), Box<dyn std::error::Error>> {
     writeln!(
         file,
         "2019/09/01 * Opening Balance
-	Assets:Checking                   $1000
-	Assets:Savings                     $500
-	Liabilities:Mortgage           $-100000
-	Liabilities:CarLoan             $-15000
-	Liabilities:Creditcard            $-500
-	Equity:Opening Balances
+	Assets:Checking                   1000
+	Assets:Savings                     500
+	Liabilities:Mortgage           -100000
+	Liabilities:CarLoan             -15000
+	Liabilities:Creditcard            -500
+	Equity:OpeningBalances          114000
 
 2019/09/03 * (DEBIT) STORMBREAKER BREWING PORTLAND OR
     Expenses:Unknown                             -33
@@ -83,10 +83,10 @@ fn balances_test() -> Result<(), Box<dyn std::error::Error>> {
     let mut cmd = Command::new("./target/debug/rust-ledger");
     cmd.arg(file.path()).arg("balance");
     cmd.assert().success().stdout(predicate::str::contains(
-        "Assets: 0
-Liabilities: 0
-Equity: 0
-Income: 0
+        "Assets: 1500.00
+Liabilities: -115500.00
+Equity: 114000.00
+Income: 0.00
 Expenses: -35.25",
     ));
 

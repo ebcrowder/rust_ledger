@@ -6,7 +6,6 @@ use std::fs;
 pub fn balance(filename: &str) -> Result<(), std::io::Error> {
     let file_string = fs::read_to_string(filename).expect("Unable to read ledger file");
     let account_vec: Vec<&str> = file_string.split('\n').collect();
-    #[derive(Debug)]
 
     struct Accounts {
         account: String,
@@ -18,8 +17,7 @@ pub fn balance(filename: &str) -> Result<(), std::io::Error> {
     // iterate through text file and push transactions into vector
     for line in account_vec {
         if line.contains(':') {
-            let line_vec: Vec<&str> = line.split('\t').collect();
-            let transaction: Vec<&str> = line_vec[0].trim().split_ascii_whitespace().collect();
+            let transaction: Vec<&str> = line.split_ascii_whitespace().collect();
 
             if transaction.len() > 1 {
                 let account = transaction[0].to_string();
@@ -62,15 +60,15 @@ pub fn balance(filename: &str) -> Result<(), std::io::Error> {
         }
 
         if key.contains("Income") {
-            income_sum += val;
+            income_sum -= val;
         }
     }
 
-    println!("Assets: {}", assets_sum);
-    println!("Liabilities: {}", liabilities_sum);
-    println!("Equity: {}", equity_sum);
-    println!("Income: {}", income_sum);
-    println!("Expenses: {}", expenses_sum);
+    println!("Assets: {:.2}", assets_sum);
+    println!("Liabilities: {:.2}", liabilities_sum);
+    println!("Equity: {:.2}", equity_sum);
+    println!("Income: {:.2}", income_sum);
+    println!("Expenses: {:.2}", expenses_sum);
 
     Ok(())
 }
