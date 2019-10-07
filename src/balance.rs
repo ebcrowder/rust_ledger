@@ -41,26 +41,32 @@ pub fn balance(filename: &str) -> Result<(), std::io::Error> {
     let mut equity_sum: f32 = 0.00;
     let mut income_sum: f32 = 0.00;
     let mut expenses_sum: f32 = 0.00;
+    let mut check_figure: f32 = 0.00;
 
     for (key, val) in occurrences.iter() {
         if key.contains("Assets") {
             assets_sum += val;
+            check_figure += val;
         }
 
         if key.contains("Liabilities") {
             liabilities_sum += val;
+            check_figure += val;
         }
 
         if key.contains("Equity") {
             equity_sum += val;
+            check_figure += val;
         }
 
         if key.contains("Expenses") {
             expenses_sum += val;
+            check_figure += val;
         }
 
         if key.contains("Income") {
-            income_sum -= val;
+            income_sum += val;
+            check_figure += val;
         }
     }
 
@@ -69,6 +75,8 @@ pub fn balance(filename: &str) -> Result<(), std::io::Error> {
     println!("Equity: {:.2}", equity_sum);
     println!("Income: {:.2}", income_sum);
     println!("Expenses: {:.2}", expenses_sum);
+    println!("===============");
+    println!("Check: {:.2}", check_figure);
 
     Ok(())
 }
