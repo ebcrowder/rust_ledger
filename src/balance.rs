@@ -7,6 +7,8 @@ pub fn balance(filename: &str) -> Result<(), std::io::Error> {
     let file_string = fs::read_to_string(filename).expect("Unable to read ledger file");
     let account_vec: Vec<&str> = file_string.split('\n').collect();
 
+    #[derive(Debug)]
+
     struct Accounts {
         account: String,
         amount: f32,
@@ -18,15 +20,27 @@ pub fn balance(filename: &str) -> Result<(), std::io::Error> {
     for line in account_vec {
         if line.contains(':') {
             let transaction: Vec<&str> = line.split_ascii_whitespace().collect();
+            let mut offset_amount: f32 = 0.00;
+
+            println!("{:?}", transaction);
 
             if transaction.len() > 1 {
                 let account = transaction[0].to_string();
                 let amount = transaction[1].parse::<f32>().unwrap();
+                offset_amount = amount;
+                transactions_vec.push(Accounts { account, amount });
+            }
+
+            if transaction.len() == 1 {
+                let account = transaction[0].to_string();
+                let amount = offset_amount;
 
                 transactions_vec.push(Accounts { account, amount });
             }
         }
     }
+
+    println!("{:?}", transactions_vec);
 
     // summarize totals by account and place into HashMap
     let mut occurrences = HashMap::new();
