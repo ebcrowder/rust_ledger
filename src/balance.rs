@@ -27,24 +27,20 @@ pub fn balance(filename: &str) -> Result<(), std::io::Error> {
 
     // iterate through text file and push transactions into vector
     let lines = lines_from_file(filename);
+    let mut amount: f32 = 0.00;
     for line in lines {
         if line.contains(':') {
             let transaction: Vec<&str> = line.split_ascii_whitespace().collect();
-            let mut offset_amount: f32 = 0.00;
+            let account = transaction[0].to_string();
 
             if transaction.len() > 1 {
-                let account = transaction[0].to_string();
-                let amount = transaction[1].parse::<f32>().unwrap();
-                offset_amount = amount;
-                transactions_vec.push(Accounts { account, amount });
+                amount = transaction[1].parse::<f32>().unwrap();
             }
 
             if transaction.len() == 1 {
-                let account = transaction[0].to_string();
-                let amount = offset_amount;
-
-                transactions_vec.push(Accounts { account, amount });
+                amount = -amount;
             }
+            transactions_vec.push(Accounts { account, amount });
         }
     }
 
