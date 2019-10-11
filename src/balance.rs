@@ -1,11 +1,20 @@
 // returns balances of all general ledger accounts
 
 use std::collections::HashMap;
-use std::fs;
+use std::{
+    fs::File,
+    io::{prelude::*, BufReader},
+    path::Path,
+};
 
 pub fn balance(filename: &str) -> Result<(), std::io::Error> {
-    let file_string = fs::read_to_string(filename).expect("Unable to read ledger file");
-    let account_vec: Vec<&str> = file_string.split('\n').collect();
+    fn lines_from_file(filename: impl AsRef<Path>) -> Vec<String> {
+        let file = File::open(filename).expect("whoops");
+        let buf = BufReader::new(file);
+        buf.lines()
+            .map(|l| l.expect("could not parse line"))
+            .collect()
+    };
 
     #[derive(Debug)]
 
@@ -17,12 +26,11 @@ pub fn balance(filename: &str) -> Result<(), std::io::Error> {
     let mut transactions_vec: Vec<Accounts> = Vec::new();
 
     // iterate through text file and push transactions into vector
-    for line in account_vec {
+    let lines = lines_from_file(filename);
+    for line in lines {
         if line.contains(':') {
             let transaction: Vec<&str> = line.split_ascii_whitespace().collect();
             let mut offset_amount: f32 = 0.00;
-
-            println!("{:?}", transaction);
 
             if transaction.len() > 1 {
                 let account = transaction[0].to_string();
