@@ -25,9 +25,14 @@ pub fn balance(filename: &str) -> Result<(), std::io::Error> {
 
     let mut transactions_vec: Vec<Accounts> = Vec::new();
 
+    // TODO add ability to parse beginning equity if amt is not provided
+
     // iterate through text file and push transactions into vector
     let lines = lines_from_file(filename);
     let mut amount: f32 = 0.00;
+
+    println!("{:?}", lines);
+
     for line in lines {
         if line.contains(':') {
             let transaction: Vec<&str> = line.split_ascii_whitespace().collect();
@@ -43,8 +48,6 @@ pub fn balance(filename: &str) -> Result<(), std::io::Error> {
             transactions_vec.push(Accounts { account, amount });
         }
     }
-
-    println!("{:?}", transactions_vec);
 
     // summarize totals by account and place into HashMap
     let mut occurrences = HashMap::new();

@@ -2,6 +2,7 @@ mod accounts;
 mod balance;
 mod error;
 mod register;
+mod register_yaml_test;
 
 use std::env;
 
@@ -22,6 +23,7 @@ fn main() -> Result<(), std::io::Error> {
         "accounts" => accounts::accounts(filename),
         "balance" => balance::balance(filename),
         "register" => register::register(filename),
+        "register_yaml_test" => register_yaml_test::register_yaml_test(filename),
         _ => error::error(),
     }
 }
