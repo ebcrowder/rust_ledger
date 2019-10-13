@@ -22,12 +22,11 @@ struct Accounts {
 
 #[derive(Debug, PartialEq, Serialize, Deserialize)]
 struct Transactions {
-    acct_type: String,
     desc: String,
     date: String,
     debit_credit: f64,
     acct_name: String,
-    acct_offset: String,
+    acct_offset_name: String,
 }
 
 #[derive(Debug, PartialEq, Serialize, Deserialize)]
@@ -42,8 +41,14 @@ pub fn register(filename: &str) -> Result<(), std::io::Error> {
     let file = std::fs::File::open(filename)?;
     let deserialized_file: LedgerFile = serde_yaml::from_reader(file).unwrap();
 
+    // TODO consider another way to do this
+    println!("date              debit     acct_name                  acct_offset_name");
+
     for item in deserialized_file.transactions {
-        println!("{:?}", item);
+        println!(
+            "{:?}      {:?}       {:?}        {:?}",
+            item.date, item.debit_credit, item.acct_name, item.acct_offset_name
+        );
     }
 
     Ok(())
