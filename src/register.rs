@@ -15,7 +15,7 @@ struct Currencies {
 #[derive(Debug, PartialEq, Serialize, Deserialize)]
 struct Accounts {
     id: i32,
-    name: String,
+    acct_name: String,
     acct_type: String,
     debit_credit: f64,
 }
@@ -26,6 +26,8 @@ struct Transactions {
     desc: String,
     date: String,
     debit_credit: f64,
+    acct_name: String,
+    acct_offset: String,
 }
 
 #[derive(Debug, PartialEq, Serialize, Deserialize)]
