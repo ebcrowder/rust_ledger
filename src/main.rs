@@ -1,5 +1,6 @@
 mod accounts;
 mod balance;
+mod csv;
 mod error;
 mod register;
 
@@ -22,6 +23,7 @@ fn main() -> Result<(), std::io::Error> {
         "accounts" => accounts::accounts(filename),
         "balance" => balance::balance(filename),
         "register" => register::register(filename),
+        "csv" => csv::csv(filename),
         _ => error::error(),
     }
 }

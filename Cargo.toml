@@ -9,6 +9,7 @@ edition = "2018"
 [dependencies]
 serde_yaml = "0.8.11"
 serde = "1.0.101"
+csv = "1.1.1"
 
 [dev-dependencies]
 assert_cmd = "0.11.1"
