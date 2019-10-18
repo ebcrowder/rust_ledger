@@ -7,6 +7,7 @@ You should _definitely_ use the original (https://github.com/ledger/ledger) or o
 ### Summary
 - Spiritual port of ledger 
 - Uses `yaml` files as data store of accounts and transactions
+- Includes a tool to convert `csv` files to `yaml` format 
 
 ### API
 - Accounts
