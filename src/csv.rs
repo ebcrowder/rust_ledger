@@ -8,8 +8,9 @@ use std::fs;
 #[derive(Debug, Deserialize)]
 struct CSV {
     date: String,
-    desc: String,
-    payee: String,
+    transaction: String,
+    name: String,
+    memo: String,
     amount: f64,
 }
 
@@ -20,7 +21,9 @@ pub fn csv(filename: &str) -> Result<(), std::io::Error> {
     for result in csv_reader.deserialize() {
         let record: CSV = result?;
         println!("- date: {:?}", record.date);
-        println!("desc: {:?}", record.desc);
+        println!("transaction: {:?}", record.transaction);
+        println!("name: {:?}", record.name);
+        println!("memo: {:?}", record.memo);
         println!("debit_credit: {:?}", record.amount);
 
         // include acct_offset as credit_card acct
