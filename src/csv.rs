@@ -20,18 +20,17 @@ pub fn csv(filename: &str) -> Result<(), std::io::Error> {
 
     for result in csv_reader.deserialize() {
         let record: CSV = result?;
-        println!("- date: {:?}", record.date);
-        println!("transaction: {:?}", record.transaction);
-        println!("debit_credit: {:?}", record.amount);
-
-        // include acct_offset as credit_card acct
-        println!("acct_offset_name: credit_card");
-
-        // if negative, return expense acct - otherwise, return income acct
         if record.amount < 0.00 {
+            println!("- date: {:?}", record.date);
+            println!("debit_credit: {:?}", record.amount);
+
+            // include acct_offset as credit_card acct
+            println!("acct_offset_name: credit_card");
+
+            // if negative, return expense acct - otherwise, return income acct
             println!("acct_name: expense-credit-card");
         } else {
-            println!("acct_name: income-other");
+            break;
         }
     }
 
