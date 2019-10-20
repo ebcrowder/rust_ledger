@@ -22,8 +22,6 @@ pub fn csv(filename: &str) -> Result<(), std::io::Error> {
         let record: CSV = result?;
         println!("- date: {:?}", record.date);
         println!("transaction: {:?}", record.transaction);
-        println!("name: {:?}", record.name);
-        println!("memo: {:?}", record.memo);
         println!("debit_credit: {:?}", record.amount);
 
         // include acct_offset as credit_card acct
@@ -31,9 +29,9 @@ pub fn csv(filename: &str) -> Result<(), std::io::Error> {
 
         // if negative, return expense acct - otherwise, return income acct
         if record.amount < 0.00 {
-            println!("acct_name: expense-test-acct");
+            println!("acct_name: expense-credit-card");
         } else {
-            println!("acct_name: income-test-acct");
+            println!("acct_name: income-other");
         }
     }
 
