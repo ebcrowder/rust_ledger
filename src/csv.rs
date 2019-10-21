@@ -28,6 +28,7 @@ pub fn csv(filename: &str) -> Result<(), std::io::Error> {
             println!("acct_offset_name: credit_card");
 
             // if negative, return expense acct - otherwise, return income acct
+            println!("acct_type: expense");
             println!("acct_name: expense-credit-card");
         } else {
             break;

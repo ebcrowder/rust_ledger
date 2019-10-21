@@ -27,6 +27,7 @@ struct Transactions {
     date: String,
     debit_credit: f64,
     acct_name: String,
+    acct_type: String,
     acct_offset_name: String,
 }
 
@@ -40,7 +41,6 @@ struct LedgerFile {
 
 struct BalanceAccounts {
     account: String,
-    account_type: String,
     amount: f64,
 }
 
@@ -61,7 +61,6 @@ pub fn balance(filename: &str) -> Result<(), std::io::Error> {
     for account in deserialized_file.accounts {
         accounts_vec.push(BalanceAccounts {
             account: account.acct_name,
-            account_type: account.acct_type,
             amount: account.debit_credit.round(),
         });
     }
@@ -77,12 +76,12 @@ pub fn balance(filename: &str) -> Result<(), std::io::Error> {
 
     // sum totals in accounts and transactions Vecs
 
-    // let mut assets_sum: f64 = 0.00;
-    // let mut liabilities_sum: f64 = 0.00;
-    // let mut equity_sum: f64 = 0.00;
-    // let mut income_sum: f64 = 0.00;
-    // let mut expenses_sum: f64 = 0.00;
-    // let mut check_figure: f64 = 0.00;
+    let mut assets_sum: f64 = 0.00;
+    let mut liabilities_sum: f64 = 0.00;
+    let mut equity_sum: f64 = 0.00;
+    let mut income_sum: f64 = 0.00;
+    let mut expenses_sum: f64 = 0.00;
+    let mut check_figure: f64 = 0.00;
 
     // summarize totals and place into HashMap
     let mut occurrences = HashMap::new();
@@ -92,18 +91,26 @@ pub fn balance(filename: &str) -> Result<(), std::io::Error> {
 
     for transaction in transactions_vec {
         *occurrences.entry(transaction.account).or_insert(0.00) += transaction.amount;
-        *occurrences
-            .entry(transaction.offset_account)
-            .or_insert(0.00) += transaction.amount;
+        if transaction.amount > 0.00 {
+            *occurrences
+                .entry(transaction.offset_account)
+                .or_insert(0.00) += -transaction.amount
+        } else {
+            *occurrences
+                .entry(transaction.offset_account)
+                .or_insert(0.00) += transaction.amount
+        }
     }
-
-    println!("occurrences {:?}", occurrences);
 
     // create output
 
     for (key, val) in occurrences.iter() {
-        println!("key value {} {}", key, val);
+        check_figure += val;
+        println!("key {} val {}", key, val);
+        // println!("{}", transactions_vec);
     }
+
+    println!("check {}", check_figure);
 
     Ok(())
 }
