@@ -85,7 +85,7 @@ pub fn balance(filename: &str) -> Result<(), std::io::Error> {
 
     // summarize totals and place into HashMap
     let mut occurrences = HashMap::new();
-    for account in accounts_vec {
+    for account in &accounts_vec {
         *occurrences.entry(account.account).or_insert(0.00) += account.amount;
     }
 
@@ -108,6 +108,12 @@ pub fn balance(filename: &str) -> Result<(), std::io::Error> {
         check_figure += val;
         println!("key {} val {}", key, val);
         // println!("{}", transactions_vec);
+
+        for account in &accounts_vec {
+            if key.to_string() == account.account {
+                println!("match")
+            }
+        }
     }
 
     println!("check {}", check_figure);
