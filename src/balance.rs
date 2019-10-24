@@ -86,18 +86,18 @@ pub fn balance(filename: &str) -> Result<(), std::io::Error> {
     // summarize totals and place into HashMap
     let mut occurrences = HashMap::new();
     for account in &accounts_vec {
-        *occurrences.entry(account.account).or_insert(0.00) += account.amount;
+        *occurrences.entry(&account.account).or_insert(0.00) += account.amount;
     }
 
-    for transaction in transactions_vec {
-        *occurrences.entry(transaction.account).or_insert(0.00) += transaction.amount;
+    for transaction in &transactions_vec {
+        *occurrences.entry(&transaction.account).or_insert(0.00) += transaction.amount;
         if transaction.amount > 0.00 {
             *occurrences
-                .entry(transaction.offset_account)
+                .entry(&transaction.offset_account)
                 .or_insert(0.00) += -transaction.amount
         } else {
             *occurrences
-                .entry(transaction.offset_account)
+                .entry(&transaction.offset_account)
                 .or_insert(0.00) += transaction.amount
         }
     }
