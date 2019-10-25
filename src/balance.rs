@@ -41,6 +41,7 @@ struct LedgerFile {
 
 struct BalanceAccounts {
     account: String,
+    account_type: String,
     amount: f64,
 }
 
@@ -61,6 +62,7 @@ pub fn balance(filename: &str) -> Result<(), std::io::Error> {
     for account in deserialized_file.accounts {
         accounts_vec.push(BalanceAccounts {
             account: account.acct_name,
+            account_type: account.acct_type,
             amount: account.debit_credit.round(),
         });
     }
@@ -106,16 +108,30 @@ pub fn balance(filename: &str) -> Result<(), std::io::Error> {
 
     for (key, val) in occurrences.iter() {
         check_figure += val;
-        println!("key {} val {}", key, val);
-        // println!("{}", transactions_vec);
 
         for account in &accounts_vec {
             if key.to_string() == account.account {
-                println!("match")
+                // TODO refactor this as a match stmt
+                if account.account_type == "asset" {
+                    assets_sum += val;
+                } else if account.account_type == "liability" {
+                    liabilities_sum += val;
+                } else if account.account_type == "equity" {
+                    equity_sum += val;
+                } else if account.account_type == "expense" {
+                    expenses_sum += val;
+                } else if account.account_type == "income" {
+                    income_sum += val;
+                }
             }
         }
     }
 
+    println!("assets {}", assets_sum);
+    println!("liabilities {}", liabilities_sum);
+    println!("equity {}", equity_sum);
+    println!("income {}", income_sum);
+    println!("expenses {}", expenses_sum);
     println!("check {}", check_figure);
 
     Ok(())

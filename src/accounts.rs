@@ -22,10 +22,10 @@ struct Accounts {
 
 #[derive(Debug, PartialEq, Serialize, Deserialize)]
 struct Transactions {
-    desc: String,
     date: String,
     debit_credit: f64,
     acct_name: String,
+    acct_type: String,
     acct_offset_name: String,
 }
 

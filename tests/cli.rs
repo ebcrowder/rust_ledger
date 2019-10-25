@@ -37,7 +37,7 @@ fn accounts_test() -> Result<(), Box<dyn std::error::Error>> {
         transactions:
             -   acct_name: expense-test-acct
                 debit_credit: 1
-                desc: test
+                acct_type: expense 
                 date: 2019-01-01
                 acct_offset_name: credit_card
         "#;
@@ -77,7 +77,7 @@ fn balances_test() -> Result<(), Box<dyn std::error::Error>> {
         transactions:
             -   acct_name: expense-test-acct
                 debit_credit: 1
-                desc: test
+                acct_type: expense 
                 date: 2019-01-01
                 acct_offset_name: credit_card
         "#;
