@@ -49,7 +49,7 @@ fn accounts_test() -> Result<(), Box<dyn std::error::Error>> {
     cmd.arg(file.path()).arg("accounts");
     cmd.assert()
         .success()
-        .stdout(predicate::str::contains("\"operating\"\n\"equity"));
+        .stdout(predicate::str::contains("operating            | asset"));
 
     Ok(())
 }

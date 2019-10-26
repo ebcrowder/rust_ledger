@@ -39,6 +39,7 @@ struct LedgerFile {
 
 struct BalanceAccounts {
     account: String,
+    account_type: String,
 }
 
 pub fn accounts(filename: &str) -> Result<(), std::io::Error> {
@@ -50,11 +51,14 @@ pub fn accounts(filename: &str) -> Result<(), std::io::Error> {
     for account in deserialized_file.accounts {
         account_vec.push(BalanceAccounts {
             account: account.acct_name,
+            account_type: account.acct_type,
         });
     }
 
+    println!("{0: <20} | {1: <20}", "account", "account_type");
+
     for account in account_vec {
-        println!("{:?}", account.account);
+        println!("{0: <20} | {1: <20}", account.account, account.account_type);
     }
 
     Ok(())
