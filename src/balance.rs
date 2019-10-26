@@ -123,12 +123,13 @@ pub fn balance(filename: &str) -> Result<(), std::io::Error> {
         }
     }
 
-    println!("assets {}", assets_sum);
-    println!("liabilities {}", liabilities_sum);
-    println!("equity {}", equity_sum);
-    println!("income {}", income_sum);
-    println!("expenses {}", expenses_sum);
-    println!("check {}", check_figure);
+    println!("{0: <12} | {1: <10}", "account", "balance");
+    println!("{0: <12} | {1: <10}", "assets", assets_sum);
+    println!("{0: <12} | {1: <10}", "liabilities", liabilities_sum);
+    println!("{0: <12} | {1: <10}", "equity", equity_sum);
+    println!("{0: <12} | {1: <10}", "income", income_sum);
+    println!("{0: <12} | {1: <10}", "expenses", expenses_sum);
+    println!("{0: <12} | {1: <10}", "check", check_figure);
 
     Ok(())
 }
