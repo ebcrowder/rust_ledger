@@ -111,17 +111,13 @@ pub fn balance(filename: &str) -> Result<(), std::io::Error> {
 
         for account in &accounts_vec {
             if key.to_string() == account.account {
-                // TODO refactor this as a match stmt
-                if account.account_type == "asset" {
-                    assets_sum += val;
-                } else if account.account_type == "liability" {
-                    liabilities_sum += val;
-                } else if account.account_type == "equity" {
-                    equity_sum += val;
-                } else if account.account_type == "expense" {
-                    expenses_sum += val;
-                } else if account.account_type == "income" {
-                    income_sum += val;
+                match account.account_type.as_ref() {
+                    "asset" => assets_sum += val,
+                    "liability" => liabilities_sum += val,
+                    "equity" => equity_sum += val,
+                    "income" => income_sum += val,
+                    "expense" => expenses_sum += val,
+                    _ => break,
                 }
             }
         }
