@@ -24,7 +24,7 @@ pub fn csv(filename: &str) -> Result<(), std::io::Error> {
             println!("- date: {:?}", record.date);
             println!("  debit_credit: {:?}", -record.amount);
 
-            // include acct_offset as credit_card acct
+            // TODO make this not specific to my use case
             println!("  acct_offset_name: credit_card");
 
             // if negative, return expense acct
