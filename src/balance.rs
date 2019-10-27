@@ -107,6 +107,7 @@ pub fn balance(filename: &str) -> Result<(), std::io::Error> {
     // create output
 
     for (key, val) in occurrences.iter() {
+        // sum totals of HashMap to ensure everything balances
         check_figure += val;
 
         for account in &accounts_vec {
