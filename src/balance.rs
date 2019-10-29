@@ -72,6 +72,9 @@ pub fn balance(filename: &str) -> Result<(), std::io::Error> {
         })
     }
 
+    // loop over Vecs and increment(+)/decrement(-) totals
+    // for each transaction
+
     for transaction in &transactions_vec {
         for account in &mut accounts_vec {
             if account.account == transaction.account {
