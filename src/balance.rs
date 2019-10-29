@@ -2,8 +2,6 @@
 
 extern crate serde_yaml;
 
-// use std::collections::HashMap;
-
 use serde::{Deserialize, Serialize};
 
 #[derive(Debug, PartialEq, Serialize, Deserialize)]
@@ -41,7 +39,6 @@ struct LedgerFile {
 
 struct BalanceAccounts {
     account: String,
-    account_type: String,
     amount: f64,
 }
 
@@ -62,7 +59,6 @@ pub fn balance(filename: &str) -> Result<(), std::io::Error> {
     for account in deserialized_file.accounts {
         accounts_vec.push(BalanceAccounts {
             account: account.acct_name,
-            account_type: account.acct_type,
             amount: account.debit_credit.round(),
         });
     }
@@ -87,64 +83,18 @@ pub fn balance(filename: &str) -> Result<(), std::io::Error> {
         }
     }
 
+    // create output
+
     let mut check_figure: f64 = 0.00;
 
     println!("{0: <20} | {1: <10}", "account", "balance");
 
     for account in accounts_vec {
         check_figure += account.amount;
-
         println!("{0: <20} | {1: <10}", account.account, account.amount);
     }
 
     println!("{0: <20} | {1: <10}", "check", check_figure);
-    // sum totals in accounts and transactions Vecs
-
-    // let mut assets_sum: f64 = 0.00;
-    // let mut liabilities_sum: f64 = 0.00;
-    // let mut equity_sum: f64 = 0.00;
-    // let mut income_sum: f64 = 0.00;
-    // let mut expenses_sum: f64 = 0.00;
-    // let mut check_figure: f64 = 0.00;
-
-    // summarize totals and place into HashMap
-    // let mut occurrences = HashMap::new();
-    // for account in &accounts_vec {
-    //     *occurrences.entry(&account.account).or_insert(0.00) += account.amount;
-    // }
-
-    // for transaction in &transactions_vec {
-    //     *occurrences.entry(&transaction.account).or_insert(0.00) += transaction.amount;
-    //     if transaction.amount > 0.00 {
-    //         *occurrences
-    //             .entry(&transaction.offset_account)
-    //             .or_insert(0.00) += -transaction.amount
-    //     } else {
-    //         *occurrences
-    //             .entry(&transaction.offset_account)
-    //             .or_insert(0.00) += transaction.amount
-    //     }
-    // }
-
-    // create output
-
-    // for (key, val) in occurrences.iter() {
-    //     // sum totals of HashMap to ensure everything balances
-    //     check_figure += val;
-
-    //     for account in &accounts_vec {
-    //         if key.to_string() == account.account {
-    //             match account.account_type.as_ref() {
-    //                 "asset" => assets_sum += val,
-    //                 "liability" => liabilities_sum += val,
-    //                 "equity" => equity_sum += val,
-    //                 "income" => income_sum += val,
-    //                 "expense" => expenses_sum += val,
-    //                 _ => break,
-    //             }
-    //         }
-    //     }
-    // }
 
     Ok(())
 }
