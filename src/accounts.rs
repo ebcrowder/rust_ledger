@@ -17,13 +17,13 @@ struct Accounts {
     id: i32,
     acct_name: String,
     acct_type: String,
-    debit_credit: f64,
+    debit_credit: i32,
 }
 
 #[derive(Debug, PartialEq, Serialize, Deserialize)]
 struct Transactions {
     date: String,
-    debit_credit: f64,
+    debit_credit: i32,
     acct_name: String,
     acct_type: String,
     acct_offset_name: String,

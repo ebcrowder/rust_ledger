@@ -2,6 +2,7 @@
 
 extern crate serde_yaml;
 
+use num_format::{Locale, ToFormattedString};
 use serde::{Deserialize, Serialize};
 
 #[derive(Debug, PartialEq, Serialize, Deserialize)]
@@ -17,13 +18,13 @@ struct Accounts {
     id: i32,
     acct_name: String,
     acct_type: String,
-    debit_credit: f64,
+    debit_credit: i32,
 }
 
 #[derive(Debug, PartialEq, Serialize, Deserialize)]
 struct Transactions {
     date: String,
-    debit_credit: f64,
+    debit_credit: i32,
     acct_name: String,
     acct_type: String,
     acct_offset_name: String,
@@ -39,13 +40,13 @@ struct LedgerFile {
 
 struct BalanceAccounts {
     account: String,
-    amount: f64,
+    amount: i32,
 }
 
 struct TransactionAccounts {
     account: String,
     offset_account: String,
-    amount: f64,
+    amount: i32,
 }
 
 pub fn balance(filename: &str) -> Result<(), std::io::Error> {
@@ -59,7 +60,7 @@ pub fn balance(filename: &str) -> Result<(), std::io::Error> {
     for account in deserialized_file.accounts {
         accounts_vec.push(BalanceAccounts {
             account: account.acct_name,
-            amount: account.debit_credit.round(),
+            amount: account.debit_credit,
         });
     }
 
@@ -68,7 +69,7 @@ pub fn balance(filename: &str) -> Result<(), std::io::Error> {
         transactions_vec.push(TransactionAccounts {
             account: transaction.acct_name,
             offset_account: transaction.acct_offset_name,
-            amount: transaction.debit_credit.round(),
+            amount: transaction.debit_credit,
         })
     }
 
@@ -88,13 +89,17 @@ pub fn balance(filename: &str) -> Result<(), std::io::Error> {
 
     // create output
 
-    let mut check_figure: f64 = 0.00;
+    let mut check_figure: i32 = 0;
 
     println!("{0: <20} | {1: <10}", "account", "balance");
 
     for account in accounts_vec {
         check_figure += account.amount;
-        println!("{0: <20} | {1: <10}", account.account, account.amount);
+        println!(
+            "{0: <20} | {1: <10}",
+            account.account,
+            account.amount.to_formatted_string(&Locale::en)
+        );
     }
 
     println!("{0: <20} | {1: <10}", "check", check_figure);

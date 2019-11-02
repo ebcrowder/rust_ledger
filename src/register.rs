@@ -2,6 +2,7 @@
 
 extern crate serde_yaml;
 
+use num_format::{Locale, ToFormattedString};
 use serde::{Deserialize, Serialize};
 
 #[derive(Debug, PartialEq, Serialize, Deserialize)]
@@ -17,13 +18,13 @@ struct Accounts {
     id: i32,
     acct_name: String,
     acct_type: String,
-    debit_credit: f64,
+    debit_credit: i32,
 }
 
 #[derive(Debug, PartialEq, Serialize, Deserialize)]
 struct Transactions {
     date: String,
-    debit_credit: f64,
+    debit_credit: i32,
     acct_name: String,
     acct_type: String,
     acct_offset_name: String,
@@ -49,7 +50,10 @@ pub fn register(filename: &str) -> Result<(), std::io::Error> {
     for item in deserialized_file.transactions {
         println!(
             "{0: <10} | {1: <10} | {2: <20} | {3: <20}",
-            item.date, item.debit_credit, item.acct_name, item.acct_offset_name
+            item.date,
+            item.debit_credit.to_formatted_string(&Locale::en),
+            item.acct_name,
+            item.acct_offset_name
         );
     }
 

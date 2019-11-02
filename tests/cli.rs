@@ -89,7 +89,7 @@ fn balances_test() -> Result<(), Box<dyn std::error::Error>> {
     cmd.arg(file.path()).arg("balance");
     cmd.assert()
         .success()
-        .stdout(predicate::str::contains("equity               | -1500"));
+        .stdout(predicate::str::contains("equity               | -1,500"));
 
     Ok(())
 }
