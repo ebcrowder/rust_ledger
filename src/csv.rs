@@ -22,7 +22,7 @@ pub fn csv(filename: &str) -> Result<(), std::io::Error> {
         let record: CSV = result?;
         if record.amount < 0.00 {
             println!("- date: {:?}", record.date);
-            println!("  debit_credit: {:?}", -record.amount);
+            println!("  debit_credit: {:?}", -record.amount.round() as i32);
 
             // TODO make this not specific to my use case
             println!("  acct_offset_name: credit_card");
