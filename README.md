@@ -15,13 +15,44 @@ As a former CPA, I could not resist building my own accounting system.
 
 ### API
 
-- Accounts
+- accounts
   - lists accounts
-- Balance
+  - example output:
+```
+account              | account_type        
+checking             | asset               
+savings              | asset               
+credit_card          | liability           
+mortgage             | liability           
+auto                 | liability           
+equity               | equity              
+expense_credit_card  | expense    
+```
+- balance
   - lists account balances to date
-- Register
+  - example output:
+```
+account_type         | account              | balance   
+asset                | checking             | 1,500     
+asset                | savings              | 2,000     
+liability            | credit_card          | -50    
+liability            | mortgage             | -100,000  
+liability            | auto                 | -5,000   
+equity               | equity               | 101,500   
+expense              | expense_credit_card  | 50       
+check                | 0
+```        
+- register
   - lists general ledger transactions to date
-- CSV
+  - example output:
+```
+date      | debit | acct_name  | acct_offset_name    
+10/1/2019 | 98    | expense_cc | credit_card         
+10/1/2019 | 1     | expense_cc | credit_card         
+10/2/2019 | 49    | expense_cc | credit_card         
+10/3/2019 | 9     | expense_cc | credit_card         
+```
+- csv
   - converts `csv` files to `yaml` format expected by `rust_ledger`
 
 ### rust_ledger `yaml` file format
