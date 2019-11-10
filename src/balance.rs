@@ -40,6 +40,7 @@ struct LedgerFile {
 
 struct BalanceAccounts {
     account: String,
+    account_type: String,
     amount: i32,
 }
 
@@ -60,6 +61,7 @@ pub fn balance(filename: &str) -> Result<(), std::io::Error> {
     for account in deserialized_file.accounts {
         accounts_vec.push(BalanceAccounts {
             account: account.acct_name,
+            account_type: account.acct_type,
             amount: account.debit_credit,
         });
     }
@@ -91,12 +93,16 @@ pub fn balance(filename: &str) -> Result<(), std::io::Error> {
 
     let mut check_figure: i32 = 0;
 
-    println!("{0: <20} | {1: <10}", "account", "balance");
+    println!(
+        "{0: <20} | {1: <20} | {2: <10}",
+        "account_type", "account", "balance"
+    );
 
     for account in accounts_vec {
         check_figure += account.amount;
         println!(
-            "{0: <20} | {1: <10}",
+            "{0: <20} | {1: <20} | {2: <10}",
+            account.account_type,
             account.account,
             account.amount.to_formatted_string(&Locale::en)
         );
