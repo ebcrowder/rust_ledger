@@ -15,6 +15,8 @@ struct CSV {
 }
 
 pub fn csv(filename: &str) -> Result<(), std::io::Error> {
+    // TODO check for matches in ledger file and 
+    // map transactions from csv to existing expense accounts
     let file = fs::File::open(filename)?;
     let mut csv_reader = csv::Reader::from_reader(file);
 
@@ -26,6 +28,7 @@ pub fn csv(filename: &str) -> Result<(), std::io::Error> {
 
             // TODO make this not specific to my use case
             println!("  acct_offset_name: credit_card");
+            println!("  name: {:?}", record.name);
 
             // if negative, return expense acct
             println!("  acct_type: expense");
