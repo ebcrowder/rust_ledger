@@ -9,21 +9,35 @@ use std::env;
 fn main() -> Result<(), std::io::Error> {
     // collect args into a vector and assign them to vars
     let args: Vec<String> = env::args().collect();
-    let (filename, command) = parse_args(&args);
 
-    fn parse_args(args: &[String]) -> (&str, &str) {
-        let filename = &args[1];
-        let command = &args[2];
+    let ledger_file: &str;
+    let csv_file: &str;
+    let command: &str;
 
-        (filename, command)
-    }
+    match args.len() {
+        1 => error::error(),
+        2 => error::error(),
+        3 => {
+            ledger_file = &args[1];
+            command = &args[2];
 
-    // match ledger commands
-    match command {
-        "accounts" => accounts::accounts(filename),
-        "balance" => balance::balance(filename),
-        "register" => register::register(filename),
-        "csv" => csv::csv(filename),
+            match command {
+                "accounts" => accounts::accounts(ledger_file),
+                "balance" => balance::balance(ledger_file),
+                "register" => register::register(ledger_file),
+                _ => error::error(),
+            }
+        }
+        4 => {
+            ledger_file = &args[1];
+            csv_file = &args[2];
+            command = &args[3];
+
+            match command {
+                "csv" => csv::csv(ledger_file, csv_file),
+                _ => error::error(),
+            }
+        }
         _ => error::error(),
     }
 }

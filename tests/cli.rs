@@ -120,6 +120,7 @@ fn register_test() -> Result<(), Box<dyn std::error::Error>> {
                 acct_type: expense 
                 date: 2019-01-01
                 acct_offset_name: credit_card
+                name: test memo
         "#;
 
     file.write_all(balance_yml).unwrap();
