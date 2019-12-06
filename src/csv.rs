@@ -63,33 +63,22 @@ pub fn csv(ledger_file: &str, csv_file: &str) -> Result<(), std::io::Error> {
     for result in csv_reader.deserialize() {
         let record: CSV = result?;
         if record.amount < 0.00 {
+            println!("- date: {:?}", record.date);
+            println!("  debit_credit: {:?}", -record.amount.round() as i32);
+
+            // TODO make this not specific to my use case
+            println!("  acct_offset_name: credit_card");
+            println!("  name: {:?}", record.name);
+
             // loop through transactions and find matching memos
             for transaction in &deserialized_file.transactions {
                 if record.name == transaction.name {
-                    println!("- date: {:?}", record.date);
-                    println!("  debit_credit: {:?}", -record.amount.round() as i32);
-
-                    // TODO make this not specific to my use case
-                    println!("  acct_offset_name: credit_card");
-                    println!("  name: {:?}", record.name);
-                    println!("  acct_name: {}", transaction.acct_name);
-
-                    // if negative, return expense acct
-                    println!("  acct_type: expense");
-                // println!("  acct_name: expense-credit-card");
-                } else {
-                    println!("- date: {:?}", record.date);
-                    println!("  debit_credit: {:?}", -record.amount.round() as i32);
-
-                    // TODO make this not specific to my use case
-                    println!("  acct_offset_name: credit_card");
-                    println!("  name: {:?}", record.name);
-
-                    // if negative, return expense acct
-                    println!("  acct_type: expense");
-                    // println!("  acct_name: expense-credit-card");
+                    println!("  acct_name: {}", transaction.acct_name)
                 }
             }
+
+            // if negative, return expense acct
+            println!("  acct_type: expense");
         } else {
             break;
         }
