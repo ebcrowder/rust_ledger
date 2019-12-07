@@ -48,6 +48,16 @@ struct LedgerFile {
     transactions: Vec<Transactions>,
 }
 
+#[derive(Debug, PartialEq, Serialize, Deserialize)]
+struct CSVOutput {
+    date: String,
+    debit_credit: f64,
+    acct_name: String,
+    acct_type: String,
+    acct_offset_name: String,
+    memo: String,
+}
+
 pub fn csv(ledger_file: &str, csv_file: &str) -> Result<(), std::io::Error> {
     // TODO check for matches in ledger file and
     // map transactions from csv to existing expense accounts
@@ -60,29 +70,24 @@ pub fn csv(ledger_file: &str, csv_file: &str) -> Result<(), std::io::Error> {
     let raw_ledger_file = std::fs::File::open(ledger_file)?;
     let deserialized_file: LedgerFile = serde_yaml::from_reader(raw_ledger_file).unwrap();
 
+    let mut csv_output: Vec<CSVOutput> = Vec::new();
+
     for result in csv_reader.deserialize() {
         let record: CSV = result?;
         if record.amount < 0.00 {
-            println!("- date: {:?}", record.date);
-            println!("  debit_credit: {:?}", -record.amount.round() as i32);
-
-            // TODO make this not specific to my use case
-            println!("  acct_offset_name: credit_card");
-            println!("  name: {:?}", record.name);
-
             // loop through transactions and find matching memos
-            for transaction in &deserialized_file.transactions {
-                if record.name == transaction.name {
-                    println!("  acct_name: {}", transaction.acct_name)
-                }
-            }
-
-            // if negative, return expense acct
-            println!("  acct_type: expense");
-        } else {
-            break;
+            csv_output.push(CSVOutput {
+                date: record.date,
+                debit_credit: record.amount,
+                acct_name: "test".to_string(),
+                acct_type: "expense".to_string(),
+                acct_offset_name: "liability-credit-card".to_string(),
+                memo: record.name,
+            })
         }
     }
 
+    let s = serde_yaml::to_string(&csv_output).unwrap();
+    println!("{:?}", s);
     Ok(())
 }
