@@ -1,3 +1,5 @@
+https://github.com/ebcrowder/rust-ledger/workflows/Rust/badge.svg
+
 # rust_ledger
 
 ### this project is for learning purposes only.
@@ -89,12 +91,12 @@ accounts:
 
 transactions:
   - acct_name: expense-test-acct
-    date: '2019-01-01'
+    date: "2019-01-01"
     debit_credit: 1
     acct_type: expense
     acct_offset_name: checking
   - acct_name: expense-test-acct
-    date: '2019-01-02'
+    date: "2019-01-02"
     debit_credit: 400
     acct_type: expense
     acct_offset_name: checking
