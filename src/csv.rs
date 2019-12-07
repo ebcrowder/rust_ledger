@@ -58,6 +58,12 @@ struct CSVOutput {
     memo: String,
 }
 
+#[derive(Debug)]
+struct CSVMatches {
+    acct_name: String,
+    memo: String,
+}
+
 pub fn csv(ledger_file: &str, csv_file: &str) -> Result<(), std::io::Error> {
     // TODO check for matches in ledger file and
     // map transactions from csv to existing expense accounts
@@ -71,17 +77,19 @@ pub fn csv(ledger_file: &str, csv_file: &str) -> Result<(), std::io::Error> {
     let deserialized_file: LedgerFile = serde_yaml::from_reader(raw_ledger_file).unwrap();
 
     let mut csv_output: Vec<CSVOutput> = Vec::new();
+    let mut csv_matches: Vec<CSVMatches> = Vec::new();
 
     for result in csv_reader.deserialize() {
         let record: CSV = result?;
-        // if record.amount < 0.00 {
         // loop through transactions and find matching memos
 
         for transaction in &deserialized_file.transactions {
-            if &transaction.name == &record.name {
-                println!("{}", transaction.acct_name);
+            if transaction.name == record.name {
+                csv_matches.push(CSVMatches {
+                    acct_name: transaction.acct_name.to_string(),
+                    memo: transaction.name.to_string(),
+                })
             }
-            // }
         }
 
         csv_output.push(CSVOutput {
@@ -92,6 +100,10 @@ pub fn csv(ledger_file: &str, csv_file: &str) -> Result<(), std::io::Error> {
             acct_offset_name: "liability-credit-card".to_string(),
             memo: record.name,
         })
+    }
+
+    for match_item in csv_matches {
+        println!("{:?}", match_item);
     }
 
     let s = serde_yaml::to_string(&csv_output).unwrap();
