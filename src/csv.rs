@@ -58,16 +58,12 @@ struct CSVOutput {
     memo: String,
 }
 
-#[derive(Debug)]
 struct CSVMatches {
     acct_name: String,
     memo: String,
 }
 
 pub fn csv(ledger_file: &str, csv_file: &str) -> Result<(), std::io::Error> {
-    // TODO check for matches in ledger file and
-    // map transactions from csv to existing expense accounts
-
     // open csv file
     let raw_csv_file = fs::File::open(csv_file)?;
     let mut csv_reader = csv::Reader::from_reader(raw_csv_file);
@@ -79,31 +75,6 @@ pub fn csv(ledger_file: &str, csv_file: &str) -> Result<(), std::io::Error> {
     let mut csv_output: Vec<CSVOutput> = Vec::new();
     let mut csv_matches: Vec<CSVMatches> = Vec::new();
 
-    for result in csv_reader.deserialize() {
-        let record: CSV = result?;
-        // loop through transactions and find matching memos
-
-        for transaction in &deserialized_file.transactions {
-            if transaction.name == record.name {
-                csv_matches.push(CSVMatches {
-                    acct_name: transaction.acct_name.to_string(),
-                    memo: transaction.name.to_string(),
-                })
-            }
-        }
-
-        let acct_name_matched = insert_match_acct(&csv_matches, &record);
-
-        csv_output.push(CSVOutput {
-            date: record.date,
-            debit_credit: record.amount,
-            acct_name: acct_name_matched,
-            acct_type: "expense".to_string(),
-            acct_offset_name: "liability-credit-card".to_string(),
-            memo: record.name,
-        })
-    }
-
     fn insert_match_acct(csv_matches: &Vec<CSVMatches>, record: &CSV) -> String {
         for match_item in csv_matches {
             if match_item.memo == record.name {
@@ -113,9 +84,29 @@ pub fn csv(ledger_file: &str, csv_file: &str) -> Result<(), std::io::Error> {
         return "expense".to_string();
     }
 
-    // for match_item in csv_matches {
-    //     println!("{:?}", match_item);
-    // }
+    for result in csv_reader.deserialize() {
+        let record: CSV = result?;
+        // loop through transactions and find matching memos
+        for transaction in &deserialized_file.transactions {
+            if transaction.name == record.name {
+                csv_matches.push(CSVMatches {
+                    acct_name: transaction.acct_name.to_string(),
+                    memo: transaction.name.to_string(),
+                })
+            }
+        }
+
+        let matched_acct_name = insert_match_acct(&csv_matches, &record);
+
+        csv_output.push(CSVOutput {
+            date: record.date,
+            debit_credit: record.amount,
+            acct_name: matched_acct_name,
+            acct_type: "expense".to_string(),
+            acct_offset_name: "liability-credit-card".to_string(),
+            memo: record.name,
+        })
+    }
 
     let s = serde_yaml::to_string(&csv_output).unwrap();
     println!("{:?}", s);
