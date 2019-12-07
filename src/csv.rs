@@ -74,17 +74,24 @@ pub fn csv(ledger_file: &str, csv_file: &str) -> Result<(), std::io::Error> {
 
     for result in csv_reader.deserialize() {
         let record: CSV = result?;
-        if record.amount < 0.00 {
-            // loop through transactions and find matching memos
-            csv_output.push(CSVOutput {
-                date: record.date,
-                debit_credit: record.amount,
-                acct_name: "test".to_string(),
-                acct_type: "expense".to_string(),
-                acct_offset_name: "liability-credit-card".to_string(),
-                memo: record.name,
-            })
+        // if record.amount < 0.00 {
+        // loop through transactions and find matching memos
+
+        for transaction in &deserialized_file.transactions {
+            if &transaction.name == &record.name {
+                println!("{}", transaction.acct_name);
+            }
+            // }
         }
+
+        csv_output.push(CSVOutput {
+            date: record.date,
+            debit_credit: record.amount,
+            acct_name: "test".to_string(),
+            acct_type: "expense".to_string(),
+            acct_offset_name: "liability-credit-card".to_string(),
+            memo: record.name,
+        })
     }
 
     let s = serde_yaml::to_string(&csv_output).unwrap();
