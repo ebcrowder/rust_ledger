@@ -1,4 +1,4 @@
-https://github.com/ebcrowder/rust-ledger/workflows/Rust/badge.svg
+![](https://github.com/ebcrowder/rust-ledger/workflows/Rust/badge.svg)
 
 # rust_ledger
 
