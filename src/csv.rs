@@ -92,19 +92,30 @@ pub fn csv(ledger_file: &str, csv_file: &str) -> Result<(), std::io::Error> {
             }
         }
 
+        let acct_name_matched = insert_match_acct(&csv_matches, &record);
+
         csv_output.push(CSVOutput {
             date: record.date,
             debit_credit: record.amount,
-            acct_name: "test".to_string(),
+            acct_name: acct_name_matched,
             acct_type: "expense".to_string(),
             acct_offset_name: "liability-credit-card".to_string(),
             memo: record.name,
         })
     }
 
-    for match_item in csv_matches {
-        println!("{:?}", match_item);
+    fn insert_match_acct(csv_matches: &Vec<CSVMatches>, record: &CSV) -> String {
+        for match_item in csv_matches {
+            if match_item.memo == record.name {
+                return match_item.acct_name.to_string();
+            }
+        }
+        return "expense".to_string();
     }
+
+    // for match_item in csv_matches {
+    //     println!("{:?}", match_item);
+    // }
 
     let s = serde_yaml::to_string(&csv_output).unwrap();
     println!("{:?}", s);
