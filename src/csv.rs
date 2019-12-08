@@ -62,7 +62,7 @@ struct CSVMatches {
     name: String,
 }
 
-fn write<T>(writer: &mut T, csv_output: &Vec<CSVOutput>) -> Result<(), serde_yaml::Error>
+fn write<T>(writer: &mut T, csv_output: &[CSVOutput]) -> Result<(), serde_yaml::Error>
 where
     T: Write,
 {
@@ -72,7 +72,7 @@ where
 
 fn write_ledger_file(
     ledger_file: &str,
-    csv_output: &Vec<CSVOutput>,
+    csv_output: &[CSVOutput],
 ) -> Result<(), serde_yaml::Error> {
     let mut f = fs::OpenOptions::new()
         .append(true)
@@ -81,13 +81,13 @@ fn write_ledger_file(
     write(&mut f, csv_output)
 }
 
-fn insert_match_acct(csv_matches: &Vec<CSVMatches>, record: &CSV) -> String {
+fn insert_match_acct(csv_matches: &[CSVMatches], record: &CSV) -> String {
     for match_item in csv_matches {
         if match_item.name == record.name {
             return match_item.acct_name.to_string();
         }
     }
-    return "expense_general".to_string();
+    "expense_general".to_string()
 }
 
 pub fn csv(ledger_file: &str, csv_file: &str) -> Result<(), std::io::Error> {
