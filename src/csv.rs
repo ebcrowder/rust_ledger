@@ -1,9 +1,8 @@
 // convert csv to yaml format
-
 extern crate csv;
 
 use serde::{Deserialize, Serialize};
-use std::fs;
+use std::{fs, io::Write};
 
 #[derive(Debug, Deserialize)]
 struct CSV {
@@ -51,16 +50,44 @@ struct LedgerFile {
 #[derive(Debug, PartialEq, Serialize, Deserialize)]
 struct CSVOutput {
     date: String,
-    debit_credit: f64,
+    debit_credit: i32,
     acct_name: String,
     acct_type: String,
     acct_offset_name: String,
-    memo: String,
+    name: String,
 }
 
 struct CSVMatches {
     acct_name: String,
-    memo: String,
+    name: String,
+}
+
+fn write<T>(writer: &mut T, csv_output: &Vec<CSVOutput>) -> Result<(), serde_yaml::Error>
+where
+    T: Write,
+{
+    serde_yaml::to_writer(writer, csv_output)?;
+    Ok(())
+}
+
+fn write_ledger_file(
+    ledger_file: &str,
+    csv_output: &Vec<CSVOutput>,
+) -> Result<(), serde_yaml::Error> {
+    let mut f = fs::OpenOptions::new()
+        .append(true)
+        .open(ledger_file)
+        .unwrap();
+    write(&mut f, csv_output)
+}
+
+fn insert_match_acct(csv_matches: &Vec<CSVMatches>, record: &CSV) -> String {
+    for match_item in csv_matches {
+        if match_item.name == record.name {
+            return match_item.acct_name.to_string();
+        }
+    }
+    return "expense".to_string();
 }
 
 pub fn csv(ledger_file: &str, csv_file: &str) -> Result<(), std::io::Error> {
@@ -75,15 +102,6 @@ pub fn csv(ledger_file: &str, csv_file: &str) -> Result<(), std::io::Error> {
     let mut csv_output: Vec<CSVOutput> = Vec::new();
     let mut csv_matches: Vec<CSVMatches> = Vec::new();
 
-    fn insert_match_acct(csv_matches: &Vec<CSVMatches>, record: &CSV) -> String {
-        for match_item in csv_matches {
-            if match_item.memo == record.name {
-                return match_item.acct_name.to_string();
-            }
-        }
-        return "expense".to_string();
-    }
-
     for result in csv_reader.deserialize() {
         let record: CSV = result?;
         // loop through transactions and find matching memos
@@ -91,24 +109,27 @@ pub fn csv(ledger_file: &str, csv_file: &str) -> Result<(), std::io::Error> {
             if transaction.name == record.name {
                 csv_matches.push(CSVMatches {
                     acct_name: transaction.acct_name.to_string(),
-                    memo: transaction.name.to_string(),
+                    name: transaction.name.to_string(),
                 })
             }
         }
-
+        // match memos with existing accounts in ledger yaml file
         let matched_acct_name = insert_match_acct(&csv_matches, &record);
-
+        // push transaction to csv output Vector
         csv_output.push(CSVOutput {
             date: record.date,
-            debit_credit: record.amount,
+            debit_credit: record.amount.round() as i32,
             acct_name: matched_acct_name,
             acct_type: "expense".to_string(),
             acct_offset_name: "liability-credit-card".to_string(),
-            memo: record.name,
+            name: record.name,
         })
     }
 
-    let s = serde_yaml::to_string(&csv_output).unwrap();
-    println!("{:?}", s);
+    // write csv_output contents to ledger file
+    write_ledger_file(ledger_file, &csv_output).unwrap();
+
+    println!("contents of csv file successfully applied to ledger yaml file");
+
     Ok(())
 }
