@@ -104,6 +104,12 @@ pub fn csv(ledger_file: &str, csv_file: &str) -> Result<(), std::io::Error> {
 
     for result in csv_reader.deserialize() {
         let record: CSV = result?;
+
+        // if amount is a credit, skip to next iteration
+        if record.amount > 1.0 {
+            continue;
+        }
+
         // loop through transactions and find matching memos
         for transaction in &deserialized_file.transactions {
             if transaction.name == record.name {
