@@ -87,7 +87,7 @@ fn insert_match_acct(csv_matches: &Vec<CSVMatches>, record: &CSV) -> String {
             return match_item.acct_name.to_string();
         }
     }
-    return "expense".to_string();
+    return "expense_general".to_string();
 }
 
 pub fn csv(ledger_file: &str, csv_file: &str) -> Result<(), std::io::Error> {
@@ -118,10 +118,10 @@ pub fn csv(ledger_file: &str, csv_file: &str) -> Result<(), std::io::Error> {
         // push transaction to csv output Vector
         csv_output.push(CSVOutput {
             date: record.date,
-            debit_credit: record.amount.round() as i32,
+            debit_credit: -record.amount.round() as i32,
             acct_name: matched_acct_name,
             acct_type: "expense".to_string(),
-            acct_offset_name: "liability-credit-card".to_string(),
+            acct_offset_name: "credit_card".to_string(),
             name: record.name,
         })
     }
