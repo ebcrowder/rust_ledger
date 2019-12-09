@@ -70,10 +70,7 @@ where
     Ok(())
 }
 
-fn write_ledger_file(
-    ledger_file: &str,
-    csv_output: &[CSVOutput],
-) -> Result<(), serde_yaml::Error> {
+fn write_ledger_file(ledger_file: &str, csv_output: &[CSVOutput]) -> Result<(), serde_yaml::Error> {
     let mut f = fs::OpenOptions::new()
         .append(true)
         .open(ledger_file)
@@ -87,7 +84,11 @@ fn insert_match_acct(csv_matches: &[CSVMatches], record: &CSV) -> String {
             return match_item.acct_name.to_string();
         }
     }
-    "expense_general".to_string()
+    if record.amount < 1.0 {
+        "expense_general".to_string()
+    } else {
+        "income_general".to_string()
+    }
 }
 
 pub fn csv(ledger_file: &str, csv_file: &str) -> Result<(), std::io::Error> {
@@ -105,11 +106,6 @@ pub fn csv(ledger_file: &str, csv_file: &str) -> Result<(), std::io::Error> {
     for result in csv_reader.deserialize() {
         let record: CSV = result?;
 
-        // if amount is a credit, skip to next iteration
-        if record.amount > 1.0 {
-            continue;
-        }
-
         // loop through transactions and find matching memos
         for transaction in &deserialized_file.transactions {
             if transaction.name == record.name {
@@ -122,14 +118,28 @@ pub fn csv(ledger_file: &str, csv_file: &str) -> Result<(), std::io::Error> {
         // match memos with existing accounts in ledger yaml file
         let matched_acct_name = insert_match_acct(&csv_matches, &record);
         // push transaction to csv output Vector
-        csv_output.push(CSVOutput {
-            date: record.date,
-            debit_credit: -record.amount.round() as i32,
-            acct_name: matched_acct_name,
-            acct_type: "expense".to_string(),
-            acct_offset_name: "credit_card".to_string(),
-            name: record.name,
-        })
+
+        // if amount is negative, post as expense
+        if record.amount < 1.0 {
+            csv_output.push(CSVOutput {
+                date: record.date,
+                debit_credit: -record.amount.round() as i32,
+                acct_name: matched_acct_name,
+                acct_type: "expense".to_string(),
+                acct_offset_name: "credit_card".to_string(),
+                name: record.name,
+            })
+        } else {
+            // if amount is positive, post as income
+            csv_output.push(CSVOutput {
+                date: record.date,
+                debit_credit: record.amount.round() as i32,
+                acct_name: matched_acct_name,
+                acct_type: "income".to_string(),
+                acct_offset_name: "credit_card".to_string(),
+                name: record.name,
+            })
+        }
     }
 
     // write csv_output contents to ledger file
