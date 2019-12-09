@@ -2,6 +2,7 @@ use assert_cmd::prelude::*;
 use predicates::prelude::*;
 use std::io::Write;
 use std::process::Command;
+use tempfile;
 
 #[test]
 fn file_does_not_exist() -> Result<(), std::io::Error> {
