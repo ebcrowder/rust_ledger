@@ -13,6 +13,7 @@ fn main() -> Result<(), std::io::Error> {
     let ledger_file: &str;
     let csv_file: &str;
     let command: &str;
+    let option: &str;
 
     match args.len() {
         1 => error::error(),
@@ -20,21 +21,34 @@ fn main() -> Result<(), std::io::Error> {
         3 => {
             ledger_file = &args[1];
             command = &args[2];
+            option = "all";
 
             match command {
                 "accounts" => accounts::accounts(ledger_file),
                 "balance" => balance::balance(ledger_file),
-                "register" => register::register(ledger_file),
+                "register" => register::register(ledger_file, option),
                 _ => error::error(),
             }
         }
         4 => {
             ledger_file = &args[1];
-            csv_file = &args[2];
-            command = &args[3];
+            command = &args[2];
+
+            if command == "csv" {
+                csv_file = &args[3];
+            } else {
+                csv_file = "none";
+            }
+
+            if command == "register" {
+                option = &args[3];
+            } else {
+                option = "none";
+            }
 
             match command {
                 "csv" => csv::csv(ledger_file, csv_file),
+                "register" => register::register(ledger_file, option),
                 _ => error::error(),
             }
         }
