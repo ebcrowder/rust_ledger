@@ -11,7 +11,6 @@ serde_yaml = "0.8.11"
 serde = "1.0.101"
 csv = "1.1.1"
 num-format = "0.4.0"
-getopts = "0.2"
 
 [dev-dependencies]
 assert_cmd = "0.11.1"

@@ -39,7 +39,7 @@ struct LedgerFile {
     transactions: Vec<Transactions>,
 }
 
-pub fn register(filename: &str) -> Result<(), std::io::Error> {
+pub fn register(filename: &str, option: &str) -> Result<(), std::io::Error> {
     let file = std::fs::File::open(filename)?;
     let deserialized_file: LedgerFile = serde_yaml::from_reader(file).unwrap();
 
@@ -48,7 +48,19 @@ pub fn register(filename: &str) -> Result<(), std::io::Error> {
         "date", "debit", "acct_name", "acct_offset_name", "acct_memo"
     );
 
-    for item in deserialized_file.transactions {
+    let filtered_items: Vec<Transactions> = deserialized_file
+        .transactions
+        .into_iter()
+        .filter(|x| {
+            if option == "all" {
+                true
+            } else {
+                x.acct_type == option
+            }
+        })
+        .collect();
+
+    for item in filtered_items {
         println!(
             "{0: <10} | {1: <10} | {2: <20} | {3: <20} | {4: <20}",
             item.date,

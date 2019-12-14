@@ -190,7 +190,7 @@ fn csv_test() -> Result<(), Box<dyn std::error::Error>> {
     csv_file.flush().unwrap();
 
     let mut cmd = Command::new("./target/debug/rust-ledger");
-    cmd.arg(yaml_file.path()).arg(csv_file.path()).arg("csv");
+    cmd.arg(yaml_file.path()).arg("csv").arg(csv_file.path());
     cmd.assert().success().stdout(predicate::str::contains(
         "contents of csv file successfully applied to ledger yaml file",
     ));
