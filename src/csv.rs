@@ -91,7 +91,7 @@ fn insert_match_acct(csv_matches: &[CSVMatches], record: &CSV) -> String {
     }
 }
 
-pub fn csv(ledger_file: &str, csv_file: &str) -> Result<(), std::io::Error> {
+pub fn csv(ledger_file: &str, csv_file: Option<&str>) -> Result<(), std::io::Error> {
     // open csv file
     let raw_csv_file = fs::File::open(csv_file)?;
     let mut csv_reader = csv::Reader::from_reader(raw_csv_file);
