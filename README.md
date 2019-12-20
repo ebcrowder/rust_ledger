@@ -2,16 +2,14 @@
 
 # rust_ledger
 
-### this project is for learning purposes only.
-
-You should _definitely_ use the original (https://github.com/ledger/ledger) or one of its ports (https://github.com/ledger/ledger/wiki/Ports) which actually work and have more features.
+command line accounting tool
 
 As a former CPA, I could not resist building my own accounting system.
 
 ### Summary
 
 - Spiritual port of ledger
-- Smaller feature set based on my particular use cases - primarily, _1)_ how much money have I spent during `xyz` time period and _2)_ what is my financial situation as of right now?
+- Smaller feature set based on typical use cases - primarily, _1)_ how much money have I spent during `xyz` time period and _2)_ what is my financial situation as of right now?
 - Uses `yaml` files as data store
 - Includes a tool to convert `csv` files to `yaml` format
 
@@ -19,8 +17,9 @@ As a former CPA, I could not resist building my own accounting system.
 
 - clone this repo
 - if Rust is not installed on your machine, follow the instructions on how to do that here: https://www.rust-lang.org/tools/install
-- run `cargo build` to compile the binary
-- run `cargo run LEDGER_FILE_PATH COMMAND OPTION` where the following:
+- run `cargo build --release` to compile the binary
+- go to `/target/release` and copy the `rust_ledger` binary in your path - generally `/usr/bin` on most unix-based systems
+- run `rust_ledger run LEDGER_FILE_PATH COMMAND OPTION` where the following:
   - LEDGER_FILE_PATH - relative path to location of yaml ledger file
   - COMMAND - ledger command (accounts, balance, register, or csv)
   - OPTION - allows you to filter the output of the `register` command by account type. For example, if you wish to only see "expense" transactions in the output, you would pass in `expense` as the option here.
