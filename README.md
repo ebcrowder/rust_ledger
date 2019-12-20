@@ -1,4 +1,6 @@
 ![](https://github.com/ebcrowder/rust-ledger/workflows/rust_ledger/badge.svg)
+[![Latest version](https://img.shields.io/crates/v/rust_ledger.svg)](https://crates.io/crates/rust_ledger)
+[![Documentation](https://docs.rs/rust_ledger/badge.svg)](https://docs.rs/rust_ledger)
 
 # rust_ledger
 
