@@ -6,7 +6,7 @@ use tempfile;
 
 #[test]
 fn file_does_not_exist() -> Result<(), std::io::Error> {
-    let mut cmd = Command::new("./target/debug/rust-ledger");
+    let mut cmd = Command::new("./target/debug/rust_ledger");
     cmd.arg("test/file/does/not/exist.txt").arg("accounts");
     cmd.assert()
         .failure()
@@ -46,7 +46,7 @@ fn accounts_test() -> Result<(), Box<dyn std::error::Error>> {
     file.write_all(account_yml).unwrap();
     file.flush().unwrap();
 
-    let mut cmd = Command::new("./target/debug/rust-ledger");
+    let mut cmd = Command::new("./target/debug/rust_ledger");
     cmd.arg(file.path()).arg("accounts");
     cmd.assert()
         .success()
@@ -86,7 +86,7 @@ fn balances_test() -> Result<(), Box<dyn std::error::Error>> {
     file.write_all(balance_yml).unwrap();
     file.flush().unwrap();
 
-    let mut cmd = Command::new("./target/debug/rust-ledger");
+    let mut cmd = Command::new("./target/debug/rust_ledger");
     cmd.arg(file.path()).arg("balance");
     cmd.assert()
         .success()
@@ -127,7 +127,7 @@ fn register_test() -> Result<(), Box<dyn std::error::Error>> {
     file.write_all(balance_yml).unwrap();
     file.flush().unwrap();
 
-    let mut cmd = Command::new("./target/debug/rust-ledger");
+    let mut cmd = Command::new("./target/debug/rust_ledger");
     cmd.arg(file.path()).arg("register");
     cmd.assert().success().stdout(predicate::str::contains(
         "2019-01-01 | 1          | expense-test-acct    | credit_card",
@@ -189,7 +189,7 @@ fn csv_test() -> Result<(), Box<dyn std::error::Error>> {
     csv_file.write_all(raw_csv).unwrap();
     csv_file.flush().unwrap();
 
-    let mut cmd = Command::new("./target/debug/rust-ledger");
+    let mut cmd = Command::new("./target/debug/rust_ledger");
     cmd.arg(yaml_file.path()).arg("csv").arg(csv_file.path());
     cmd.assert().success().stdout(predicate::str::contains(
         "contents of csv file successfully applied to ledger yaml file",
