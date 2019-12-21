@@ -10,7 +10,7 @@ As a former CPA, I could not resist building my own accounting system.
 
 ### Summary
 
-- Spiritual port of ledger
+- Spiritual port of [ledger](https://github.com/ledger/ledger)
 - Smaller feature set based on typical use cases - primarily, _1)_ how much money have I spent during `xyz` time period and _2)_ what is my financial situation as of right now?
 - Uses `yaml` files as data store
 - Includes a tool to convert `csv` files to `yaml` format
@@ -28,7 +28,7 @@ As a former CPA, I could not resist building my own accounting system.
 
 ### Test
 
-- run `cargo test` to run the test suite
+- `cargo test`
 
 ### API
 
