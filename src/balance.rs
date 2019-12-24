@@ -1,5 +1,4 @@
 // returns balances of all general ledger accounts
-extern crate serde;
 extern crate serde_yaml;
 
 use num_format::{Locale, ToFormattedString};

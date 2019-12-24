@@ -1,5 +1,4 @@
 // returns all general ledger transactions
-extern crate serde;
 extern crate serde_yaml;
 
 use num_format::{Locale, ToFormattedString};
