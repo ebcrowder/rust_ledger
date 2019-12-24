@@ -8,10 +8,13 @@ command line accounting tool
 
 As a former CPA, I could not resist building my own accounting system.
 
+PRs and issues are certainly welcome. I use this tool to keep track of my personal finances but would sincerely appreciate feedback on how to make it more useful for others.
+
 ### Summary
 
 - Spiritual port of [ledger](https://github.com/ledger/ledger)
-- Smaller feature set based on typical use cases - primarily, _1)_ how much money have I spent during `xyz` time period and _2)_ what is my financial situation as of right now?
+- Uses double-entry accounting paradigm
+- Small feature set based on typical use cases
 - Uses `yaml` files as data store
 - Includes a tool to convert `csv` files to `yaml` format
 
@@ -88,6 +91,9 @@ date       | debit      | acct_name            | acct_offset_name     | acct_mem
 
 - csv
   - converts `csv` files to `yaml` format expected by `rust_ledger`
+  - most financial institutions (banks, credit unions and credit card companies) will provide exports of transaction history in `csv` format
+  - **note** - prior to importing your `csv` file into the tool, you must rename the columns in the first line of the document in the following schema:
+    `"date","transaction","name","memo","amount"`
 
 ### rust_ledger `yaml` file format
 
