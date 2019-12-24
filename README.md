@@ -92,7 +92,7 @@ date       | debit      | acct_name            | acct_offset_name     | acct_mem
 - csv
   - converts `csv` files to `yaml` format expected by `rust_ledger`
   - most financial institutions (banks, credit unions and credit card companies) will provide exports of transaction history in `csv` format
-  - **note** - prior to importing your `csv` file into the tool, you must rename the columns in the first line of the document in the following schema:
+  - **note** - prior to importing your `csv` file into the tool, you must rename the columns in the first line of the `csv` file in the following schema:
     `"date","transaction","name","memo","amount"`
 
 ### rust_ledger `yaml` file format
