@@ -20,10 +20,15 @@ PRs and issues are certainly welcome. I use this tool to keep track of my person
 
 ### Use
 
-- clone this repo
+- install via cargo - `cargo install rust_ledger`
+- this command will install the binary at `~/.cargo/bin/`
+- copy the `rust_ledger` binary to your path: `/usr/bin`
+
+Alternatively, clone this repo and do the following:
+
 - if Rust is not installed on your machine, follow the instructions on how to do that here: https://www.rust-lang.org/tools/install
 - run `cargo build --release` to compile the binary
-- go to `/target/release` and copy the `rust_ledger` binary in your path - generally `/usr/bin` on most unix-based systems
+- go to `/target/release` and copy the `rust_ledger` binary in your path: `/usr/bin`
 - run `rust_ledger run LEDGER_FILE_PATH COMMAND OPTION` where the following:
   - LEDGER_FILE_PATH - relative path to location of yaml ledger file
   - COMMAND - ledger command (accounts, balance, register, or csv)
