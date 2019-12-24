@@ -1,5 +1,6 @@
 // convert csv to yaml format
 extern crate csv;
+extern crate serde;
 
 use serde::{Deserialize, Serialize};
 use std::{fs, io::Write};

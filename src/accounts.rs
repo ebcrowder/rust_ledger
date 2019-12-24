@@ -1,5 +1,5 @@
 // returns all general ledger accounts
-
+extern crate serde;
 extern crate serde_yaml;
 
 use serde::{Deserialize, Serialize};
