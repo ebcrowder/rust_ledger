@@ -313,7 +313,7 @@ dependencies = [
 
 [[package]]
 name = "rust_ledger"
-version = "0.1.5"
+version = "0.1.6"
 dependencies = [
  "assert_cmd 0.12.0 (registry+https://github.com/rust-lang/crates.io-index)",
  "csv 1.1.1 (registry+https://github.com/rust-lang/crates.io-index)",
