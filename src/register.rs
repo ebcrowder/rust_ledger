@@ -2,41 +2,7 @@
 extern crate serde_yaml;
 
 use num_format::{Locale, ToFormattedString};
-use serde::{Deserialize, Serialize};
-
-#[derive(Debug, PartialEq, Serialize, Deserialize)]
-struct Currencies {
-    id: String,
-    name: String,
-    alias: String,
-    note: String,
-}
-
-#[derive(Debug, PartialEq, Serialize, Deserialize)]
-struct Accounts {
-    id: i32,
-    acct_name: String,
-    acct_type: String,
-    debit_credit: i32,
-}
-
-#[derive(Debug, PartialEq, Serialize, Deserialize)]
-struct Transactions {
-    date: String,
-    debit_credit: i32,
-    acct_name: String,
-    acct_type: String,
-    acct_offset_name: String,
-    name: String,
-}
-
-#[derive(Debug, PartialEq, Serialize, Deserialize)]
-struct LedgerFile {
-    owner: String,
-    currencies: Currencies,
-    accounts: Vec<Accounts>,
-    transactions: Vec<Transactions>,
-}
+use super::models::{LedgerFile, Transaction};
 
 pub fn register(filename: &str, option: &str) -> Result<(), std::io::Error> {
     let file = std::fs::File::open(filename)?;
@@ -47,7 +13,7 @@ pub fn register(filename: &str, option: &str) -> Result<(), std::io::Error> {
         "date", "debit", "acct_name", "acct_offset_name", "acct_memo"
     );
 
-    let filtered_items: Vec<Transactions> = deserialized_file
+    let filtered_items: Vec<Transaction> = deserialized_file
         .transactions
         .into_iter()
         .filter(|x| {

@@ -1,42 +1,9 @@
 // returns all general ledger accounts
 extern crate serde_yaml;
 
-use serde::{Deserialize, Serialize};
+use super::models::{LedgerFile};
 
-#[derive(Debug, PartialEq, Serialize, Deserialize)]
-struct Currencies {
-    id: String,
-    name: String,
-    alias: String,
-    note: String,
-}
-
-#[derive(Debug, PartialEq, Serialize, Deserialize)]
-struct Accounts {
-    id: i32,
-    acct_name: String,
-    acct_type: String,
-    debit_credit: i32,
-}
-
-#[derive(Debug, PartialEq, Serialize, Deserialize)]
-struct Transactions {
-    date: String,
-    debit_credit: i32,
-    acct_name: String,
-    acct_type: String,
-    acct_offset_name: String,
-}
-
-#[derive(Debug, PartialEq, Serialize, Deserialize)]
-struct LedgerFile {
-    owner: String,
-    currencies: Currencies,
-    accounts: Vec<Accounts>,
-    transactions: Vec<Transactions>,
-}
-
-struct BalanceAccounts {
+struct BalanceAccount {
     account: String,
     account_type: String,
 }
@@ -45,10 +12,10 @@ pub fn accounts(filename: &str) -> Result<(), std::io::Error> {
     let file = std::fs::File::open(filename)?;
     let deserialized_file: LedgerFile = serde_yaml::from_reader(file).unwrap();
 
-    let mut account_vec: Vec<BalanceAccounts> = Vec::new();
+    let mut account_vec: Vec<BalanceAccount> = Vec::new();
 
     for account in deserialized_file.accounts {
-        account_vec.push(BalanceAccounts {
+        account_vec.push(BalanceAccount {
             account: account.acct_name,
             account_type: account.acct_type,
         });

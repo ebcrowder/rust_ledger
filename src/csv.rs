@@ -3,6 +3,7 @@ extern crate csv;
 
 use serde::{Deserialize, Serialize};
 use std::{fs, io::Write};
+use super::models::{LedgerFile};
 
 #[derive(Debug, Deserialize)]
 struct CSV {
@@ -11,40 +12,6 @@ struct CSV {
     name: String,
     memo: String,
     amount: f64,
-}
-
-#[derive(Debug, PartialEq, Serialize, Deserialize)]
-struct Currencies {
-    id: String,
-    name: String,
-    alias: String,
-    note: String,
-}
-
-#[derive(Debug, PartialEq, Serialize, Deserialize)]
-struct Accounts {
-    id: i32,
-    acct_name: String,
-    acct_type: String,
-    debit_credit: i32,
-}
-
-#[derive(Debug, PartialEq, Serialize, Deserialize)]
-struct Transactions {
-    date: String,
-    debit_credit: i32,
-    acct_name: String,
-    acct_type: String,
-    acct_offset_name: String,
-    name: String,
-}
-
-#[derive(Debug, PartialEq, Serialize, Deserialize)]
-struct LedgerFile {
-    owner: String,
-    currencies: Currencies,
-    accounts: Vec<Accounts>,
-    transactions: Vec<Transactions>,
 }
 
 #[derive(Debug, PartialEq, Serialize, Deserialize)]

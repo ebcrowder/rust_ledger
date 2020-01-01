@@ -3,6 +3,7 @@ mod balance;
 mod csv;
 mod error;
 mod register;
+mod models;
 
 use std::env;
 
