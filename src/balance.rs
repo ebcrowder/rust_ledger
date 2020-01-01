@@ -2,48 +2,15 @@
 extern crate serde_yaml;
 
 use num_format::{Locale, ToFormattedString};
-use serde::{Deserialize, Serialize};
+use super::models::{LedgerFile};
 
-#[derive(Debug, PartialEq, Serialize, Deserialize)]
-struct Currencies {
-    id: String,
-    name: String,
-    alias: String,
-    note: String,
-}
-
-#[derive(Debug, PartialEq, Serialize, Deserialize)]
-struct Accounts {
-    id: i32,
-    acct_name: String,
-    acct_type: String,
-    debit_credit: i32,
-}
-
-#[derive(Debug, PartialEq, Serialize, Deserialize)]
-struct Transactions {
-    date: String,
-    debit_credit: i32,
-    acct_name: String,
-    acct_type: String,
-    acct_offset_name: String,
-}
-
-#[derive(Debug, PartialEq, Serialize, Deserialize)]
-struct LedgerFile {
-    owner: String,
-    currencies: Currencies,
-    accounts: Vec<Accounts>,
-    transactions: Vec<Transactions>,
-}
-
-struct BalanceAccounts {
+struct BalanceAccount {
     account: String,
     account_type: String,
     amount: i32,
 }
 
-struct TransactionAccounts {
+struct TransactionAccount {
     account: String,
     offset_account: String,
     amount: i32,
@@ -53,12 +20,12 @@ pub fn balance(filename: &str) -> Result<(), std::io::Error> {
     let file = std::fs::File::open(filename)?;
     let deserialized_file: LedgerFile = serde_yaml::from_reader(file).unwrap();
 
-    let mut accounts_vec: Vec<BalanceAccounts> = Vec::new();
-    let mut transactions_vec: Vec<TransactionAccounts> = Vec::new();
+    let mut accounts_vec: Vec<BalanceAccount> = Vec::new();
+    let mut transactions_vec: Vec<TransactionAccount> = Vec::new();
 
     // push opening balances into Vec
     for account in deserialized_file.accounts {
-        accounts_vec.push(BalanceAccounts {
+        accounts_vec.push(BalanceAccount {
             account: account.acct_name,
             account_type: account.acct_type,
             amount: account.debit_credit,
@@ -67,7 +34,7 @@ pub fn balance(filename: &str) -> Result<(), std::io::Error> {
 
     // push transactions into Vec
     for transaction in deserialized_file.transactions {
-        transactions_vec.push(TransactionAccounts {
+        transactions_vec.push(TransactionAccount {
             account: transaction.acct_name,
             offset_account: transaction.acct_offset_name,
             amount: transaction.debit_credit,

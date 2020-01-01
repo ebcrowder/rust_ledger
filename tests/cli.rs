@@ -41,6 +41,7 @@ fn accounts_test() -> Result<(), Box<dyn std::error::Error>> {
                 acct_type: expense 
                 date: 2019-01-01
                 acct_offset_name: credit_card
+                name: 'expense transaction'
         "#;
 
     file.write_all(account_yml).unwrap();
@@ -81,6 +82,7 @@ fn balances_test() -> Result<(), Box<dyn std::error::Error>> {
                 acct_type: expense 
                 date: 2019-01-01
                 acct_offset_name: credit_card
+                name: 'expense transaction'
         "#;
 
     file.write_all(balance_yml).unwrap();
