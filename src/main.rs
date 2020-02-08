@@ -2,8 +2,8 @@ mod accounts;
 mod balance;
 mod csv;
 mod error;
-mod register;
 mod models;
+mod register;
 
 use std::env;
 
@@ -44,7 +44,7 @@ fn main() -> Result<(), std::io::Error> {
             if command == "register" {
                 option = &args[3];
             } else {
-                option = "none";
+                option = "all";
             }
 
             match command {

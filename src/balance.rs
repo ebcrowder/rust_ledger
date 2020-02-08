@@ -1,8 +1,8 @@
 // returns balances of all general ledger accounts
 extern crate serde_yaml;
 
+use super::models::LedgerFile;
 use num_format::{Locale, ToFormattedString};
-use super::models::{LedgerFile};
 
 struct BalanceAccount {
     account: String,
