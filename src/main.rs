@@ -12,7 +12,6 @@ fn main() -> Result<(), std::io::Error> {
     let args: Vec<String> = env::args().collect();
 
     let ledger_file: &str;
-    let csv_file: &str;
     let command: &str;
     let option: &str;
 
@@ -35,21 +34,9 @@ fn main() -> Result<(), std::io::Error> {
             ledger_file = &args[1];
             command = &args[2];
 
-            if command == "csv" {
-                csv_file = &args[3];
-            } else {
-                csv_file = "none";
-            }
-
-            if command == "register" {
-                option = &args[3];
-            } else {
-                option = "all";
-            }
-
             match command {
-                "csv" => csv::csv(ledger_file, csv_file),
-                "register" => register::register(ledger_file, option),
+                "csv" => csv::csv(ledger_file, &args[3]),
+                "register" => register::register(ledger_file, &args[3]),
                 _ => error::error(),
             }
         }
