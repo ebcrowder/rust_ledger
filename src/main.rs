@@ -8,7 +8,6 @@ mod register;
 use std::env;
 
 fn main() -> Result<(), std::io::Error> {
-    // collect args into a vector and assign them to vars
     let args: Vec<String> = env::args().collect();
 
     let ledger_file: &str;

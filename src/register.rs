@@ -1,8 +1,8 @@
 // returns all general ledger transactions
 extern crate serde_yaml;
 
-use num_format::{Locale, ToFormattedString};
 use super::models::{LedgerFile, Transaction};
+use num_format::{Locale, ToFormattedString};
 
 pub fn register(filename: &str, option: &str) -> Result<(), std::io::Error> {
     let file = std::fs::File::open(filename)?;
@@ -16,12 +16,9 @@ pub fn register(filename: &str, option: &str) -> Result<(), std::io::Error> {
     let filtered_items: Vec<Transaction> = deserialized_file
         .transactions
         .into_iter()
-        .filter(|x| {
-            if option == "all" {
-                true
-            } else {
-                x.acct_type == option
-            }
+        .filter(|x| match option {
+            "all" => true,
+            _ => x.acct_type == option,
         })
         .collect();
 
