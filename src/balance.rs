@@ -46,7 +46,6 @@ pub fn balance(filename: &str) -> Result<(), std::io::Error> {
 
     for transaction in &transactions_vec {
         for account in &mut accounts_vec {
-            // TODO - could this be a match stmt?
             if account.account == transaction.account {
                 account.amount += &transaction.amount;
             }
