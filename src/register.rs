@@ -18,7 +18,13 @@ pub fn register(filename: &str, option: &str) -> Result<(), std::io::Error> {
         .into_iter()
         .filter(|x| match option {
             "all" => true,
-            _ => x.acct_type == option,
+            _ => {
+                x.acct_type.contains(option)
+                    || x.date.contains(option)
+                    || x.acct_name.contains(option)
+                    || x.acct_offset_name.contains(option)
+                    || x.name.contains(option)
+            }
         })
         .collect();
 
