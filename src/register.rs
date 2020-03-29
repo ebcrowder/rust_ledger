@@ -24,6 +24,7 @@ pub fn register(filename: &str, option: &str) -> Result<(), std::io::Error> {
                     || x.acct_name.contains(option)
                     || x.acct_offset_name.contains(option)
                     || x.name.contains(option)
+                    || x.debit_credit.to_string().contains(option)
             }
         })
         .collect();
