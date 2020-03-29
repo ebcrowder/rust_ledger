@@ -1,13 +1,13 @@
-// returns all general ledger accounts
 extern crate serde_yaml;
 
-use super::models::{LedgerFile};
+use super::models::LedgerFile;
 
 struct BalanceAccount {
     account: String,
     account_type: String,
 }
 
+/// returns all general ledger accounts
 pub fn accounts(filename: &str) -> Result<(), std::io::Error> {
     let file = std::fs::File::open(filename)?;
     let deserialized_file: LedgerFile = serde_yaml::from_reader(file).unwrap();

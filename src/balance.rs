@@ -1,4 +1,3 @@
-// returns balances of all general ledger accounts
 extern crate serde_yaml;
 
 use super::models::LedgerFile;
@@ -16,6 +15,7 @@ struct TransactionAccount {
     amount: i32,
 }
 
+/// returns balances of all general ledger accounts
 pub fn balance(filename: &str) -> Result<(), std::io::Error> {
     let file = std::fs::File::open(filename)?;
     let deserialized_file: LedgerFile = serde_yaml::from_reader(file).unwrap();

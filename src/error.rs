@@ -1,7 +1,6 @@
-// returns an error if a command is not provided
-
 use std::io::{Error, ErrorKind};
 
+/// returns an error if a command is not provided
 pub fn error() -> Result<(), std::io::Error> {
     Err(Error::new(
         ErrorKind::InvalidInput,

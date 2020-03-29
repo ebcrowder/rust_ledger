@@ -1,9 +1,9 @@
-// returns all general ledger transactions
 extern crate serde_yaml;
 
 use super::models::{LedgerFile, Transaction};
 use num_format::{Locale, ToFormattedString};
 
+/// returns all general ledger transactions
 pub fn register(filename: &str, option: &str) -> Result<(), std::io::Error> {
     let file = std::fs::File::open(filename)?;
     let deserialized_file: LedgerFile = serde_yaml::from_reader(file).unwrap();
