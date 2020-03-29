@@ -85,7 +85,7 @@ check                | 0         0
 
 - register
   - lists general ledger transactions to date
-  - can filter output by account via optional parameter
+  - can filter output by any field via optional parameter
   - example output:
 
 ```

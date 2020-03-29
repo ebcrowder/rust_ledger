@@ -10,7 +10,7 @@ pub fn register(filename: &str, option: &str) -> Result<(), std::io::Error> {
 
     println!(
         "{0: <10} | {1: <10} | {2: <20} | {3: <20} | {4: <20}",
-        "date", "debit", "acct_name", "acct_offset_name", "acct_memo"
+        "date", "dr_cr", "acct_name", "acct_offset_name", "acct_memo"
     );
 
     let filtered_items: Vec<Transaction> = deserialized_file
