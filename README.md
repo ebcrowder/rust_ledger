@@ -89,7 +89,7 @@ check                | 0         0
   - example output:
 
 ```
-date       | debit      | acct_name            | acct_offset_name     | acct_memo
+date       | dr_cr      | acct_name            | acct_offset_name     | acct_memo
 11/4/2019  | 455        | expense_auto         | credit_card          | car maintenance
 11/4/2019  | 1          | expense_computer     | credit_card          | raspberry pi
 ```
