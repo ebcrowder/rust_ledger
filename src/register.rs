@@ -4,9 +4,13 @@ use super::models::{LedgerFile, Transaction};
 use num_format::{Locale, ToFormattedString};
 
 /// returns all general ledger transactions
-pub fn register(filename: &str, option: &str) -> Result<(), std::io::Error> {
+pub fn register(filename: &String, options: &Vec<String>) -> Result<(), std::io::Error> {
     let file = std::fs::File::open(filename)?;
     let deserialized_file: LedgerFile = serde_yaml::from_reader(file).unwrap();
+    let option = match options.len() {
+        0 => "",
+        _ => &options[3],
+    };
 
     println!(
         "{0: <10} | {1: <10} | {2: <20} | {3: <20} | {4: <20}",

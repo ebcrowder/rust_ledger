@@ -5,40 +5,43 @@ mod error;
 mod models;
 mod register;
 
+use pargs;
 use std::env;
 
 fn main() -> Result<(), std::io::Error> {
     let args: Vec<String> = env::args().collect();
 
-    let ledger_file: &str;
-    let command: &str;
-    let option: &str;
+    let command_args: Vec<String> = vec![
+        String::from("accounts"),
+        String::from("balance"),
+        String::from("register"),
+        String::from("csv"),
+    ];
 
-    match args.len() {
-        1 => error::error(),
-        2 => error::error(),
-        3 => {
-            ledger_file = &args[1];
-            command = &args[2];
-            option = "all";
+    let flag_args: Vec<String> = vec![];
+    let option_args: Vec<String> = vec![String::from("-l"), String::from("-f")];
 
-            match command {
-                "accounts" => accounts::accounts(ledger_file),
-                "balance" => balance::balance(ledger_file),
-                "register" => register::register(ledger_file, option),
-                _ => error::error(),
-            }
-        }
-        4 => {
-            ledger_file = &args[1];
-            command = &args[2];
+    let pargs_result = pargs::parse(args, command_args, flag_args, option_args)?;
 
-            match command {
-                "csv" => csv::csv(ledger_file, &args[3]),
-                "register" => register::register(ledger_file, &args[3]),
-                _ => error::error(),
-            }
-        }
+    let empty_vec = &vec!["".to_string()];
+
+    let pargs_options = match pargs_result.get("option_args") {
+        Some(option_args_vec) => option_args_vec,
+        _ => empty_vec,
+    };
+
+    let ledger_file = &pargs_options.clone()[1];
+
+    let pargs_commands = match pargs_result.get("command_args") {
+        Some(command_args_vec) => command_args_vec,
+        _ => empty_vec,
+    };
+
+    match &pargs_commands[0][..] {
+        "accounts" => accounts::accounts(ledger_file),
+        "balance" => balance::balance(ledger_file),
+        "register" => register::register(ledger_file, &pargs_options),
+        "csv" => csv::csv(ledger_file, &pargs_options),
         _ => error::error(),
     }
 }
