@@ -181,7 +181,7 @@ dependencies = [
 
 [[package]]
 name = "pargs"
-version = "0.1.1"
+version = "0.1.2"
 source = "registry+https://github.com/rust-lang/crates.io-index"
 
 [[package]]
@@ -312,7 +312,7 @@ dependencies = [
  "assert_cmd 0.12.2 (registry+https://github.com/rust-lang/crates.io-index)",
  "csv 1.1.3 (registry+https://github.com/rust-lang/crates.io-index)",
  "num-format 0.4.0 (registry+https://github.com/rust-lang/crates.io-index)",
- "pargs 0.1.1 (registry+https://github.com/rust-lang/crates.io-index)",
+ "pargs 0.1.2 (registry+https://github.com/rust-lang/crates.io-index)",
  "predicates 1.0.4 (registry+https://github.com/rust-lang/crates.io-index)",
  "serde 1.0.105 (registry+https://github.com/rust-lang/crates.io-index)",
  "serde_yaml 0.8.11 (registry+https://github.com/rust-lang/crates.io-index)",
@@ -470,7 +470,7 @@ dependencies = [
 "checksum normalize-line-endings 0.3.0 (registry+https://github.com/rust-lang/crates.io-index)" = "61807f77802ff30975e01f4f071c8ba10c022052f98b3294119f3e615d13e5be"
 "checksum num-format 0.4.0 (registry+https://github.com/rust-lang/crates.io-index)" = "bafe4179722c2894288ee77a9f044f02811c86af699344c498b0840c698a2465"
 "checksum num-traits 0.2.11 (registry+https://github.com/rust-lang/crates.io-index)" = "c62be47e61d1842b9170f0fdeec8eba98e60e90e5446449a0545e5152acd7096"
-"checksum pargs 0.1.1 (registry+https://github.com/rust-lang/crates.io-index)" = "daf399e4194773dd31e5f688a663886a610a166524a918d866837a1e0a4de480"
+"checksum pargs 0.1.2 (registry+https://github.com/rust-lang/crates.io-index)" = "f080acdde13f2aed4b294fa229be16814963d8d48c37ef66dc0bb81c6b5802b4"
 "checksum ppv-lite86 0.2.6 (registry+https://github.com/rust-lang/crates.io-index)" = "74490b50b9fbe561ac330df47c08f3f33073d2d00c150f719147d7c54522fa1b"
 "checksum predicates 1.0.4 (registry+https://github.com/rust-lang/crates.io-index)" = "347a1b6f0b21e636bc9872fb60b83b8e185f6f5516298b8238699f7f9a531030"
 "checksum predicates-core 1.0.0 (registry+https://github.com/rust-lang/crates.io-index)" = "06075c3a3e92559ff8929e7a280684489ea27fe44805174c3ebd9328dcb37178"
