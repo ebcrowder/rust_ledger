@@ -7,7 +7,9 @@ use tempfile;
 #[test]
 fn file_does_not_exist() -> Result<(), std::io::Error> {
     let mut cmd = Command::new("./target/debug/rust_ledger");
-    cmd.arg("test/file/does/not/exist.txt").arg("accounts");
+    cmd.arg("-l")
+        .arg("test/file/does/not/exist.txt")
+        .arg("accounts");
     cmd.assert()
         .failure()
         .stderr(predicate::str::contains("No such file or directory"));
@@ -48,7 +50,7 @@ fn accounts_test() -> Result<(), Box<dyn std::error::Error>> {
     file.flush().unwrap();
 
     let mut cmd = Command::new("./target/debug/rust_ledger");
-    cmd.arg(file.path()).arg("accounts");
+    cmd.arg("-l").arg(file.path()).arg("accounts");
     cmd.assert()
         .success()
         .stdout(predicate::str::contains("operating            | asset"));
@@ -89,7 +91,7 @@ fn balances_test() -> Result<(), Box<dyn std::error::Error>> {
     file.flush().unwrap();
 
     let mut cmd = Command::new("./target/debug/rust_ledger");
-    cmd.arg(file.path()).arg("balance");
+    cmd.arg("-l").arg(file.path()).arg("balance");
     cmd.assert()
         .success()
         .stdout(predicate::str::contains("equity               | -1,500"));
@@ -130,7 +132,7 @@ fn register_test() -> Result<(), Box<dyn std::error::Error>> {
     file.flush().unwrap();
 
     let mut cmd = Command::new("./target/debug/rust_ledger");
-    cmd.arg(file.path()).arg("register");
+    cmd.arg("-l").arg(file.path()).arg("register");
     cmd.assert().success().stdout(predicate::str::contains(
         "2019-01-01 | 1          | expense-test-acct    | credit_card",
     ));
@@ -192,7 +194,10 @@ fn csv_test() -> Result<(), Box<dyn std::error::Error>> {
     csv_file.flush().unwrap();
 
     let mut cmd = Command::new("./target/debug/rust_ledger");
-    cmd.arg(yaml_file.path()).arg("csv").arg(csv_file.path());
+    cmd.arg("-l")
+        .arg(yaml_file.path())
+        .arg("csv")
+        .arg(csv_file.path());
     cmd.assert().success().stdout(predicate::str::contains(
         "contents of csv file successfully applied to ledger yaml file",
     ));
