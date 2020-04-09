@@ -132,7 +132,10 @@ fn register_test() -> Result<(), Box<dyn std::error::Error>> {
     file.flush().unwrap();
 
     let mut cmd = Command::new("./target/debug/rust_ledger");
-    cmd.arg("-l").arg(file.path()).arg("register");
+    cmd.arg("-l")
+        .arg(file.path())
+        .arg("register")
+        .arg("-f=credit_card");
     cmd.assert().success().stdout(predicate::str::contains(
         "2019-01-01 | 1          | expense-test-acct    | credit_card",
     ));
@@ -197,6 +200,7 @@ fn csv_test() -> Result<(), Box<dyn std::error::Error>> {
     cmd.arg("-l")
         .arg(yaml_file.path())
         .arg("csv")
+        .arg("-f")
         .arg(csv_file.path());
     cmd.assert().success().stdout(predicate::str::contains(
         "contents of csv file successfully applied to ledger yaml file",

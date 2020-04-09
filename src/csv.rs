@@ -65,7 +65,7 @@ pub fn csv(ledger_file: &String, options: &Vec<String>) -> Result<(), std::io::E
     // parse csv_file args
     let csv_file = match options.len() {
         0 => "",
-        _ => &options[1],
+        _ => &options[3],
     };
 
     // open csv file
