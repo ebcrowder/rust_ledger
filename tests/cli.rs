@@ -91,7 +91,7 @@ fn balances_test() -> Result<(), Box<dyn std::error::Error>> {
     file.flush().unwrap();
 
     let mut cmd = Command::new("./target/debug/rust_ledger");
-    cmd.arg("-l").arg(file.path()).arg("balance");
+    cmd.arg("-l").arg(file.path()).arg("balances");
     cmd.assert()
         .success()
         .stdout(predicate::str::contains("equity               | -1,500"));
