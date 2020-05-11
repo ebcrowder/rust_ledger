@@ -4,6 +4,8 @@ use std::io::Write;
 use std::process::Command;
 use tempfile;
 
+use std::env;
+
 #[test]
 fn file_does_not_exist() -> Result<(), std::io::Error> {
     let mut cmd = Command::new("./target/debug/rust_ledger");
@@ -13,6 +15,49 @@ fn file_does_not_exist() -> Result<(), std::io::Error> {
     cmd.assert()
         .failure()
         .stderr(predicate::str::contains("No such file or directory"));
+
+    Ok(())
+}
+
+#[test]
+fn file_path_found_as_env() -> Result<(), Box<dyn std::error::Error>> {
+    let mut file = tempfile::Builder::new().suffix(".yaml").tempfile().unwrap();
+
+    let account_yml = br#"
+        owner: test
+        currencies:
+            id: $
+            name: US Dollar
+            alias: USD
+            note: US Currency 
+        accounts:
+            -   id: 0
+                acct_name: operating
+                acct_type: asset
+                debit_credit: 1500
+            -   id: 1
+                acct_name: equity
+                acct_type: equity
+                debit_credit: -1500
+        transactions:
+            -   acct_name: expense-test-acct
+                debit_credit: 1
+                acct_type: expense 
+                date: 2019-01-01
+                acct_offset_name: credit_card
+                name: 'expense transaction'
+        "#;
+
+    file.write_all(account_yml).unwrap();
+    file.flush().unwrap();
+    
+    env::set_var("RLEDGER_FILE", file.path());
+
+    let mut cmd = Command::new("./target/debug/rust_ledger");
+    cmd.arg("accounts");
+
+    cmd.assert()
+        .success();
 
     Ok(())
 }
