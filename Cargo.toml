@@ -1,6 +1,6 @@
 [package]
 name = "rust_ledger"
-version = "0.1.8"
+version = "0.1.9"
 authors = ["ebcrowder <ebcrowder@gmail.com>"]
 edition = "2018"
 license = "GPL-3.0"
@@ -11,13 +11,13 @@ repository = "https://github.com/ebcrowder/rust_ledger"
 readme = "README.md"
 
 [dependencies]
-serde_yaml = "0.8.11"
-serde = { version = "1.0.104", features = ["derive"] } 
+serde_yaml = "0.8.12"
+serde = { version = "1.0.110", features = ["derive"] } 
 csv = "1.1.3"
 num-format = "0.4.0"
 pargs = "0.1.4" 
 
 [dev-dependencies]
-assert_cmd = "0.12.0"
-predicates = "1.0.2"
+assert_cmd = "1.0.1"
+predicates = "1.0.4"
 tempfile = "3.1.0"

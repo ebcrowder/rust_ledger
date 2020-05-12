@@ -21,18 +21,16 @@ PRs and issues are certainly welcome. I use this tool to keep track of my person
 ### Use
 
 - install via cargo - `cargo install rust_ledger`
-- this command will install the binary at `~/.cargo/bin/`
-- copy the `rust_ledger` binary to your path: `/usr/bin`
 
 Alternatively, clone this repo and do the following:
 
 - if Rust is not installed on your machine, follow the instructions on how to do that here: https://www.rust-lang.org/tools/install
 - run `cargo build --release` to compile the binary
 - go to `/target/release` and copy the `rust_ledger` binary in your path: `/usr/bin`
-- run `rust_ledger run LEDGER_FILE_PATH COMMAND OPTION` where the following:
-  - LEDGER_FILE_PATH - relative path to location of yaml ledger file
+- do `rust_ledger -l LEDGER_FILE_PATH COMMAND -f OPTION` where the following:
+  - LEDGER_FILE_PATH (denoted by `-l`) - relative path to location of yaml ledger file
   - COMMAND - ledger command (accounts, balance, register, or csv)
-  - OPTION - allows you to filter the output of the `register` command by account type. For example, if you wish to only see "expense" transactions in the output, you would pass in `expense` as the option here.
+  - OPTION (denoted by `-f`) - allows you to filter the output of the `register` command by account type. For example, if you wish to only see "expense" transactions in the output, you would pass in `expense` as the option here.
 
 ### Test
 
