@@ -31,6 +31,7 @@ Alternatively, clone this repo and do the following:
   - LEDGER_FILE_PATH (denoted by `-l`) - relative path to location of yaml ledger file
   - COMMAND - ledger command (accounts, balance, register, or csv)
   - OPTION (denoted by `-f`) - allows you to filter the output of the `register` command by account type. For example, if you wish to only see "expense" transactions in the output, you would pass in `expense` as the option here.
+- optionally, the ledger file path can be set via the environment variable `$RLEDGER_FILE` to avoid having to specify the path when calling the program each time.
 
 ### Test
 
