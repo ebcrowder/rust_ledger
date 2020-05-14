@@ -1,3 +1,5 @@
+extern crate term;
+
 mod accounts;
 mod balance;
 mod csv;
@@ -27,15 +29,13 @@ fn main() -> Result<(), std::io::Error> {
 
     let pargs_options = pargs_result.option_args;
     let pargs_commands = pargs_result.command_args;
-    
+
     let ledger_file = match pargs_options.get("-l") {
         Some(value) => value.to_string(),
         None => {
             let ledger_file_env = match std::env::var("RLEDGER_FILE") {
                 Ok(p) => format!("{}", p),
-                Err(_) => {
-                    format!("{}", "")
-                }
+                Err(_) => format!("{}", ""),
             };
 
             ledger_file_env.to_string()

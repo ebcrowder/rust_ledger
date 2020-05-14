@@ -50,14 +50,13 @@ fn file_path_found_as_env() -> Result<(), Box<dyn std::error::Error>> {
 
     file.write_all(account_yml).unwrap();
     file.flush().unwrap();
-    
+
     env::set_var("RLEDGER_FILE", file.path());
 
     let mut cmd = Command::new("./target/debug/rust_ledger");
     cmd.arg("accounts");
 
-    cmd.assert()
-        .success();
+    cmd.assert().success();
 
     Ok(())
 }

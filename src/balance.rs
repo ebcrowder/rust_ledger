@@ -1,4 +1,5 @@
 extern crate serde_yaml;
+use term;
 
 use super::models::LedgerFile;
 use num_format::{Locale, ToFormattedString};
@@ -17,6 +18,7 @@ struct TransactionAccount {
 
 /// returns balances of all general ledger accounts
 pub fn balance(filename: &String) -> Result<(), std::io::Error> {
+    let mut terminal = term::stdout().unwrap();
     let file = std::fs::File::open(filename)?;
     let deserialized_file: LedgerFile = serde_yaml::from_reader(file).unwrap();
 
@@ -59,22 +61,41 @@ pub fn balance(filename: &String) -> Result<(), std::io::Error> {
 
     let mut check_figure: i32 = 0;
 
-    println!(
-        "{0: <20} | {1: <20} | {2: <10}",
-        "account_type", "account", "balance"
-    );
+    terminal.fg(term::color::BRIGHT_BLUE).unwrap();
+    println!("\n {0: <29} {1: <20} \n{2:-<39}", "account", "balance", "");
+    terminal.reset().unwrap();
+
+    let mut current_account_type = String::new();
 
     for account in accounts_vec {
         check_figure += account.amount;
+
+        if !current_account_type.eq(&account.account_type) {
+            current_account_type = account.account_type;
+            println!("{}", current_account_type);
+        }
+
         println!(
-            "{0: <20} | {1: <20} | {2: <10}",
-            account.account_type,
+            "  {0: <28} {1: <20}",
             account.account,
             account.amount.to_formatted_string(&Locale::en)
         );
     }
 
-    println!("{0: <20} | {1: <10}", "check", check_figure);
+    terminal.fg(term::color::BRIGHT_BLUE).unwrap();
+    println!("\n{:-<39}", "");
+    terminal.reset().unwrap();
+    print!("{: <30}", "check");
+    if check_figure > 0 {
+        terminal.fg(term::color::BRIGHT_RED).unwrap();
+    }
+    print!(" {:<20}\n", check_figure);
+
+    if check_figure > 0 {
+        terminal.reset().unwrap();
+    }
+
+    println!("\n");
 
     Ok(())
 }
