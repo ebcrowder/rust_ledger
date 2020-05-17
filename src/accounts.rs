@@ -1,5 +1,6 @@
 extern crate serde_yaml;
 
+use colored::*;
 use super::models::LedgerFile;
 
 struct BalanceAccount {
@@ -21,11 +22,17 @@ pub fn accounts(filename: &String) -> Result<(), std::io::Error> {
         });
     }
 
-    println!("{0: <20} | {1: <20}", "account", "account_type");
+    println!("\n {0: <29} {1: <20}", "Account", "Type");
+    println!("{:-<39}", "".bright_blue());
 
     for account in account_vec {
-        println!("{0: <20} | {1: <20}", account.account, account.account_type);
+        println!(
+            "{0: <28} {1: <20}",
+            account.account,
+            account.account_type);
     }
+
+    println!("\n");
 
     Ok(())
 }

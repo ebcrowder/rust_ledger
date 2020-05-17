@@ -1,5 +1,3 @@
-extern crate term;
-
 mod accounts;
 mod balance;
 mod csv;
