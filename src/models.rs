@@ -17,6 +17,12 @@ pub struct Account {
 }
 
 #[derive(Debug, PartialEq, Serialize, Deserialize)]
+pub struct TransactionSplit {
+    pub amount: i32,
+    pub account: String,
+}
+
+#[derive(Debug, PartialEq, Serialize, Deserialize)]
 pub struct Transaction {
     pub date: String,
     pub debit_credit: i32,
@@ -24,6 +30,7 @@ pub struct Transaction {
     pub acct_type: String,
     pub acct_offset_name: String,
     pub name: String,
+    pub split: Option<Vec<TransactionSplit>>,
 }
 
 #[derive(Debug, PartialEq, Serialize, Deserialize)]
