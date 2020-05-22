@@ -20,7 +20,7 @@ As a former CPA, I could not resist building my own accounting system.
 ### Contributing
 - See `CODE_OF_CONDUCT.md` for fundamental guidelines
 - PRs, issues and feature requests are welcome and encouraged
-- Join us at on Matrix (#rust_ledger:matrix.org) at https://matrix.to/#/!dYISGJYNNiZcUrxhcm:matrix.org?via=matrix.org 
+- Join us on Matrix (#rust_ledger:matrix.org) at https://matrix.to/#/!dYISGJYNNiZcUrxhcm:matrix.org?via=matrix.org 
 
 ### Install
 
