@@ -8,7 +8,6 @@ command line accounting tool
 
 As a former CPA, I could not resist building my own accounting system.
 
-PRs and issues are certainly welcome. I use this tool to keep track of my personal finances but would sincerely appreciate feedback on how to make it more useful for others.
 
 ### Summary
 
@@ -17,6 +16,11 @@ PRs and issues are certainly welcome. I use this tool to keep track of my person
 - Small feature set based on typical use cases
 - Uses `yaml` files as data store
 - Includes a tool to convert `csv` files to `yaml` format
+
+### Contributing
+- See `CODE_OF_CONDUCT.md` for fundamental guidelines
+- PRs, issues and feature requests are welcome and encouraged
+- Join us at on Matrix (#rust_ledger:matrix.org) at https://matrix.to/#/!dYISGJYNNiZcUrxhcm:matrix.org?via=matrix.org 
 
 ### Install
 
