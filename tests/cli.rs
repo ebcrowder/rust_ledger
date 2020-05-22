@@ -50,14 +50,13 @@ fn file_path_found_as_env() -> Result<(), Box<dyn std::error::Error>> {
 
     file.write_all(account_yml).unwrap();
     file.flush().unwrap();
-    
+
     env::set_var("RLEDGER_FILE", file.path());
 
     let mut cmd = Command::new("./target/debug/rust_ledger");
     cmd.arg("accounts");
 
-    cmd.assert()
-        .success();
+    cmd.assert().success();
 
     Ok(())
 }
@@ -98,7 +97,7 @@ fn accounts_test() -> Result<(), Box<dyn std::error::Error>> {
     cmd.arg("-l").arg(file.path()).arg("accounts");
     cmd.assert()
         .success()
-        .stdout(predicate::str::contains("operating            | asset"));
+        .stdout(predicate::str::contains("operating                    asset"));
 
     Ok(())
 }
@@ -139,7 +138,7 @@ fn balances_test() -> Result<(), Box<dyn std::error::Error>> {
     cmd.arg("-l").arg(file.path()).arg("balances");
     cmd.assert()
         .success()
-        .stdout(predicate::str::contains("equity               | -1,500"));
+        .stdout(predicate::str::contains("  equity                       -1,500"));
 
     Ok(())
 }
@@ -182,7 +181,7 @@ fn register_test() -> Result<(), Box<dyn std::error::Error>> {
         .arg("register")
         .arg("-f=credit_card");
     cmd.assert().success().stdout(predicate::str::contains(
-        "2019-01-01 | 1          | expense-test-acct    | credit_card",
+        "2019-01-01 test memo               expense-test-acct              1           1",
     ));
 
     Ok(())

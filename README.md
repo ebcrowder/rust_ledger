@@ -18,20 +18,48 @@ PRs and issues are certainly welcome. I use this tool to keep track of my person
 - Uses `yaml` files as data store
 - Includes a tool to convert `csv` files to `yaml` format
 
-### Use
+### Install
 
-- install via cargo - `cargo install rust_ledger`
+#### From Cargo 
+
+install via cargo - `cargo install rust_ledger`
+
+#### Build from Source
 
 Alternatively, clone this repo and do the following:
 
-- if Rust is not installed on your machine, follow the instructions on how to do that here: https://www.rust-lang.org/tools/install
+- If Rust is not installed on your machine, follow the instructions on how to do that here: https://www.rust-lang.org/tools/install
 - run `cargo build --release` to compile the binary
 - go to `/target/release` and copy the `rust_ledger` binary in your path: `/usr/bin`
-- do `rust_ledger -l LEDGER_FILE_PATH COMMAND -f OPTION` where the following:
-  - LEDGER_FILE_PATH (denoted by `-l`) - relative path to location of yaml ledger file
-  - COMMAND - ledger command (accounts, balance, register, or csv)
-  - OPTION (denoted by `-f`) - allows you to filter the output of the `register` command by account type. For example, if you wish to only see "expense" transactions in the output, you would pass in `expense` as the option here.
-- optionally, the ledger file path can be set via the environment variable `$RLEDGER_FILE` in lieu of specifying it whenever the program is invoked.
+
+### Usage
+
+`rust_ledger -l LEDGER_FILE_PATH COMMAND -f OPTION`
+
+LEDGER_FILE_PATH (denoted by `-l`) - relative path to location of yaml ledger file
+
+  - Optionally, the ledger file path can be set via the environment variable `RLEDGER_FILE` in lieu of specifying whenever the program is invoked.
+  - If `-l` is provided with a file path the file provided will be used instead of any `RLEDGER_FILE` set.
+
+```
+RLEDGER_FILE=~/rledger.yaml rust_ledger balances
+```
+
+`RLEDGER_FILE` can be set as a system or user environment variable.
+
+```
+export RLEDGER_FILE="$HOME/rledger.yaml"
+```
+
+COMMAND - ledger command (accounts, balance, register, or csv)
+
+OPTION (denoted by `-f`) - allows you to filter the output of the `register` command by account type. For example, if you wish to only see "expense" transactions in the output, you would pass in `expense` as the option here.
+
+### Environment Variables
+
+`RLEDGER_FILE` - Path to rledger file. ex: `RLEDGER_FILE=~/rledger.yaml`
+
+`NO_COLOR` - Disables color output. ex: `NO_COLOR=true`
 
 ### Test
 
@@ -44,20 +72,21 @@ Alternatively, clone this repo and do the following:
   - example output:
 
 ```
-account              | account_type
-checking             | asset
-savings              | asset
-credit_card          | liability
-equity               | equity
-expense_auto         | expense
-expense_computer     | expense
-expense_food         | expense
-expense_gasoline     | expense
-expense_pets         | expense
-expense_amazon       | expense
-expense_home         | expense
-expense_general      | expense
-income_general       | income
+ Account                       Type                
+---------------------------------------
+checking                     asset               
+savings                      asset               
+credit_card                  liability           
+equity                       equity              
+expense_auto                 expense             
+expense_computer             expense             
+expense_food                 expense             
+expense_gasoline             expense             
+expense_pets                 expense             
+expense_amazon               expense             
+expense_home                 expense             
+expense_general              expense             
+income_general               income  
 ```
 
 - balance
@@ -65,21 +94,29 @@ income_general       | income
   - example output:
 
 ```
-account_type         | account              | balance
-asset                | checking             | 1,500
-asset                | savings              | 2,000
-liability            | credit_card          | -456
-equity               | equity               | -3,500
-expense              | expense_auto         | 455
-expense              | expense_computer     | 1
-expense              | expense_food         | 0
-expense              | expense_gasoline     | 0
-expense              | expense_pets         | 0
-expense              | expense_amazon       | 0
-expense              | expense_home         | 0
-expense              | expense_general      | 0
-income               | income_general       | 0
-check                | 0         0
+ Account                       Balance             
+---------------------------------------
+asset
+  checking                     1,300               
+  savings                      2,000               
+liability
+  credit_card                  -456                
+equity
+  equity                       -3,500              
+expense
+  expense_auto                 455                 
+  expense_computer             1                   
+  expense_food                 0                   
+  expense_gasoline             0                   
+  expense_pets                 0                   
+  expense_amazon               0                   
+  expense_home                 100                 
+  expense_general              0                   
+income
+  income_general               0                   
+
+---------------------------------------
+check                          -100 
 ```
 
 - register
@@ -88,9 +125,14 @@ check                | 0         0
   - example output:
 
 ```
-date       | dr_cr      | acct_name            | acct_offset_name     | acct_memo
-11/4/2019  | 455        | expense_auto         | credit_card          | car maintenance
-11/4/2019  | 1          | expense_computer     | credit_card          | raspberry pi
+Date       Description             Accounts            
+-------------------------------------------------------------------------------
+11/4/2019  car maintenance         expense_auto                 455         455
+                                   credit_card                 -455           0
+11/4/2019  raspberry pi            expense_computer               1           1
+                                   credit_card                   -1           0
+05/12/2020 stuff                   expense_home                 100         100
+                                   checkings                   -100           0
 ```
 
 - csv
