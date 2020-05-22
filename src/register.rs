@@ -1,5 +1,6 @@
 extern crate serde_yaml;
 
+use colored::*;
 use super::models::{LedgerFile, Transaction};
 use num_format::{Locale, ToFormattedString};
 
@@ -9,9 +10,13 @@ pub fn register(filename: &String, option: &String) -> Result<(), std::io::Error
     let deserialized_file: LedgerFile = serde_yaml::from_reader(file).unwrap();
 
     println!(
-        "{0: <10} | {1: <10} | {2: <20} | {3: <20} | {4: <20}",
-        "date", "dr_cr", "acct_name", "acct_offset_name", "acct_memo"
+        "\n{0: <10} {1: <23} {2: <20}",
+        "Date".bold(),
+        "Description".bold(),
+        "Accounts".bold()
     );
+
+    println!("{0:-<79}", "".bright_blue());
 
     let filtered_items: Vec<Transaction> = deserialized_file
         .transactions
@@ -31,14 +36,20 @@ pub fn register(filename: &String, option: &String) -> Result<(), std::io::Error
 
     for item in filtered_items {
         println!(
-            "{0: <10} | {1: <10} | {2: <20} | {3: <20} | {4: <20}",
+            "{0: <10} {1: <20}    {2: <20}    {3: >8}    {4: >8}
+                                   {5: <20}    {6: >8}    {7: >8}",
             item.date,
-            item.debit_credit.to_formatted_string(&Locale::en),
+            item.name,
             item.acct_name,
+            item.debit_credit.to_formatted_string(&Locale::en),
+            format!("{}", item.debit_credit.to_formatted_string(&Locale::en)),
             item.acct_offset_name,
-            item.name
+            format!("-{}", item.debit_credit.to_formatted_string(&Locale::en)),
+            (item.debit_credit - item.debit_credit).to_formatted_string(&Locale::en)
         );
     }
+
+    println!("\n");
 
     Ok(())
 }

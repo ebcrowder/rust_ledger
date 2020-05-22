@@ -1,5 +1,6 @@
 extern crate serde_yaml;
 
+use colored::*;
 use super::models::LedgerFile;
 use num_format::{Locale, ToFormattedString};
 
@@ -59,22 +60,39 @@ pub fn balance(filename: &String) -> Result<(), std::io::Error> {
 
     let mut check_figure: i32 = 0;
 
-    println!(
-        "{0: <20} | {1: <20} | {2: <10}",
-        "account_type", "account", "balance"
-    );
+    println!("\n {0: <29} {1: <20}", "Account".bold(), "Balance".bold());
+
+    println!("{0:-<39}", "".bright_blue());
+
+    let mut current_account_type = String::new();
 
     for account in accounts_vec {
         check_figure += account.amount;
+
+        if !current_account_type.eq(&account.account_type) {
+            current_account_type = account.account_type;
+            println!("{}", current_account_type);
+        }
+
         println!(
-            "{0: <20} | {1: <20} | {2: <10}",
-            account.account_type,
+            "  {0: <28} {1: <20}",
             account.account,
             account.amount.to_formatted_string(&Locale::en)
         );
     }
 
-    println!("{0: <20} | {1: <10}", "check", check_figure);
+    println!("\n{:-<39}", "".bright_blue());
+    print!("{: <30}", "check");
+    print!(" {:<20}\n", match check_figure {
+        0 => check_figure
+            .to_formatted_string(&Locale::en)
+            .white(),
+        _ => check_figure
+            .to_formatted_string(&Locale::en)
+            .red(),
+    });
+
+    println!("\n");
 
     Ok(())
 }
