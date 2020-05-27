@@ -9,14 +9,13 @@ struct CSV {
     date: String,
     transaction: String,
     name: String,
-    memo: String,
     amount: f64,
 }
 
 #[derive(Debug, PartialEq, Serialize, Deserialize)]
 struct CSVOutput {
     date: String,
-    debit_credit: i32,
+    debit_credit: f32,
     acct_name: String,
     acct_type: String,
     acct_offset_name: String,
@@ -78,10 +77,10 @@ pub fn csv(ledger_file: &String, csv_file: &String) -> Result<(), std::io::Error
 
         // loop through transactions and find matching memos
         for transaction in &deserialized_file.transactions {
-            if transaction.name == record.name {
+            if transaction.name.trim() == record.name.trim() {
                 csv_matches.push(CSVMatches {
                     acct_name: transaction.acct_name.to_string(),
-                    name: transaction.name.to_string(),
+                    name: transaction.name.trim().to_string(),
                 })
             }
         }
@@ -93,21 +92,21 @@ pub fn csv(ledger_file: &String, csv_file: &String) -> Result<(), std::io::Error
         if record.amount < 1.0 {
             csv_output.push(CSVOutput {
                 date: record.date,
-                debit_credit: -record.amount.round() as i32,
+                debit_credit: -record.amount as f32,
                 acct_name: matched_acct_name,
                 acct_type: "expense".to_string(),
                 acct_offset_name: "credit_card".to_string(),
-                name: record.name,
+                name: record.name.trim().to_string(),
             })
         } else {
             // if amount is positive, post as income
             csv_output.push(CSVOutput {
                 date: record.date,
-                debit_credit: record.amount.round() as i32,
+                debit_credit: record.amount as f32,
                 acct_name: matched_acct_name,
                 acct_type: "income".to_string(),
                 acct_offset_name: "credit_card".to_string(),
-                name: record.name,
+                name: record.name.trim().to_string(),
             })
         }
     }
