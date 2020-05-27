@@ -116,7 +116,7 @@ pub fn balance(filename: &String) -> Result<(), std::io::Error> {
     println!("\n{:-<39}", "".bright_blue());
     print!("{: <30}", "check");
     if check_figure == 0.0 {
-        print!(" {:<20}\n", format!("{0:.2}", check_figure).bold());
+        print!(" {:<20}\n", check_figure.to_string().bold());
     } else {
         print!(" {:<20}\n", format!("{0:.2}", check_figure).red().bold());
     }
