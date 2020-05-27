@@ -3,8 +3,7 @@ extern crate serde_yaml;
 use rusty_money::{money, Money};
 
 use colored::*;
-use super::models::LedgerFile;
-// use num_format::{Locale, ToFormattedString};
+use super::models::{LedgerFile, Currency};
 
 struct BalanceAccount {
     account: String,
@@ -25,6 +24,7 @@ pub fn balance(filename: &String) -> Result<(), std::io::Error> {
 
     let mut accounts_vec: Vec<BalanceAccount> = Vec::new();
     let mut transactions_vec: Vec<TransactionAccount> = Vec::new();
+    let currencies: Currency = deserialized_file.currencies;
 
     // push opening balances into Vec
     for account in deserialized_file.accounts {
@@ -104,11 +104,11 @@ pub fn balance(filename: &String) -> Result<(), std::io::Error> {
             "  {0: <28} {1: <20}",
             account.account,
             if account.amount < 0.0 {
-                money!(format!("{0:.2}", account.amount), "USD").to_string().red().bold()
+                money!(format!("{0:.2}", account.amount), currencies.alias).to_string().red().bold()
             } else if account.amount == 0.0 {
                 account.amount.to_string().yellow().bold()
             } else {
-                money!(format!("{0:.2}", account.amount), "USD").to_string().bold()
+                money!(format!("{0:.2}", account.amount), currencies.alias).to_string().bold()
             }
         );
     }
