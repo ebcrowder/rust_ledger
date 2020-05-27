@@ -1,13 +1,14 @@
 extern crate serde_yaml;
 
 use colored::*;
-use super::models::{LedgerFile, Transaction};
-// use num_format::{Locale, ToFormattedString};
+use rusty_money::{money, Money};
+use super::models::{LedgerFile, Transaction, Currency};
 
 /// returns all general ledger transactions
 pub fn register(filename: &String, option: &String) -> Result<(), std::io::Error> {
     let file = std::fs::File::open(filename)?;
     let deserialized_file: LedgerFile = serde_yaml::from_reader(file).unwrap();
+    let currencies: Currency = deserialized_file.currencies;
 
     println!(
         "\n{0: <10} {1: <23} {2: <20}",
@@ -43,15 +44,16 @@ pub fn register(filename: &String, option: &String) -> Result<(), std::io::Error
                     item.date,
                     item.name.bold(),
                     item.acct_name,
-                    item.debit_credit.to_string().bold(),
-                    format!("{}", item.debit_credit.to_string()).bold()
+                    money!(format!("{0:.2}", item.debit_credit), currencies.alias).to_string().bold(),
+                    money!(format!("{0:.2}", item.debit_credit), currencies.alias).to_string().bold()
                 );
+
                 println!(
                     "{0: <35}{1: <20}    {2: >8}    {3: >8}",
                     "",
                     item.acct_offset_name,
-                    format!("-{}", item.debit_credit.to_string()).red().bold(),
-                    (item.debit_credit - item.debit_credit).to_string().bold()
+                    money!(format!("-{0:.2}", item.debit_credit), currencies.alias).to_string().red().bold(),
+                    0 // no check at this point because it can only be zero
                 );
             },
             Some(split) => {
@@ -62,8 +64,8 @@ pub fn register(filename: &String, option: &String) -> Result<(), std::io::Error
                         item.date,
                         item.name.bold(),
                         first.account,
-                        first.amount.to_string().bold(),
-                        format!("{}", first.amount.to_string()).bold()
+                        money!(format!("{0:.2}", first.amount), currencies.alias).to_string().bold(),
+                        money!(format!("{0:.2}", first.amount), currencies.alias).to_string().bold()
                     );
 
                     for i in elements {
@@ -72,8 +74,8 @@ pub fn register(filename: &String, option: &String) -> Result<(), std::io::Error
                             "{0: <35}{1: <20}    {2: >8}    {3: >8}",
                             "",
                             i.account,
-                            format!("{}", i.amount.to_string()).bold(),
-                            (credit).to_string().bold()
+                            money!(format!("{0:.2}", i.amount), currencies.alias).to_string().bold(),
+                            money!(format!("{0:.2}", credit), currencies.alias).to_string().bold()
                         );
                     }
 
@@ -83,8 +85,12 @@ pub fn register(filename: &String, option: &String) -> Result<(), std::io::Error
                         "{0: <35}{1: <20}    {2: >8}    {3: >8}",
                         "",
                         item.acct_offset_name,
-                        format!("-{}", item.debit_credit.to_string()).red().bold(),
-                        if check != 0.0 { check.to_string().red().bold() } else { check.to_string().bold() }
+                        money!(format!("-{0:.2}", item.debit_credit), currencies.alias).to_string().red().bold(),
+                        if check != 0.0 { 
+                            money!(format!("{0:.2}", check), currencies.alias).to_string().red().bold() 
+                        } else { 
+                            check.to_string().bold()
+                        }
                     );
                 }                
             }

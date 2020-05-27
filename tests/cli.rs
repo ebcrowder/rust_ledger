@@ -181,7 +181,7 @@ fn register_test() -> Result<(), Box<dyn std::error::Error>> {
         .arg("register")
         .arg("-f=credit_card");
     cmd.assert().success().stdout(predicate::str::contains(
-        "2019-01-01 test memo               expense-test-acct              1           1",
+        "2019-01-01 test memo               expense-test-acct          $1.00       $1.00",
     ));
 
     Ok(())
