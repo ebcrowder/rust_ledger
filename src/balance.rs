@@ -39,17 +39,26 @@ pub fn balance(filename: &String) -> Result<(), std::io::Error> {
 
         match transaction.split {
             None => {
+                let amount = match transaction.acct_type.as_ref() {
+                    "income" => -transaction.debit_credit,
+                    _ => transaction.debit_credit,
+                };
+
                 transactions_vec.push(TransactionAccount {
                     account: transaction.acct_name,
                     offset_account: offset_account.to_string(),
-                    amount: transaction.debit_credit,
+                    amount: amount,
                 });
             },
             Some(split) => {
                 let mut credit: i32 = 0;
                 
                 for i in split {
-                    credit += i.amount;
+                    let amount = match transaction.acct_type.as_ref() {
+                        "income" => -i.amount,
+                        _ => i.amount,
+                    };
+                    credit += amount;
                     transactions_vec.push(TransactionAccount {
                         account: i.account,
                         offset_account: offset_account.to_string(),
