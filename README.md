@@ -259,6 +259,10 @@ accounts:
     acct_name: income_general
     acct_type: income
     debit_credit: 0
+  - id: 13
+    acct_name: income_gift
+    acct_type: income
+    debit_credit: 0
 
 transactions:
   - date: 11/4/2019
@@ -284,4 +288,15 @@ transactions:
         account: expense_general
       - amount: 180
         account: expense_food
+  - date: 06/01/2020
+    debit_credit: 300
+    acct_offset_name: checking
+    name: general income
+    acct_type: income
+    acct_name:
+    split:
+      - amount: 200
+        account: income_general
+      - amount: 100
+        account: income_gift
 ```
