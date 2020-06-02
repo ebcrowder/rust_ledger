@@ -35,11 +35,44 @@ pub fn balance(filename: &String) -> Result<(), std::io::Error> {
 
     // push transactions into Vec
     for transaction in deserialized_file.transactions {
-        transactions_vec.push(TransactionAccount {
-            account: transaction.acct_name,
-            offset_account: transaction.acct_offset_name,
-            amount: transaction.debit_credit,
-        })
+        let offset_account = &transaction.acct_offset_name;
+
+        match transaction.split {
+            None => {
+                let amount = match transaction.acct_type.as_ref() {
+                    "income" => -transaction.debit_credit,
+                    _ => transaction.debit_credit,
+                };
+
+                transactions_vec.push(TransactionAccount {
+                    account: transaction.acct_name,
+                    offset_account: offset_account.to_string(),
+                    amount: amount,
+                });
+            },
+            Some(split) => {
+                let mut credit: i32 = 0;
+                
+                for i in split {
+                    let amount = match transaction.acct_type.as_ref() {
+                        "income" => -i.amount,
+                        _ => i.amount,
+                    };
+                    credit += amount;
+                    transactions_vec.push(TransactionAccount {
+                        account: i.account,
+                        offset_account: offset_account.to_string(),
+                        amount: i.amount,
+                    })
+                }
+
+                transactions_vec.push(TransactionAccount {
+                    account: transaction.acct_name,
+                    offset_account: offset_account.to_string(),
+                    amount: transaction.debit_credit - credit,
+                });
+            }
+        }
     }
 
     // loop over Vecs and increment(+)/decrement(-) totals
@@ -77,7 +110,13 @@ pub fn balance(filename: &String) -> Result<(), std::io::Error> {
         println!(
             "  {0: <28} {1: <20}",
             account.account,
-            account.amount.to_formatted_string(&Locale::en)
+            if account.amount < 0 {
+                (account.amount).to_formatted_string(&Locale::en).red().bold()
+            } else if account.amount == 0 {
+                (account.amount).to_formatted_string(&Locale::en).yellow().bold()
+            } else {
+                (account.amount).to_formatted_string(&Locale::en).bold()
+            }
         );
     }
 
@@ -86,10 +125,10 @@ pub fn balance(filename: &String) -> Result<(), std::io::Error> {
     print!(" {:<20}\n", match check_figure {
         0 => check_figure
             .to_formatted_string(&Locale::en)
-            .white(),
+            .bold(),
         _ => check_figure
             .to_formatted_string(&Locale::en)
-            .red(),
+            .red().bold(),
     });
 
     println!("\n");

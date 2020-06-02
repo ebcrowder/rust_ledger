@@ -65,6 +65,55 @@ OPTION (denoted by `-f`) - allows you to filter the output of the `register` com
 
 `NO_COLOR` - Disables color output. ex: `NO_COLOR=true`
 
+### Features
+
+#### Transaction
+
+```
+- date: 05/23/2020
+  debit_credit: 200
+  acct_offset_name: credit_card
+  name: grocery store
+  acct_type: expense
+  acct_name: expense_general
+```
+
+**Required Fields**
+* date
+* debit_credit
+* acct_offset_name
+* name
+* acct_type
+* acct_name - This field is required but can be empty
+
+
+
+#### Split Transactions
+
+Each transaction can be split to multiple expense categories.
+
+In order to add a split to a transaction add `split` to a transaction with `amount` and `account` added to each split.
+
+Splits should add up to equal the `debit_credit`.
+
+```
+- date: 05/23/2020
+  debit_credit: 200
+  acct_offset_name: credit_card
+  name: grocery store
+  acct_type: expense
+  acct_name:
+  split:
+    - amount: 20
+      account: expense_general
+    - amount: 180
+      account: expense_food
+```
+
+**Required Fields**
+* amount
+* account
+
 ### Test
 
 - `cargo test`
@@ -210,6 +259,10 @@ accounts:
     acct_name: income_general
     acct_type: income
     debit_credit: 0
+  - id: 13
+    acct_name: income_gift
+    acct_type: income
+    debit_credit: 0
 
 transactions:
   - date: 11/4/2019
@@ -224,4 +277,26 @@ transactions:
     name: raspberry pi
     acct_type: expense
     acct_name: expense_computer
+  - date: 05/23/2020
+    debit_credit: 200
+    acct_offset_name: credit_card
+    name: grocery store
+    acct_type: expense
+    acct_name:
+    split:
+      - amount: 20
+        account: expense_general
+      - amount: 180
+        account: expense_food
+  - date: 06/01/2020
+    debit_credit: 300
+    acct_offset_name: checking
+    name: general income
+    acct_type: income
+    acct_name:
+    split:
+      - amount: 200
+        account: income_general
+      - amount: 100
+        account: income_gift
 ```

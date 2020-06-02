@@ -35,18 +35,117 @@ pub fn register(filename: &String, option: &String) -> Result<(), std::io::Error
         .collect();
 
     for item in filtered_items {
-        println!(
-            "{0: <10} {1: <20}    {2: <20}    {3: >8}    {4: >8}
-                                   {5: <20}    {6: >8}    {7: >8}",
-            item.date,
-            item.name,
-            item.acct_name,
-            item.debit_credit.to_formatted_string(&Locale::en),
-            format!("{}", item.debit_credit.to_formatted_string(&Locale::en)),
-            item.acct_offset_name,
-            format!("-{}", item.debit_credit.to_formatted_string(&Locale::en)),
-            (item.debit_credit - item.debit_credit).to_formatted_string(&Locale::en)
-        );
+        let mut credit: i32 = 0;
+
+        match item.split {
+            None => {
+                match item.acct_type.as_ref() {
+                    "income" => {
+                        println!("{0: <10} {1: <20}    {2: <20}    {3: >8}    {4: >8}",
+                            item.date,
+                            item.name.bold(),
+                            item.acct_offset_name,
+                            item.debit_credit.to_formatted_string(&Locale::en).bold(),
+                            format!("{}", item.debit_credit.to_formatted_string(&Locale::en)).bold()
+                        );
+                        println!(
+                            "{0: <35}{1: <20}    {2: >8}    {3: >8}",
+                            "",
+                            item.acct_name,
+                            format!("-{}", item.debit_credit.to_formatted_string(&Locale::en)).bold(),
+                            "0".bold() // hack for now. No need to do any math
+                        );
+                    },
+                    _ => {
+                        println!("{0: <10} {1: <20}    {2: <20}    {3: >8}    {4: >8}",
+                            item.date,
+                            item.name.bold(),
+                            item.acct_name,
+                            item.debit_credit.to_formatted_string(&Locale::en).bold(),
+                            format!("{}", item.debit_credit.to_formatted_string(&Locale::en)).bold()
+                        );
+                        println!(
+                            "{0: <35}{1: <20}    {2: >8}    {3: >8}",
+                            "",
+                            item.acct_offset_name,
+                            format!("-{}", item.debit_credit.to_formatted_string(&Locale::en)).bold(),
+                            (item.debit_credit - item.debit_credit).to_formatted_string(&Locale::en).bold()
+                        );
+                    },
+                };
+            },
+            Some(split) => {
+                match item.acct_type.as_ref() {
+                    "income" => {
+                        if let Some((last, elements)) = split.split_last() {        
+                            println!("{0: <10} {1: <20}    {2: <20}    {3: >8}    {4: >8}",
+                                item.date,
+                                item.name.bold(),
+                                item.acct_offset_name,
+                                item.debit_credit.to_formatted_string(&Locale::en).bold(),
+                                format!("{}", item.debit_credit.to_formatted_string(&Locale::en)).bold()
+                            );
+        
+                            for i in elements {
+                                credit -= i.amount;
+                                println!(
+                                    "{0: <35}{1: <20}    {2: >8}    {3: >8}",
+                                    "",
+                                    i.account,
+                                    format!("{}", i.amount.to_formatted_string(&Locale::en)).bold(),
+                                    (credit).to_formatted_string(&Locale::en).bold()
+                                );
+                            }
+
+                            credit -= last.amount;
+                            let check = item.debit_credit - credit;
+        
+                            println!(
+                                "{0: <35}{1: <20}    {2: >8}    {3: >8}",
+                                "",
+                                last.account,
+                                format!("{}", last.amount.to_formatted_string(&Locale::en)).bold(),
+                                if check != 0 { (check).to_formatted_string(&Locale::en).red().bold() } else { (check).to_formatted_string(&Locale::en).bold() }
+                            );
+                        }  
+                    },
+                    _ => {
+                        if let Some((first, elements)) = split.split_first() {
+                            credit += first.amount;
+        
+                            println!("{0: <10} {1: <20}    {2: <20}    {3: >8}    {4: >8}",
+                                item.date,
+                                item.name.bold(),
+                                first.account,
+                                first.amount.to_formatted_string(&Locale::en).bold(),
+                                format!("{}", first.amount.to_formatted_string(&Locale::en)).bold()
+                            );
+        
+                            for i in elements {
+                                credit += i.amount;
+                                println!(
+                                    "{0: <35}{1: <20}    {2: >8}    {3: >8}",
+                                    "",
+                                    i.account,
+                                    format!("{}", i.amount.to_formatted_string(&Locale::en)).bold(),
+                                    (credit).to_formatted_string(&Locale::en).bold()
+                                );
+                            }
+        
+                            let check = item.debit_credit - credit;
+        
+                            println!(
+                                "{0: <35}{1: <20}    {2: >8}    {3: >8}",
+                                "",
+                                item.acct_offset_name,
+                                format!("-{}", item.debit_credit.to_formatted_string(&Locale::en)).bold(),
+                                if check != 0 { (check).to_formatted_string(&Locale::en).red().bold() } else { (check).to_formatted_string(&Locale::en).bold() }
+                            );
+                        }  
+                    }
+                };                  
+            }
+        }
     }
 
     println!("\n");
