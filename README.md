@@ -150,26 +150,26 @@ income_general               income
  Account                       Balance             
 ---------------------------------------
 asset
-  checking                     $1,300.00               
-  savings                      $2,000.00               
+  checking                      1,300.00               
+  savings                       2,000.00               
 liability
-  credit_card                  -$456.00                
+  credit_card                   -456.00                
 equity
-  equity                       -$3,500.00              
+  equity                        -3,500.00              
 expense
-  expense_auto                 $455.00                 
-  expense_computer             $1.00                   
-  expense_food                 0                   
-  expense_gasoline             0                   
-  expense_pets                 0                   
-  expense_amazon               0                   
-  expense_home                 $100.00                 
-  expense_general              0                   
+  expense_auto                  455.00                 
+  expense_computer              1.00                   
+  expense_food                  0                   
+  expense_gasoline              0                   
+  expense_pets                  0                   
+  expense_amazon                0                   
+  expense_home                  100.00                 
+  expense_general               0                   
 income
-  income_general               0                   
+  income_general                0                   
 
 ---------------------------------------
-check                          -$100.00 
+check                           -100.00 
 ```
 
 - register
@@ -180,12 +180,12 @@ check                          -$100.00
 ```
 Date       Description             Accounts            
 -------------------------------------------------------------------------------
-11/4/2019  car maintenance         expense_auto             $455.50     $455.50
-                                   credit_card             -$455.00           0
-11/4/2019  raspberry pi            expense_computer         $1.00         $1.00
-                                   credit_card             -$1.00             0
-05/12/2020 stuff                   expense_home             $100.00     $100.00
-                                   checkings               -$100.00           0
+11/4/2019  car maintenance         expense_auto              455.50      455.50
+                                   credit_card              -455.00           0
+11/4/2019  raspberry pi            expense_computer          1.00          1.00
+                                   credit_card              -1.00             0
+05/12/2020 stuff                   expense_home              100.00      100.00
+                                   checkings                -100.00           0
 ```
 
 - csv
