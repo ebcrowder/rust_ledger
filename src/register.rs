@@ -40,59 +40,119 @@ pub fn register(filename: &String, option: &String) -> Result<(), std::io::Error
 
         match item.split {
             None => {
-                println!("{0: <10} {1: <20}    {2: <20}    {3: >8}    {4: >8}",
-                    item.date,
-                    item.name.bold(),
-                    item.acct_name,
-                    money!(format!("{0:.2}", item.debit_credit), currencies.alias).to_string().bold(),
-                    money!(format!("{0:.2}", item.debit_credit), currencies.alias).to_string().bold()
-                );
-
-                println!(
-                    "{0: <35}{1: <20}    {2: >8}    {3: >8}",
-                    "",
-                    item.acct_offset_name,
-                    money!(format!("-{0:.2}", item.debit_credit), currencies.alias).to_string().red().bold(),
-                    0 // no check at this point because it can only be zero
-                );
-            },
-            Some(split) => {
-                if let Some((first, elements)) = split.split_first() {
-                    credit += first.amount;
-
-                    println!("{0: <10} {1: <20}    {2: <20}    {3: >8}    {4: >8}",
-                        item.date,
-                        item.name.bold(),
-                        first.account,
-                        money!(format!("{0:.2}", first.amount), currencies.alias).to_string().bold(),
-                        money!(format!("{0:.2}", first.amount), currencies.alias).to_string().bold()
-                    );
-
-                    for i in elements {
-                        credit += i.amount;
+                match item.acct_type.as_ref() {
+                    "income" => {
+                        println!("{0: <10} {1: <20}    {2: <20}    {3: >8}    {4: >8}",
+                            item.date,
+                            item.name.bold(),
+                            item.acct_offset_name,
+                            money!(format!("{0:.2}", item.debit_credit), currencies.alias).to_string().bold(),
+                            money!(format!("{0:.2}", item.debit_credit), currencies.alias).to_string().bold()
+                        );
                         println!(
                             "{0: <35}{1: <20}    {2: >8}    {3: >8}",
                             "",
-                            i.account,
-                            money!(format!("{0:.2}", i.amount), currencies.alias).to_string().bold(),
-                            money!(format!("{0:.2}", credit), currencies.alias).to_string().bold()
+                            item.acct_name,
+                            money!(format!("-{0:.2}", item.debit_credit), currencies.alias).to_string().bold(),
+                            "0".bold() // hack for now. No need to do any math
                         );
+                    },
+                    _ => {
+                        println!("{0: <10} {1: <20}    {2: <20}    {3: >8}    {4: >8}",
+                            item.date,
+                            item.name.bold(),
+                            item.acct_name,
+                            money!(format!("{0:.2}", item.debit_credit), currencies.alias).to_string().bold(),
+                            money!(format!("{0:.2}", item.debit_credit), currencies.alias).to_string().bold()
+                        );
+                        println!(
+                            "{0: <35}{1: <20}    {2: >8}    {3: >8}",
+                            "",
+                            item.acct_offset_name,
+                            money!(format!("-{0:.2}", item.debit_credit), currencies.alias).to_string().bold(),
+                            money!(format!("{0:.2}", (item.debit_credit - item.debit_credit)), currencies.alias).to_string().bold()
+                        );
+                    },
+                };
+            },
+            Some(split) => {
+                match item.acct_type.as_ref() {
+                    "income" => {
+                        if let Some((last, elements)) = split.split_last() {        
+                            println!("{0: <10} {1: <20}    {2: <20}    {3: >8}    {4: >8}",
+                                item.date,
+                                item.name.bold(),
+                                item.acct_offset_name,
+                                money!(format!("{0:.2}", item.debit_credit), currencies.alias).to_string().bold(),
+                                money!(format!("{0:.2}", item.debit_credit), currencies.alias).to_string().bold()
+                            );
+        
+                            for i in elements {
+                                credit -= i.amount;
+                                println!(
+                                    "{0: <35}{1: <20}    {2: >8}    {3: >8}",
+                                    "",
+                                    i.account,
+                                    money!(format!("{0:.2}", i.amount), currencies.alias).to_string().bold(),
+                                    money!(format!("{0:.2}", credit), currencies.alias).to_string().bold()
+                                );
+                            }
+
+                            credit -= last.amount;
+                            let check: f32 = item.debit_credit - credit;
+        
+                            println!(
+                                "{0: <35}{1: <20}    {2: >8}    {3: >8}",
+                                "",
+                                last.account,
+                                money!(format!("{0:.2}", last.amount), currencies.alias).to_string().bold(),
+                                if check != 0.0 { 
+                                    money!(format!("{0:.2}", check), currencies.alias).to_string().red().bold()
+                                } else { 
+                                    check.to_string().bold()
+                                }
+                            );
+                        }  
+                    },
+                    _ => {
+                        if let Some((first, elements)) = split.split_first() {
+                            credit += first.amount;
+        
+                            println!("{0: <10} {1: <20}    {2: <20}    {3: >8}    {4: >8}",
+                                item.date,
+                                item.name.bold(),
+                                first.account,
+                                money!(format!("{0:.2}", first.amount), currencies.alias).to_string().bold(),
+                                money!(format!("{0:.2}", first.amount), currencies.alias).to_string().bold()
+                            );
+        
+                            for i in elements {
+                                credit += i.amount;
+                                println!(
+                                    "{0: <35}{1: <20}    {2: >8}    {3: >8}",
+                                    "",
+                                    i.account,
+                                    money!(format!("{0:.2}", i.amount), currencies.alias).to_string().bold(),
+                                    money!(format!("{0:.2}", credit), currencies.alias).to_string().bold()
+                                );
+                            }
+        
+                            let check: f32 = item.debit_credit - credit;
+        
+                            println!(
+                                "{0: <35}{1: <20}    {2: >8}    {3: >8}",
+                                "",
+                                item.acct_offset_name,
+                                money!(format!("-{0:.2}", item.debit_credit), currencies.alias).to_string().bold(),
+                                if check != 0.0 {
+                                    (check).to_string().red().bold()
+                                } else { 
+                                    (check).to_string().bold() 
+                                }
+                            );
+                        }  
                     }
-
-                    let check: f32 = item.debit_credit - credit;
-
-                    println!(
-                        "{0: <35}{1: <20}    {2: >8}    {3: >8}",
-                        "",
-                        item.acct_offset_name,
-                        money!(format!("-{0:.2}", item.debit_credit), currencies.alias).to_string().red().bold(),
-                        if check != 0.0 { 
-                            money!(format!("{0:.2}", check), currencies.alias).to_string().red().bold() 
-                        } else { 
-                            check.to_string().bold()
-                        }
-                    );
-                }                
+                };                  
             }
         }
     }
