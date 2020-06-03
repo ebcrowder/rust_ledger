@@ -150,23 +150,23 @@ income_general               income
  Account                       Balance             
 ---------------------------------------
 asset
-  checking                      1,300.00               
-  savings                       2,000.00               
+  checking                     1300.00               
+  savings                      2000.00               
 liability
-  credit_card                   -456.00                
+  credit_card                  -456.00                
 equity
-  equity                        -3,500.00              
+  equity                       -3500.00              
 expense
-  expense_auto                  455.00                 
-  expense_computer              1.00                   
-  expense_food                  0                   
-  expense_gasoline              0                   
-  expense_pets                  0                   
-  expense_amazon                0                   
-  expense_home                  100.00                 
-  expense_general               0                   
+  expense_auto                 455.00                 
+  expense_computer             1.00                   
+  expense_food                 0                   
+  expense_gasoline             0                   
+  expense_pets                 0                   
+  expense_amazon               0                   
+  expense_home                 100.00                 
+  expense_general              0                   
 income
-  income_general                0                   
+  income_general               0                   
 
 ---------------------------------------
 check                           -100.00 
