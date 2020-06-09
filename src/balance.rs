@@ -12,6 +12,7 @@ struct BalanceAccount {
 
 struct TransactionAccount {
     account: String,
+    account_type: String,
     offset_account: String,
     amount: i32,
 }
@@ -46,6 +47,7 @@ pub fn balance(filename: &String) -> Result<(), std::io::Error> {
 
                 transactions_vec.push(TransactionAccount {
                     account: transaction.acct_name,
+                    account_type: transaction.acct_type,
                     offset_account: offset_account.to_string(),
                     amount: amount,
                 });
@@ -54,13 +56,15 @@ pub fn balance(filename: &String) -> Result<(), std::io::Error> {
                 let mut credit: i32 = 0;
                 
                 for i in split {
-                    let amount = match transaction.acct_type.as_ref() {
+                    let acct_type = transaction.acct_type.as_ref();
+                    let amount = match acct_type {
                         "income" => -i.amount,
                         _ => i.amount,
                     };
                     credit += amount;
                     transactions_vec.push(TransactionAccount {
                         account: i.account,
+                        account_type: i.account_type.unwrap_or(acct_type.to_string()),
                         offset_account: offset_account.to_string(),
                         amount: i.amount,
                     })
@@ -68,6 +72,7 @@ pub fn balance(filename: &String) -> Result<(), std::io::Error> {
 
                 transactions_vec.push(TransactionAccount {
                     account: transaction.acct_name,
+                    account_type: transaction.acct_type,
                     offset_account: offset_account.to_string(),
                     amount: transaction.debit_credit - credit,
                 });
@@ -80,7 +85,8 @@ pub fn balance(filename: &String) -> Result<(), std::io::Error> {
 
     for transaction in &transactions_vec {
         for account in &mut accounts_vec {
-            if account.account == transaction.account {
+            if account.account == transaction.account 
+                && account.account_type == transaction.account_type {
                 account.amount += &transaction.amount;
             }
             if account.account == transaction.offset_account {
@@ -111,7 +117,11 @@ pub fn balance(filename: &String) -> Result<(), std::io::Error> {
             "  {0: <28} {1: <20}",
             account.account,
             if account.amount < 0 {
-                (account.amount).to_formatted_string(&Locale::en).red().bold()
+                if current_account_type.eq("asset") {
+                    (account.amount).to_formatted_string(&Locale::en).red().bold()
+                } else {
+                    (account.amount).to_formatted_string(&Locale::en).bold()
+                }
             } else if account.amount == 0 {
                 (account.amount).to_formatted_string(&Locale::en).yellow().bold()
             } else {
