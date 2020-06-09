@@ -127,19 +127,18 @@ Splits should add up to equal the `debit_credit`.
 ```
  Account                       Type                
 ---------------------------------------
-checking                     asset               
-savings                      asset               
-credit_card                  liability           
+Checking                     asset               
+Savings                      asset               
+CreditCard                   liability           
 equity                       equity              
-expense_auto                 expense             
-expense_computer             expense             
-expense_food                 expense             
-expense_gasoline             expense             
-expense_pets                 expense             
-expense_amazon               expense             
-expense_home                 expense             
-expense_general              expense             
-income_general               income  
+auto                         expense             
+grocery                      expense             
+fuel                         expense             
+pets                         expense             
+general                      expense             
+income-1                     income              
+income-2                     income              
+interest                     income
 ```
 
 - balance
@@ -150,26 +149,25 @@ income_general               income
  Account                       Balance             
 ---------------------------------------
 asset
-  checking                     1300.00               
-  savings                      2000.00               
+  Checking                     2400.76             
+  Savings                      2000.00             
 liability
-  credit_card                  -456.50                
+  CreditCard                   -456.00             
 equity
-  equity                       -3500.00              
+  equity                       -3500.00            
 expense
-  expense_auto                 455.00                 
-  expense_computer             1.00                   
-  expense_food                 0                   
-  expense_gasoline             0                   
-  expense_pets                 0                   
-  expense_amazon               0                   
-  expense_home                 100.00                 
-  expense_general              0                   
+  auto                         455.00              
+  grocery                      0                   
+  fuel                         0                   
+  pets                         0                   
+  general                      1.00                
 income
-  income_general               0                   
+  income-1                     -179.50             
+  income-2                     -600.76             
+  interest                     -120.50             
 
 ---------------------------------------
-check                           -100.00 
+check                          -0.00               
 ```
 
 - register
@@ -180,12 +178,15 @@ check                           -100.00
 ```
 Date       Description             Accounts            
 -------------------------------------------------------------------------------
-11/4/2019  car maintenance         expense_auto              455.50      455.50
-                                   credit_card              -455.50           0
-11/4/2019  raspberry pi            expense_computer          1.00          1.00
-                                   credit_card              -1.00             0
-05/12/2020 stuff                   expense_home              100.00      100.00
-                                   checkings                -100.00           0
+11/4/2019  car maintenance         auto                      455.00      455.00
+                                   CreditCard               -455.00        0.00
+11/4/2019  raspberry pi            general                     1.00        1.00
+                                   CreditCard                 -1.00        0.00
+05/23/2020 business stuff          Checking                  600.76      600.76
+                                   income-2                 -600.76           0
+05/23/2020 business stuff          Checking                  300.00      300.00
+                                   income-1                 -179.50      179.50
+                                   interest                 -120.50           0
 ```
 
 - csv

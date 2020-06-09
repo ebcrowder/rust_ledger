@@ -43,11 +43,11 @@ accounts:
     acct_type: expense
     debit_credit: 0
   - id: 9
-    acct_name: general
+    acct_name: income-1
     acct_type: income
     debit_credit: 0
   - id: 10
-    acct_name: income-1
+    acct_name: income-2
     acct_type: income
     debit_credit: 0
   - id: 11
@@ -69,11 +69,11 @@ transactions:
     acct_type: expense
     acct_name: general
   - date: 05/23/2020
-    debit_credit: 300
+    debit_credit: 600.76
     acct_offset_name: Checking
     name: business stuff
     acct_type: income
-    acct_name: income-1
+    acct_name: income-2
   - date: 05/23/2020
     debit_credit: 300
     acct_offset_name: Checking
@@ -81,7 +81,7 @@ transactions:
     acct_type: income
     acct_name:
     split:
-      - amount: -120
+      - amount: -179.50
         account: income-1
-      - amount: -120
+      - amount: -120.50
         account: interest
