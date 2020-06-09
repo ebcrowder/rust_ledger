@@ -153,7 +153,7 @@ asset
   checking                     1300.00               
   savings                      2000.00               
 liability
-  credit_card                  -456.00                
+  credit_card                  -456.50                
 equity
   equity                       -3500.00              
 expense
@@ -181,7 +181,7 @@ check                           -100.00
 Date       Description             Accounts            
 -------------------------------------------------------------------------------
 11/4/2019  car maintenance         expense_auto              455.50      455.50
-                                   credit_card              -455.00           0
+                                   credit_card              -455.50           0
 11/4/2019  raspberry pi            expense_computer          1.00          1.00
                                    credit_card              -1.00             0
 05/12/2020 stuff                   expense_home              100.00      100.00
