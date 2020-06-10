@@ -20,6 +20,7 @@ pub struct Account {
 pub struct TransactionSplit {
     pub amount: i32,
     pub account: String,
+    pub account_type: Option<String>,
 }
 
 #[derive(Debug, PartialEq, Serialize, Deserialize)]

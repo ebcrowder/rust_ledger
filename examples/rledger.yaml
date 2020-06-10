@@ -1,0 +1,87 @@
+owner: test-user
+currencies:
+  id: $
+  name: US Dollar
+  alias: USD
+  note: Currency used in the United States
+
+accounts:
+  - id: 0
+    acct_name: Checking
+    acct_type: asset
+    debit_credit: 1500
+  - id: 1
+    acct_name: Savings
+    acct_type: asset
+    debit_credit: 2000
+  - id: 2
+    acct_name: CreditCard
+    acct_type: liability
+    debit_credit: 0
+  - id: 3
+    acct_name: equity
+    acct_type: equity
+    debit_credit: -3500
+  - id: 4
+    acct_name: auto
+    acct_type: expense
+    debit_credit: 0
+  - id: 5
+    acct_name: grocery
+    acct_type: expense
+    debit_credit: 0
+  - id: 6
+    acct_name: fuel
+    acct_type: expense
+    debit_credit: 0
+  - id: 7
+    acct_name: pets
+    acct_type: expense
+    debit_credit: 0
+  - id: 8
+    acct_name: general
+    acct_type: expense
+    debit_credit: 0
+  - id: 9
+    acct_name: general
+    acct_type: income
+    debit_credit: 0
+  - id: 10
+    acct_name: income-1
+    acct_type: income
+    debit_credit: 0
+  - id: 11
+    acct_name: interest
+    acct_type: income
+    debit_credit: 0
+
+transactions:
+  - date: 11/4/2019
+    debit_credit: 455
+    acct_offset_name: CreditCard
+    name: car maintenance
+    acct_type: expense
+    acct_name: auto
+  - date: 11/4/2019
+    debit_credit: 1
+    acct_offset_name: CreditCard
+    name: raspberry pi
+    acct_type: expense
+    acct_name: general
+  - date: 05/23/2020
+    debit_credit: 600
+    acct_offset_name: Checking
+    name: business stuff
+    acct_type: income
+    acct_name: general
+  - date: 05/23/2020
+    debit_credit: 300
+    acct_offset_name: Checking
+    name: business stuff
+    acct_type: income
+    acct_name:
+    split:
+      - amount: -180
+        account: income-1
+      - amount: -120
+        account: interest

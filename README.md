@@ -127,19 +127,18 @@ Splits should add up to equal the `debit_credit`.
 ```
  Account                       Type                
 ---------------------------------------
-checking                     asset               
-savings                      asset               
-credit_card                  liability           
+Checking                     asset               
+Savings                      asset               
+CreditCard                   liability           
 equity                       equity              
-expense_auto                 expense             
-expense_computer             expense             
-expense_food                 expense             
-expense_gasoline             expense             
-expense_pets                 expense             
-expense_amazon               expense             
-expense_home                 expense             
-expense_general              expense             
-income_general               income  
+auto                         expense             
+grocery                      expense             
+fuel                         expense             
+pets                         expense             
+general                      expense             
+general                      income              
+income-1                     income              
+interest                     income 
 ```
 
 - balance
@@ -150,26 +149,25 @@ income_general               income
  Account                       Balance             
 ---------------------------------------
 asset
-  checking                     1,300               
-  savings                      2,000               
+  Checking                     2,400               
+  Savings                      2,000               
 liability
-  credit_card                  -456                
+  CreditCard                   -456                
 equity
   equity                       -3,500              
 expense
-  expense_auto                 455                 
-  expense_computer             1                   
-  expense_food                 0                   
-  expense_gasoline             0                   
-  expense_pets                 0                   
-  expense_amazon               0                   
-  expense_home                 100                 
-  expense_general              0                   
+  auto                         455                 
+  grocery                      0                   
+  fuel                         0                   
+  pets                         0                   
+  general                      1                   
 income
-  income_general               0                   
+  general                      -600                
+  income-1                     -180                
+  interest                     -120                
 
 ---------------------------------------
-check                          -100 
+check                          0       
 ```
 
 - register
@@ -180,12 +178,15 @@ check                          -100
 ```
 Date       Description             Accounts            
 -------------------------------------------------------------------------------
-11/4/2019  car maintenance         expense_auto                 455         455
-                                   credit_card                 -455           0
-11/4/2019  raspberry pi            expense_computer               1           1
-                                   credit_card                   -1           0
-05/12/2020 stuff                   expense_home                 100         100
-                                   checkings                   -100           0
+11/4/2019  car maintenance         auto                         455         455
+                                   CreditCard                  -455           0
+11/4/2019  raspberry pi            general                        1           1
+                                   CreditCard                    -1           0
+05/23/2020 business stuff          Checking                     600         600
+                                   general                     -600           0
+05/23/2020 business stuff          Checking                     300         300
+                                   income-1                    -180         180
+                                   interest                    -120           0
 ```
 
 - csv
@@ -196,10 +197,11 @@ Date       Description             Accounts
 
 ### rust_ledger `yaml` file format
 
+- `rledger.yaml` example found at `examples/rledger.yaml`
 - rust_ledger utilizes `yaml` files in the following format:
 
 ```yaml
-owner: test_owner
+owner: test-user
 currencies:
   id: $
   name: US Dollar
@@ -208,95 +210,82 @@ currencies:
 
 accounts:
   - id: 0
-    acct_name: checking
+    acct_name: Checking
     acct_type: asset
     debit_credit: 1500
   - id: 1
-    acct_name: savings
+    acct_name: Savings
     acct_type: asset
     debit_credit: 2000
-  - id: 3
-    acct_name: credit_card
+  - id: 2
+    acct_name: CreditCard
     acct_type: liability
     debit_credit: 0
-  - id: 4
+  - id: 3
     acct_name: equity
     acct_type: equity
     debit_credit: -3500
+  - id: 4
+    acct_name: auto
+    acct_type: expense
+    debit_credit: 0
   - id: 5
-    acct_name: expense_auto
+    acct_name: grocery
     acct_type: expense
     debit_credit: 0
   - id: 6
-    acct_name: expense_computer
+    acct_name: fuel
     acct_type: expense
     debit_credit: 0
   - id: 7
-    acct_name: expense_food
+    acct_name: pets
     acct_type: expense
     debit_credit: 0
   - id: 8
-    acct_name: expense_gasoline
+    acct_name: general
     acct_type: expense
     debit_credit: 0
   - id: 9
-    acct_name: expense_pets
-    acct_type: expense
-    debit_credit: 0
-  - id: 10
-    acct_name: expense_amazon
-    acct_type: expense
-    debit_credit: 0
-  - id: 11
-    acct_name: expense_home
-    acct_type: expense
-    debit_credit: 0
-  - id: 12
-    acct_name: expense_general
-    acct_type: expense
-    debit_credit: 0
-  - id: 13
-    acct_name: income_general
+    acct_name: general
     acct_type: income
     debit_credit: 0
-  - id: 13
-    acct_name: income_gift
+  - id: 10
+    acct_name: income-1
+    acct_type: income
+    debit_credit: 0
+  - id: 11
+    acct_name: interest
     acct_type: income
     debit_credit: 0
 
 transactions:
   - date: 11/4/2019
     debit_credit: 455
-    acct_offset_name: credit_card
+    acct_offset_name: CreditCard
     name: car maintenance
     acct_type: expense
-    acct_name: expense_auto
+    acct_name: auto
   - date: 11/4/2019
     debit_credit: 1
-    acct_offset_name: credit_card
+    acct_offset_name: CreditCard
     name: raspberry pi
     acct_type: expense
-    acct_name: expense_computer
+    acct_name: general
   - date: 05/23/2020
-    debit_credit: 200
-    acct_offset_name: credit_card
-    name: grocery store
-    acct_type: expense
-    acct_name:
-    split:
-      - amount: 20
-        account: expense_general
-      - amount: 180
-        account: expense_food
-  - date: 06/01/2020
+    debit_credit: 600
+    acct_offset_name: Checking
+    name: business stuff
+    acct_type: income
+    acct_name: general
+  - date: 05/23/2020
     debit_credit: 300
-    acct_offset_name: checking
-    name: general income
+    acct_offset_name: Checking
+    name: business stuff
     acct_type: income
     acct_name:
     split:
-      - amount: 200
-        account: income_general
-      - amount: 100
-        account: income_gift
+      - amount: -180
+        account: income-1
+      - amount: -120
+        account: interest
 ```
