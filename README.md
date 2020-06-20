@@ -8,7 +8,6 @@ command line accounting tool
 
 As a former CPA, I could not resist building my own accounting system.
 
-
 ### Summary
 
 - Spiritual port of [ledger](https://github.com/ledger/ledger)
@@ -26,7 +25,7 @@ As a former CPA, I could not resist building my own accounting system.
 
 #### From Cargo 
 
-install via cargo - `cargo install rust_ledger`
+`cargo install rust_ledger`
 
 #### Build from Source
 
@@ -72,7 +71,7 @@ OPTION (denoted by `-f`) - allows you to filter the output of the `register` com
 ```
 - date: 05/23/2020
   debit_credit: 200
-  acct_offset_name: credit_card
+  acct_offset_name: credit_card_amex
   name: grocery store
   acct_type: expense
   acct_name: expense_general
@@ -86,8 +85,6 @@ OPTION (denoted by `-f`) - allows you to filter the output of the `register` com
 * acct_type
 * acct_name - This field is required but can be empty
 
-
-
 #### Split Transactions
 
 Each transaction can be split to multiple expense categories.
@@ -99,7 +96,7 @@ Splits should add up to equal the `debit_credit`.
 ```
 - date: 05/23/2020
   debit_credit: 200
-  acct_offset_name: credit_card
+  acct_offset_name: credit_card_amex
   name: grocery store
   acct_type: expense
   acct_name:
@@ -125,20 +122,15 @@ Splits should add up to equal the `debit_credit`.
   - example output:
 
 ```
- Account                       Type                
+ Account                       Type
 ---------------------------------------
-Checking                     asset               
-Savings                      asset               
-CreditCard                   liability           
-equity                       equity              
-auto                         expense             
-grocery                      expense             
-fuel                         expense             
-pets                         expense             
-general                      expense             
-general                      income              
-income-1                     income              
-interest                     income 
+cash_checking                asset
+cash_savings                 asset
+credit_card_amex             liability
+equity                       equity
+grocery                      expense
+general                      expense
+general                      income
 ```
 
 - balance
@@ -146,28 +138,23 @@ interest                     income
   - example output:
 
 ```
- Account                       Balance             
+ Account                       Balance
 ---------------------------------------
 asset
-  Checking                     2,400               
-  Savings                      2,000               
+  cash_checking                2,100
+  cash_savings                 2,000
 liability
-  CreditCard                   -456                
+  credit_card_amex             -505
 equity
-  equity                       -3,500              
+  equity                       -3,500
 expense
-  auto                         455                 
-  grocery                      0                   
-  fuel                         0                   
-  pets                         0                   
-  general                      1                   
+  grocery                      455
+  general                      50
 income
-  general                      -600                
-  income-1                     -180                
-  interest                     -120                
+  general                      -600
 
 ---------------------------------------
-check                          0       
+check                          0
 ```
 
 - register
@@ -176,17 +163,14 @@ check                          0
   - example output:
 
 ```
-Date       Description             Accounts            
+Date       Description             Accounts
 -------------------------------------------------------------------------------
-11/4/2019  car maintenance         auto                         455         455
-                                   CreditCard                  -455           0
-11/4/2019  raspberry pi            general                        1           1
-                                   CreditCard                    -1           0
-05/23/2020 business stuff          Checking                     600         600
+11/4/2019  weekly groceries        grocery                      455         455
+                                   credit_card_amex            -455           0
+11/4/2019  raspberry pi            general                       50          50
+                                   credit_card_amex             -50           0
+05/23/2020 business stuff          cash_checking                600         600
                                    general                     -600           0
-05/23/2020 business stuff          Checking                     300         300
-                                   income-1                    -180         180
-                                   interest                    -120           0
 ```
 
 - csv
@@ -197,11 +181,11 @@ Date       Description             Accounts
 
 ### rust_ledger `yaml` file format
 
-- `rledger.yaml` example found at `examples/rledger.yaml`
+- example ledger `yaml` file can be found at `examples/example.yaml`
 - rust_ledger utilizes `yaml` files in the following format:
 
 ```yaml
-owner: test-user
+owner: user
 currencies:
   id: $
   name: US Dollar
@@ -210,15 +194,15 @@ currencies:
 
 accounts:
   - id: 0
-    acct_name: Checking
+    acct_name: cash_checking
     acct_type: asset
     debit_credit: 1500
   - id: 1
-    acct_name: Savings
+    acct_name: cash_savings 
     acct_type: asset
     debit_credit: 2000
   - id: 2
-    acct_name: CreditCard
+    acct_name: credit_card_amex 
     acct_type: liability
     debit_credit: 0
   - id: 3
@@ -226,66 +210,35 @@ accounts:
     acct_type: equity
     debit_credit: -3500
   - id: 4
-    acct_name: auto
-    acct_type: expense
-    debit_credit: 0
-  - id: 5
     acct_name: grocery
     acct_type: expense
     debit_credit: 0
+  - id: 5
+    acct_name: general
+    acct_type: expense
+    debit_credit: 0
   - id: 6
-    acct_name: fuel
-    acct_type: expense
-    debit_credit: 0
-  - id: 7
-    acct_name: pets
-    acct_type: expense
-    debit_credit: 0
-  - id: 8
     acct_name: general
-    acct_type: expense
-    debit_credit: 0
-  - id: 9
-    acct_name: general
-    acct_type: income
-    debit_credit: 0
-  - id: 10
-    acct_name: income-1
-    acct_type: income
-    debit_credit: 0
-  - id: 11
-    acct_name: interest
     acct_type: income
     debit_credit: 0
 
 transactions:
   - date: 11/4/2019
     debit_credit: 455
-    acct_offset_name: CreditCard
-    name: car maintenance
+    acct_offset_name: credit_card_amex
+    name: weekly groceries
     acct_type: expense
-    acct_name: auto
+    acct_name: grocery 
   - date: 11/4/2019
-    debit_credit: 1
-    acct_offset_name: CreditCard
+    debit_credit: 50
+    acct_offset_name: credit_card_amex
     name: raspberry pi
     acct_type: expense
     acct_name: general
   - date: 05/23/2020
     debit_credit: 600
-    acct_offset_name: Checking
+    acct_offset_name: cash_checking 
     name: business stuff
     acct_type: income
     acct_name: general
-  - date: 05/23/2020
-    debit_credit: 300
-    acct_offset_name: Checking
-    name: business stuff
-    acct_type: income
-    acct_name:
-    split:
-      - amount: -180
-        account: income-1
-      - amount: -120
-        account: interest
 ```
