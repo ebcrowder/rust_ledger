@@ -34,7 +34,7 @@ pub fn register(filename: &String, option: &String) -> Result<(), std::io::Error
         .collect();
 
     for item in filtered_items {
-        let mut credit: f32 = 0.0;
+        let mut credit: f64 = 0.0;
 
         match item.split {
             None => {
@@ -97,7 +97,7 @@ pub fn register(filename: &String, option: &String) -> Result<(), std::io::Error
                             }
 
                             credit -= last.amount;
-                            let check: f32 = item.debit_credit - credit;
+                            let check: f64 = item.debit_credit - credit;
         
                             println!(
                                 "{0: <35}{1: <20}    {2: >8}    {3: >8}",
@@ -135,7 +135,7 @@ pub fn register(filename: &String, option: &String) -> Result<(), std::io::Error
                                 );
                             }
         
-                            let check: f32 = item.debit_credit - credit;
+                            let check: f64 = item.debit_credit - credit;
         
                             println!(
                                 "{0: <35}{1: <20}    {2: >8}    {3: >8}",

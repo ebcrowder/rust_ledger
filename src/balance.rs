@@ -6,13 +6,13 @@ use super::models::{LedgerFile};
 struct BalanceAccount {
     account: String,
     account_type: String,
-    amount: f32,
+    amount: f64,
 }
 
 struct TransactionAccount {
     account: String,
     offset_account: String,
-    amount: f32,
+    amount: f64,
 }
 
 /// returns balances of all general ledger accounts
@@ -50,7 +50,7 @@ pub fn balance(filename: &String) -> Result<(), std::io::Error> {
                 });
             },
             Some(split) => {
-                let mut credit: f32 = 0.0;
+                let mut credit: f64 = 0.0;
                 
                 for i in split {
                     let amount = match transaction.acct_type.as_ref() {
@@ -90,7 +90,7 @@ pub fn balance(filename: &String) -> Result<(), std::io::Error> {
 
     // create output
 
-    let mut check_figure: f32 = 0.0;
+    let mut check_figure: f64 = 0.0;
 
     println!("\n {0: <29} {1: <20}", "Account".bold(), "Balance".bold());
 

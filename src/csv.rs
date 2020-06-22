@@ -15,7 +15,7 @@ struct CSV {
 #[derive(Debug, PartialEq, Serialize, Deserialize)]
 struct CSVOutput {
     date: String,
-    debit_credit: f32,
+    debit_credit: f64,
     acct_name: String,
     acct_type: String,
     acct_offset_name: String,
@@ -92,7 +92,7 @@ pub fn csv(ledger_file: &String, csv_file: &String) -> Result<(), std::io::Error
         if record.amount < 1.0 {
             csv_output.push(CSVOutput {
                 date: record.date,
-                debit_credit: -record.amount as f32,
+                debit_credit: -record.amount as f64,
                 acct_name: matched_acct_name,
                 acct_type: "expense".to_string(),
                 acct_offset_name: "credit_card".to_string(),
@@ -102,7 +102,7 @@ pub fn csv(ledger_file: &String, csv_file: &String) -> Result<(), std::io::Error
             // if amount is positive, post as income
             csv_output.push(CSVOutput {
                 date: record.date,
-                debit_credit: record.amount as f32,
+                debit_credit: record.amount as f64,
                 acct_name: matched_acct_name,
                 acct_type: "income".to_string(),
                 acct_offset_name: "credit_card".to_string(),

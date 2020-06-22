@@ -13,19 +13,19 @@ pub struct Account {
     pub id: i32,
     pub acct_name: String,
     pub acct_type: String,
-    pub debit_credit: f32,
+    pub debit_credit: f64,
 }
 
 #[derive(Debug, PartialEq, Serialize, Deserialize)]
 pub struct TransactionSplit {
-    pub amount: f32,
+    pub amount: f64,
     pub account: String,
 }
 
 #[derive(Debug, PartialEq, Serialize, Deserialize)]
 pub struct Transaction {
     pub date: String,
-    pub debit_credit: f32,
+    pub debit_credit: f64,
     pub acct_name: String,
     pub acct_type: String,
     pub acct_offset_name: String,
