@@ -3,6 +3,8 @@ extern crate serde_yaml;
 use colored::*;
 use super::models::{LedgerFile};
 
+use monee::*;
+
 struct BalanceAccount {
     account: String,
     account_type: String,
@@ -116,11 +118,11 @@ pub fn balance(filename: &String) -> Result<(), std::io::Error> {
             "  {0: <28} {1: <20}",
             account.account,
             if account.amount < 0.0 {
-                format!("{0:.2}", account.amount).to_string().red().bold()
+                format!("{: >1}", money!(account.amount, "USD")).red().bold()
             } else if account.amount == 0.0 {
                 account.amount.to_string().yellow().bold()
             } else {
-                format!("{0:.2}", account.amount).to_string().bold()
+                format!("{: >1}", money!(account.amount, "USD")).to_string().bold()
             }
         );
     }
@@ -130,7 +132,7 @@ pub fn balance(filename: &String) -> Result<(), std::io::Error> {
     if check_figure == 0.0 {
         print!(" {:<20}\n", check_figure.to_string().bold());
     } else {
-        print!(" {:<20}\n", format!("{0:.2}", check_figure).red().bold());
+        print!(" {:<20}\n", format!("{: >1}", money!(check_figure, "USD")).red().bold());
     }
 
     println!("\n");
