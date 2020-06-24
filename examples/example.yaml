@@ -54,3 +54,14 @@ transactions:
     name: business stuff
     acct_type: income
     acct_name: general
+  - date: 06/21/2020
+    debit_credit: 200
+    acct_offset_name: credit_card_amex
+    name: grocery store
+    acct_type: expense
+    acct_name:
+    split:
+      - amount: 20
+        account: general
+      - amount: 180
+        account: grocery

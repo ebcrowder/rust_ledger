@@ -1,20 +1,19 @@
 extern crate serde_yaml;
 
 use colored::*;
-use super::models::LedgerFile;
-use num_format::{Locale, ToFormattedString};
+use super::models::{LedgerFile};
 
 struct BalanceAccount {
     account: String,
     account_type: String,
-    amount: i32,
+    amount: f64,
 }
 
 struct TransactionAccount {
     account: String,
     account_type: String,
     offset_account: String,
-    amount: i32,
+    amount: f64,
 }
 
 /// returns balances of all general ledger accounts
@@ -53,7 +52,7 @@ pub fn balance(filename: &String) -> Result<(), std::io::Error> {
                 });
             },
             Some(split) => {
-                let mut credit: i32 = 0;
+                let mut credit: f64 = 0.0;
                 
                 for i in split {
                     let acct_type = transaction.acct_type.as_ref();
@@ -85,11 +84,11 @@ pub fn balance(filename: &String) -> Result<(), std::io::Error> {
 
     for transaction in &transactions_vec {
         for account in &mut accounts_vec {
-            if account.account == transaction.account 
+            if account.account.eq_ignore_ascii_case(&transaction.account)
                 && account.account_type == transaction.account_type {
                 account.amount += &transaction.amount;
             }
-            if account.account == transaction.offset_account {
+            if account.account.eq_ignore_ascii_case(&transaction.offset_account) {
                 account.amount -= &transaction.amount;
             }
         }
@@ -97,7 +96,7 @@ pub fn balance(filename: &String) -> Result<(), std::io::Error> {
 
     // create output
 
-    let mut check_figure: i32 = 0;
+    let mut check_figure: f64 = 0.0;
 
     println!("\n {0: <29} {1: <20}", "Account".bold(), "Balance".bold());
 
@@ -116,30 +115,23 @@ pub fn balance(filename: &String) -> Result<(), std::io::Error> {
         println!(
             "  {0: <28} {1: <20}",
             account.account,
-            if account.amount < 0 {
-                if current_account_type.eq("asset") {
-                    (account.amount).to_formatted_string(&Locale::en).red().bold()
-                } else {
-                    (account.amount).to_formatted_string(&Locale::en).bold()
-                }
-            } else if account.amount == 0 {
-                (account.amount).to_formatted_string(&Locale::en).yellow().bold()
+            if account.amount < 0.0 {
+                format!("{0:.2}", account.amount).to_string().red().bold()
+            } else if account.amount == 0.0 {
+                account.amount.to_string().yellow().bold()
             } else {
-                (account.amount).to_formatted_string(&Locale::en).bold()
+                format!("{0:.2}", account.amount).to_string().bold()
             }
         );
     }
 
     println!("\n{:-<39}", "".bright_blue());
     print!("{: <30}", "check");
-    print!(" {:<20}\n", match check_figure {
-        0 => check_figure
-            .to_formatted_string(&Locale::en)
-            .bold(),
-        _ => check_figure
-            .to_formatted_string(&Locale::en)
-            .red().bold(),
-    });
+    if check_figure == 0.0 {
+        print!(" {:<20}\n", check_figure.to_string().bold());
+    } else {
+        print!(" {:<20}\n", format!("{0:.2}", check_figure).red().bold());
+    }
 
     println!("\n");
 
