@@ -83,7 +83,6 @@ pub fn balance(filename: &String) -> Result<(), std::io::Error> {
 
     // loop over Vecs and increment(+)/decrement(-) totals
     // for each transaction
-
     for transaction in &transactions_vec {
         for account in &mut accounts_vec {
             if account.account.eq_ignore_ascii_case(&transaction.account)
@@ -97,7 +96,6 @@ pub fn balance(filename: &String) -> Result<(), std::io::Error> {
     }
 
     // create output
-
     let mut check_figure: f64 = 0.0;
 
     println!("\n {0: <29} {1: <20}", "Account".bold(), "Balance".bold());
@@ -115,7 +113,7 @@ pub fn balance(filename: &String) -> Result<(), std::io::Error> {
         }
 
         println!(
-            "  {0: <28} {1: <20}",
+            "  {0: <27} {1: <20}",
             account.account,
             if account.amount < 0.0 {
                 format!("{: >1}", money!(account.amount, "USD")).red().bold()
@@ -128,7 +126,7 @@ pub fn balance(filename: &String) -> Result<(), std::io::Error> {
     }
 
     println!("\n{:-<39}", "".bright_blue());
-    print!("{: <30}", "check");
+    print!("{: <29}", "check");
     if check_figure == 0.0 {
         print!(" {:<20}\n", check_figure.to_string().bold());
     } else {
