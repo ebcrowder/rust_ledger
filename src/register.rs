@@ -9,6 +9,7 @@ use monee::*;
 pub fn register(filename: &String, option: &String) -> Result<(), std::io::Error> {
     let file = std::fs::File::open(filename)?;
     let deserialized_file: LedgerFile = serde_yaml::from_reader(file).unwrap();
+    let currency_iso = deserialized_file.currencies.alias;
 
     println!(
         "\n{0: <10} {1: <24} {2: <20}",
@@ -46,14 +47,14 @@ pub fn register(filename: &String, option: &String) -> Result<(), std::io::Error
                             item.date,
                             item.name.bold(),
                             item.acct_offset_name,
-                            format!("{: >1}", money!(item.debit_credit, "USD")).bold(),
-                            format!("{: >1}", money!(item.debit_credit, "USD")).bold()
+                            format!("{: >1}", money!(item.debit_credit, currency_iso)).bold(),
+                            format!("{: >1}", money!(item.debit_credit, currency_iso)).bold()
                         );
                         println!(
                             "{0: <36}{1: <20} {2: >16} {3: >16}",
                             "",
                             item.acct_name,
-                            format!("{: >1}", money!(-item.debit_credit, "USD")).bold(),
+                            format!("{: >1}", money!(-item.debit_credit, currency_iso)).bold(),
                             "0".bold() // hack for now. No need to do any math
                         );
                     },
@@ -62,15 +63,15 @@ pub fn register(filename: &String, option: &String) -> Result<(), std::io::Error
                             item.date,
                             item.name.bold(),
                             item.acct_name,
-                            format!("{: >1}", money!(item.debit_credit, "USD")).bold(),
-                            format!("{: >1}", money!(item.debit_credit, "USD")).bold()
+                            format!("{: >1}", money!(item.debit_credit, currency_iso)).bold(),
+                            format!("{: >1}", money!(item.debit_credit, currency_iso)).bold()
                         );
                         println!(
                             "{0: <36}{1: <20} {2: >16} {3: >16}",
                             "",
                             item.acct_offset_name,
-                            format!("{: >1}", money!(-item.debit_credit, "USD")).bold(),
-                            format!("{: >1}", money!(item.debit_credit - item.debit_credit, "USD")).bold()
+                            format!("{: >1}", money!(-item.debit_credit, currency_iso)).bold(),
+                            format!("{: >1}", money!(item.debit_credit - item.debit_credit, currency_iso)).bold()
                         );
                     },
                 };
@@ -83,8 +84,8 @@ pub fn register(filename: &String, option: &String) -> Result<(), std::io::Error
                                 item.date,
                                 item.name.bold(),
                                 item.acct_offset_name,
-                                format!("{: >1}", money!(item.debit_credit, "USD")).bold(),
-                                format!("{: >1}", money!(item.debit_credit, "USD")).bold()
+                                format!("{: >1}", money!(item.debit_credit, currency_iso)).bold(),
+                                format!("{: >1}", money!(item.debit_credit, currency_iso)).bold()
                             );
         
                             for i in elements {
@@ -93,8 +94,8 @@ pub fn register(filename: &String, option: &String) -> Result<(), std::io::Error
                                     "{0: <36}{1: <20} {2: >16} {3: >16}",
                                     "",
                                     i.account,
-                                    format!("{: >1}", money!(i.amount, "USD")).bold(),
-                                    format!("{: >1}", money!(credit, "USD)")).bold()
+                                    format!("{: >1}", money!(i.amount, currency_iso)).bold(),
+                                    format!("{: >1}", money!(credit, currency_iso)).bold()
                                 );
                             }
 
@@ -105,9 +106,9 @@ pub fn register(filename: &String, option: &String) -> Result<(), std::io::Error
                                 "{0: <36}{1: <20} {2: >16} {3: >16}",
                                 "",
                                 last.account,
-                                format!("{: >1}", money!(last.amount, "USD")).bold(),
+                                format!("{: >1}", money!(last.amount, currency_iso)).bold(),
                                 if check != 0.0 { 
-                                    format!("{: >1}", money!(check, "USD")).red().bold()
+                                    format!("{: >1}", money!(check, currency_iso)).red().bold()
                                 } else { 
                                     check.to_string().bold()
                                 }
@@ -122,8 +123,8 @@ pub fn register(filename: &String, option: &String) -> Result<(), std::io::Error
                                 item.date,
                                 item.name.bold(),
                                 first.account,
-                                format!("{: >1}", money!(first.amount, "USD")).bold(),
-                                format!("{: >1}", money!(first.amount, "USD")).bold()
+                                format!("{: >1}", money!(first.amount, currency_iso)).bold(),
+                                format!("{: >1}", money!(first.amount, currency_iso)).bold()
                             );
         
                             for i in elements {
@@ -132,8 +133,8 @@ pub fn register(filename: &String, option: &String) -> Result<(), std::io::Error
                                     "{0: <36}{1: <20} {2: >16} {3: >16}",
                                     "",
                                     i.account,
-                                    format!("{: >1}", money!(i.amount, "USD")).bold(),
-                                    format!("{: >1}", money!(credit, "USD")).bold()
+                                    format!("{: >1}", money!(i.amount, currency_iso)).bold(),
+                                    format!("{: >1}", money!(credit, currency_iso)).bold()
                                 );
                             }
         
@@ -143,9 +144,9 @@ pub fn register(filename: &String, option: &String) -> Result<(), std::io::Error
                                 "{0: <36}{1: <20} {2: >16} {3: >16}",
                                 "",
                                 item.acct_offset_name,
-                                format!("{: >1}", money!(-item.debit_credit, "USD")).bold(),
+                                format!("{: >1}", money!(-item.debit_credit, currency_iso)).bold(),
                                 if check != 0.0 {
-                                    format!("{: >1}", money!(check, "USD")).red().bold()
+                                    format!("{: >1}", money!(check, currency_iso)).red().bold()
                                 } else { 
                                     (check).to_string().bold()
                                 }

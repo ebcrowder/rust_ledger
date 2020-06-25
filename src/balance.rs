@@ -22,6 +22,7 @@ struct TransactionAccount {
 pub fn balance(filename: &String) -> Result<(), std::io::Error> {
     let file = std::fs::File::open(filename)?;
     let deserialized_file: LedgerFile = serde_yaml::from_reader(file).unwrap();
+    let currency_iso = deserialized_file.currencies.alias;
 
     let mut accounts_vec: Vec<BalanceAccount> = Vec::new();
     let mut transactions_vec: Vec<TransactionAccount> = Vec::new();
@@ -116,11 +117,11 @@ pub fn balance(filename: &String) -> Result<(), std::io::Error> {
             "  {0: <27} {1: <20}",
             account.account,
             if account.amount < 0.0 {
-                format!("{: >1}", money!(account.amount, "USD")).red().bold()
+                format!("{: >1}", money!(account.amount, currency_iso)).red().bold()
             } else if account.amount == 0.0 {
                 account.amount.to_string().yellow().bold()
             } else {
-                format!("{: >1}", money!(account.amount, "USD")).to_string().bold()
+                format!("{: >1}", money!(account.amount, currency_iso)).to_string().bold()
             }
         );
     }
@@ -130,7 +131,7 @@ pub fn balance(filename: &String) -> Result<(), std::io::Error> {
     if check_figure == 0.0 {
         print!(" {:<20}\n", check_figure.to_string().bold());
     } else {
-        print!(" {:<20}\n", format!("{: >1}", money!(check_figure, "USD")).red().bold());
+        print!(" {:<20}\n", format!("{: >1}", money!(check_figure, currency_iso)).red().bold());
     }
 
     println!("\n");
