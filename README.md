@@ -141,20 +141,20 @@ general                      income
  Account                       Balance             
 ---------------------------------------
 asset
-  cash_checking                2100.00             
-  cash_savings                 2000.00             
+  cash_checking               $ 2100.00           
+  cash_savings                $ 2000.00           
 liability
-  credit_card_amex             -705.00             
+  credit_card_amex            $ -705.00           
 equity
-  equity                       -3500.00            
+  equity                      $ -3500.00          
 expense
-  grocery                      635.00              
-  general                      70.00               
+  grocery                     $ 635.00            
+  general                     $ 70.00             
 income
-  general                      -600.00             
+  general                     $ -600.00           
 
 ---------------------------------------
-check                          0
+check                         0         
 ```
 
 - register
@@ -163,17 +163,17 @@ check                          0
   - example output:
 
 ```
-Date       Description             Accounts            
--------------------------------------------------------------------------------
-11/4/2019  weekly groceries        grocery                   455.00      455.00
-                                   credit_card_amex         -455.00        0.00
-11/4/2019  raspberry pi            general                    50.00       50.00
-                                   credit_card_amex          -50.00        0.00
-05/23/2020 business stuff          cash_checking             600.00      600.00
-                                   general                  -600.00           0
-06/21/2020 grocery store           general                    20.00       20.00
-                                   grocery                   180.00      200.00
-                                   credit_card_amex         -200.00           0
+Date       Description              Accounts            
+------------------------------------------------------------------------------------------
+11/4/2019  weekly groceries         grocery                      $ 455.00         $ 455.00
+                                    credit_card_amex            $ -455.00                0
+11/4/2019  raspberry pi             general                       $ 50.00          $ 50.00
+                                    credit_card_amex             $ -50.00                0
+05/23/2020 business stuff           cash_checking                $ 600.00         $ 600.00
+                                    general                     $ -600.00                0
+06/21/2020 grocery store            general                       $ 20.00          $ 20.00
+                                    grocery                      $ 180.00         $ 200.00
+                                    credit_card_amex            $ -200.00                0
 ```
 
 - csv
@@ -188,7 +188,7 @@ Date       Description             Accounts
 - rust_ledger utilizes `yaml` files in the following format:
 
 ```yaml
-owner: user
+owner: user 
 currencies:
   id: $
   name: US Dollar
@@ -244,4 +244,15 @@ transactions:
     name: business stuff
     acct_type: income
     acct_name: general
+  - date: 06/21/2020
+    debit_credit: 200
+    acct_offset_name: credit_card_amex
+    name: grocery store
+    acct_type: expense
+    acct_name:
+    split:
+      - amount: 20
+        account: general
+      - amount: 180
+        account: grocery
 ```
