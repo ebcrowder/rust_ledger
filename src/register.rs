@@ -3,19 +3,21 @@ extern crate serde_yaml;
 use colored::*;
 use super::models::{LedgerFile, Transaction};
 
+use monee::*;
+
 /// returns all general ledger transactions
 pub fn register(filename: &String, option: &String) -> Result<(), std::io::Error> {
     let file = std::fs::File::open(filename)?;
     let deserialized_file: LedgerFile = serde_yaml::from_reader(file).unwrap();
 
     println!(
-        "\n{0: <10} {1: <23} {2: <20}",
+        "\n{0: <10} {1: <24} {2: <20}",
         "Date".bold(),
         "Description".bold(),
         "Accounts".bold()
     );
 
-    println!("{0:-<79}", "".bright_blue());
+    println!("{0:-<90}", "".bright_blue());
 
     let filtered_items: Vec<Transaction> = deserialized_file
         .transactions
@@ -40,35 +42,35 @@ pub fn register(filename: &String, option: &String) -> Result<(), std::io::Error
             None => {
                 match item.acct_type.as_ref() {
                     "income" => {
-                        println!("{0: <10} {1: <20}    {2: <20}    {3: >8}    {4: >8}",
+                        println!("{0: <10} {1: <24} {2: <20} {3: >16} {4: >16}",
                             item.date,
                             item.name.bold(),
                             item.acct_offset_name,
-                            format!("{0:.2}", item.debit_credit).to_string().bold(),
-                            format!("{0:.2}", item.debit_credit).to_string().bold()
+                            format!("{: >1}", money!(item.debit_credit, "USD")).bold(),
+                            format!("{: >1}", money!(item.debit_credit, "USD")).bold()
                         );
                         println!(
-                            "{0: <35}{1: <20}    {2: >8}    {3: >8}",
+                            "{0: <36}{1: <20} {2: >16} {3: >16}",
                             "",
                             item.acct_name,
-                            format!("-{0:.2}", item.debit_credit).to_string().bold(),
+                            format!("{: >1}", money!(-item.debit_credit, "USD")).bold(),
                             "0".bold() // hack for now. No need to do any math
                         );
                     },
                     _ => {
-                        println!("{0: <10} {1: <20}    {2: <20}    {3: >8}    {4: >8}",
+                        println!("{0: <10} {1: <24} {2: <20} {3: >16} {4: >16}",
                             item.date,
                             item.name.bold(),
                             item.acct_name,
-                            format!("{0:.2}", item.debit_credit).to_string().bold(),
-                            format!("{0:.2}", item.debit_credit).to_string().bold()
+                            format!("{: >1}", money!(item.debit_credit, "USD")).bold(),
+                            format!("{: >1}", money!(item.debit_credit, "USD")).bold()
                         );
                         println!(
-                            "{0: <35}{1: <20}    {2: >8}    {3: >8}",
+                            "{0: <36}{1: <20} {2: >16} {3: >16}",
                             "",
                             item.acct_offset_name,
-                            format!("-{0:.2}", item.debit_credit).to_string().bold(),
-                            format!("{0:.2}", (item.debit_credit - item.debit_credit)).to_string().bold()
+                            format!("{: >1}", money!(-item.debit_credit, "USD")).bold(),
+                            format!("{: >1}", money!(item.debit_credit - item.debit_credit, "USD")).bold()
                         );
                     },
                 };
@@ -77,22 +79,22 @@ pub fn register(filename: &String, option: &String) -> Result<(), std::io::Error
                 match item.acct_type.as_ref() {
                     "income" => {
                         if let Some((last, elements)) = split.split_last() {        
-                            println!("{0: <10} {1: <20}    {2: <20}    {3: >8}    {4: >8}",
+                            println!("{0: <10} {1: <24} {2: <20} {3: >16} {4: >16}",
                                 item.date,
                                 item.name.bold(),
                                 item.acct_offset_name,
-                                format!("{0:.2}", item.debit_credit).to_string().bold(),
-                                format!("{0:.2}", item.debit_credit).to_string().bold()
+                                format!("{: >1}", money!(item.debit_credit, "USD")).bold(),
+                                format!("{: >1}", money!(item.debit_credit, "USD")).bold()
                             );
         
                             for i in elements {
                                 credit -= i.amount;
                                 println!(
-                                    "{0: <35}{1: <20}    {2: >8}    {3: >8}",
+                                    "{0: <36}{1: <20} {2: >16} {3: >16}",
                                     "",
                                     i.account,
-                                    format!("{0:.2}", i.amount).to_string().bold(),
-                                    format!("{0:.2}", credit).to_string().bold()
+                                    format!("{: >1}", money!(i.amount, "USD")).bold(),
+                                    format!("{: >1}", money!(credit, "USD)")).bold()
                                 );
                             }
 
@@ -100,12 +102,12 @@ pub fn register(filename: &String, option: &String) -> Result<(), std::io::Error
                             let check: f64 = item.debit_credit - credit;
         
                             println!(
-                                "{0: <35}{1: <20}    {2: >8}    {3: >8}",
+                                "{0: <36}{1: <20} {2: >16} {3: >16}",
                                 "",
                                 last.account,
-                                format!("{0:.2}", last.amount).to_string().bold(),
+                                format!("{: >1}", money!(last.amount, "USD")).bold(),
                                 if check != 0.0 { 
-                                    format!("{0:.2}", check).to_string().red().bold()
+                                    format!("{: >1}", money!(check, "USD")).red().bold()
                                 } else { 
                                     check.to_string().bold()
                                 }
@@ -116,36 +118,36 @@ pub fn register(filename: &String, option: &String) -> Result<(), std::io::Error
                         if let Some((first, elements)) = split.split_first() {
                             credit += first.amount;
         
-                            println!("{0: <10} {1: <20}    {2: <20}    {3: >8}    {4: >8}",
+                            println!("{0: <10} {1: <24} {2: <20} {3: >16} {4: >16}",
                                 item.date,
                                 item.name.bold(),
                                 first.account,
-                                format!("{0:.2}", first.amount).to_string().bold(),
-                                format!("{0:.2}", first.amount).to_string().bold()
+                                format!("{: >1}", money!(first.amount, "USD")).bold(),
+                                format!("{: >1}", money!(first.amount, "USD")).bold()
                             );
         
                             for i in elements {
                                 credit += i.amount;
                                 println!(
-                                    "{0: <35}{1: <20}    {2: >8}    {3: >8}",
+                                    "{0: <36}{1: <20} {2: >16} {3: >16}",
                                     "",
                                     i.account,
-                                    format!("{0:.2}", i.amount).to_string().bold(),
-                                    format!("{0:.2}", credit).to_string().bold()
+                                    format!("{: >1}", money!(i.amount, "USD")).bold(),
+                                    format!("{: >1}", money!(credit, "USD")).bold()
                                 );
                             }
         
                             let check: f64 = item.debit_credit - credit;
         
                             println!(
-                                "{0: <35}{1: <20}    {2: >8}    {3: >8}",
+                                "{0: <36}{1: <20} {2: >16} {3: >16}",
                                 "",
                                 item.acct_offset_name,
-                                format!("-{0:.2}", item.debit_credit).to_string().bold(),
+                                format!("{: >1}", money!(-item.debit_credit, "USD")).bold(),
                                 if check != 0.0 {
-                                    (check).to_string().red().bold()
+                                    format!("{: >1}", money!(check, "USD")).red().bold()
                                 } else { 
-                                    (check).to_string().bold() 
+                                    (check).to_string().bold()
                                 }
                             );
                         }  
