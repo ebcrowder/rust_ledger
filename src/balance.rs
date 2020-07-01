@@ -1,18 +1,16 @@
 extern crate serde_yaml;
 
+use super::models::LedgerFile;
 use colored::*;
-use super::models::{LedgerFile};
 
 struct BalanceAccount {
     account: String,
-    account_type: String,
     amount: f64,
 }
 
 struct TransactionAccount {
     account: String,
-    account_type: String,
-    offset_account: String,
+    offset_account: Option<String>,
     amount: f64,
 }
 
@@ -27,53 +25,50 @@ pub fn balance(filename: &String) -> Result<(), std::io::Error> {
     // push opening balances into Vec
     for account in deserialized_file.accounts {
         accounts_vec.push(BalanceAccount {
-            account: account.acct_name,
-            account_type: account.acct_type,
-            amount: account.debit_credit,
+            account: account.account,
+            amount: account.amount,
         });
     }
 
     // push transactions into Vec
     for transaction in deserialized_file.transactions {
-        let offset_account = &transaction.acct_offset_name;
+        let offset_account = transaction.offset_account;
 
-        match transaction.split {
+        let account_type: Vec<&str> = transaction.account.split(":").collect();
+
+        match transaction.transaction {
             None => {
-                let amount = match transaction.acct_type.as_ref() {
-                    "income" => -transaction.debit_credit,
-                    _ => transaction.debit_credit,
+                let amount = match account_type[0] {
+                    "income" => -transaction.amount,
+                    _ => transaction.amount,
                 };
 
                 transactions_vec.push(TransactionAccount {
-                    account: transaction.acct_name,
-                    account_type: transaction.acct_type,
-                    offset_account: offset_account.to_string(),
-                    amount: amount,
+                    account: transaction.account,
+                    offset_account,
+                    amount,
                 });
-            },
+            }
             Some(split) => {
                 let mut credit: f64 = 0.0;
-                
+
                 for i in split {
-                    let acct_type = transaction.acct_type.as_ref();
-                    let amount = match acct_type {
+                    let amount = match account_type[0] {
                         "income" => -i.amount,
                         _ => i.amount,
                     };
                     credit += amount;
                     transactions_vec.push(TransactionAccount {
                         account: i.account,
-                        account_type: i.account_type.unwrap_or(acct_type.to_string()),
-                        offset_account: offset_account.to_string(),
+                        offset_account,
                         amount: i.amount,
                     })
                 }
 
                 transactions_vec.push(TransactionAccount {
-                    account: transaction.acct_name,
-                    account_type: transaction.acct_type,
-                    offset_account: offset_account.to_string(),
-                    amount: transaction.debit_credit - credit,
+                    account: transaction.account,
+                    offset_account,
+                    amount: transaction.amount - credit,
                 });
             }
         }
@@ -83,12 +78,26 @@ pub fn balance(filename: &String) -> Result<(), std::io::Error> {
     // for each transaction
 
     for transaction in &transactions_vec {
+        let transaction_account_type: Vec<&str> = transaction.account.split(":").collect();
+
         for account in &mut accounts_vec {
+            let account_type: Vec<&str> = account.account.split(":").collect();
+
             if account.account.eq_ignore_ascii_case(&transaction.account)
-                && account.account_type == transaction.account_type {
+                && account_type[0] == transaction_account_type[0]
+            {
                 account.amount += &transaction.amount;
             }
-            if account.account.eq_ignore_ascii_case(&transaction.offset_account) {
+
+            let thing = String::from("");
+
+            let transaction_offset_account: String =
+                transaction.offset_account.unwrap_or("empty".to_string());
+
+            if account
+                .account
+                .eq_ignore_ascii_case(&transaction_offset_account)
+            {
                 account.amount -= &transaction.amount;
             }
         }
@@ -106,9 +115,10 @@ pub fn balance(filename: &String) -> Result<(), std::io::Error> {
 
     for account in accounts_vec {
         check_figure += account.amount;
+        let account_type: Vec<&str> = account.account.split(":").collect();
 
-        if !current_account_type.eq(&account.account_type) {
-            current_account_type = account.account_type;
+        if !current_account_type.eq(account_type[0]) {
+            current_account_type = account_type[0].to_string();
             println!("{}", current_account_type);
         }
 
