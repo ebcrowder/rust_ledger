@@ -1,11 +1,10 @@
 extern crate serde_yaml;
 
-use colored::*;
 use super::models::LedgerFile;
+use colored::*;
 
 struct BalanceAccount {
     account: String,
-    account_type: String,
 }
 
 /// returns all general ledger accounts
@@ -17,19 +16,15 @@ pub fn accounts(filename: &String) -> Result<(), std::io::Error> {
 
     for account in deserialized_file.accounts {
         account_vec.push(BalanceAccount {
-            account: account.acct_name,
-            account_type: account.acct_type,
+            account: account.account,
         });
     }
 
-    println!("\n {0: <29} {1: <20}", "Account", "Type");
+    println!("\n {0: <29}", "Account");
     println!("{:-<39}", "".bright_blue());
 
     for account in account_vec {
-        println!(
-            "{0: <28} {1: <20}",
-            account.account,
-            account.account_type);
+        println!("{0: <28}", account.account);
     }
 
     println!("\n");
