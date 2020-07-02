@@ -22,8 +22,6 @@ transactions:
     offset_account: liability:credit_card_amex
   - date: 06/21/2020
     description: grocery store
-    account: 
-    amount: 200
     transaction:
       - amount: 20
         account: expense:general

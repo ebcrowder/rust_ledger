@@ -10,7 +10,6 @@ struct BalanceAccount {
 
 struct TransactionAccount {
     account: String,
-    offset_account: Option<String>,
     amount: f64,
 }
 
@@ -32,22 +31,41 @@ pub fn balance(filename: &String) -> Result<(), std::io::Error> {
 
     // push transactions into Vec
     for transaction in deserialized_file.transactions {
-        let offset_account = transaction.offset_account;
+        let optional_account = match transaction.account {
+            None => "".to_string(),
+            Some(name) => name,
+        };
 
-        let account_type: Vec<&str> = transaction.account.split(":").collect();
+        let optional_amount = match transaction.amount {
+            None => 0.00,
+            Some(number) => number,
+        };
+
+        let account_type: Vec<&str> = optional_account.split(":").collect();
 
         match transaction.transaction {
             None => {
+                let offset_account = match transaction.offset_account {
+                    None => "".to_string(),
+                    Some(name) => name,
+                };
+
                 let amount = match account_type[0] {
-                    "income" => -transaction.amount,
-                    _ => transaction.amount,
+                    "income" => -optional_amount,
+                    _ => optional_amount,
                 };
 
                 transactions_vec.push(TransactionAccount {
-                    account: transaction.account,
-                    offset_account,
+                    account: optional_account,
                     amount,
                 });
+
+                if offset_account.is_empty() {
+                    transactions_vec.push(TransactionAccount {
+                        account: offset_account,
+                        amount: -amount,
+                    });
+                }
             }
             Some(split) => {
                 let mut credit: f64 = 0.0;
@@ -60,15 +78,13 @@ pub fn balance(filename: &String) -> Result<(), std::io::Error> {
                     credit += amount;
                     transactions_vec.push(TransactionAccount {
                         account: i.account,
-                        offset_account: offset_account.to_owned(), // TODO - value moved here, so clone it
                         amount: i.amount,
                     })
                 }
 
                 transactions_vec.push(TransactionAccount {
-                    account: transaction.account,
-                    offset_account,
-                    amount: transaction.amount - credit,
+                    account: optional_account,
+                    amount: optional_amount - credit,
                 });
             }
         }
@@ -87,18 +103,6 @@ pub fn balance(filename: &String) -> Result<(), std::io::Error> {
                 && account_type[0] == transaction_account_type[0]
             {
                 account.amount += &transaction.amount;
-            }
-
-            let transaction_offset_account = match &transaction.offset_account {
-                Some(value) => value.to_string(),
-                None => "none".to_string(),
-            };
-
-            if account
-                .account
-                .eq_ignore_ascii_case(&transaction_offset_account)
-            {
-                account.amount -= &transaction.amount;
             }
         }
     }

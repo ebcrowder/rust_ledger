@@ -15,8 +15,8 @@ pub struct TransactionList {
 #[derive(Debug, PartialEq, Serialize, Deserialize)]
 pub struct Transaction {
     pub date: String,
-    pub account: String,
-    pub amount: f64,
+    pub account: Option<String>,
+    pub amount: Option<f64>,
     pub description: String,
     pub offset_account: Option<String>,
     pub transaction: Option<Vec<TransactionList>>,

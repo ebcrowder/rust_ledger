@@ -76,9 +76,14 @@ pub fn csv(ledger_file: &String, csv_file: &String) -> Result<(), std::io::Error
 
         // loop through transactions and find matching memos
         for transaction in &deserialized_file.transactions {
+            let optional_account = match &transaction.account {
+                None => "".to_string(),
+                Some(name) => name.to_string(),
+            };
+
             if transaction.description.trim() == record.description.trim() {
                 csv_matches.push(CSVMatches {
-                    acct_name: transaction.account.to_string(),
+                    acct_name: optional_account.to_string(),
                     description: transaction.description.trim().to_string(),
                 })
             }

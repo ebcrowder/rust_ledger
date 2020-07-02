@@ -22,18 +22,24 @@ pub fn register(filename: &String, option: &String) -> Result<(), std::io::Error
         .into_iter()
         .filter(|x| match option.as_str() {
             "all" => true,
-            _ => {
-                x.date.contains(option)
-                    || x.description.contains(option)
-                    || x.amount.to_string().contains(option)
-            }
+            _ => x.date.contains(option) || x.description.contains(option),
         })
         .collect();
 
     for item in filtered_items {
+        let optional_account = match item.account {
+            None => "".to_string(),
+            Some(name) => name,
+        };
+
+        let optional_amount = match item.amount {
+            None => 0.00,
+            Some(number) => number,
+        };
+
         let mut credit: f64 = 0.0;
 
-        let account_type: Vec<&str> = item.account.split(":").collect();
+        let account_type: Vec<&str> = optional_account.split(":").collect();
 
         match item.transaction {
             None => {
@@ -43,14 +49,14 @@ pub fn register(filename: &String, option: &String) -> Result<(), std::io::Error
                             "{0: <10} {1: <20}    {2: <20}    {3: >8}   ",
                             item.date,
                             item.description.bold(),
-                            format!("{0:.2}", item.amount).to_string().bold(),
-                            format!("{0:.2}", item.amount).to_string().bold()
+                            format!("{0:.2}", optional_amount).to_string().bold(),
+                            format!("{0:.2}", optional_amount).to_string().bold()
                         );
                         println!(
                             "{0: <35}{1: <20}    {2: >8}    {3: >8}",
                             "",
-                            item.account,
-                            format!("-{0:.2}", item.amount).to_string().bold(),
+                            optional_account,
+                            format!("-{0:.2}", optional_amount).to_string().bold(),
                             "0".bold() // hack for now. No need to do any math
                         );
                     }
@@ -59,15 +65,15 @@ pub fn register(filename: &String, option: &String) -> Result<(), std::io::Error
                             "{0: <10} {1: <20}    {2: <20}    {3: >8}    {4: >8}",
                             item.date,
                             item.description.bold(),
-                            item.account,
-                            format!("{0:.2}", item.amount).to_string().bold(),
-                            format!("{0:.2}", item.amount).to_string().bold()
+                            optional_account,
+                            format!("{0:.2}", optional_amount).to_string().bold(),
+                            format!("{0:.2}", optional_amount).to_string().bold()
                         );
                         println!(
                             "{0: <35}{1: <20}    {2: >8}   ",
                             "",
-                            format!("-{0:.2}", item.amount).to_string().bold(),
-                            format!("{0:.2}", (item.amount - item.amount))
+                            format!("-{0:.2}", optional_amount).to_string().bold(),
+                            format!("{0:.2}", (optional_amount - optional_amount))
                                 .to_string()
                                 .bold()
                         );
@@ -82,8 +88,8 @@ pub fn register(filename: &String, option: &String) -> Result<(), std::io::Error
                                 "{0: <10} {1: <20}    {2: <20}    {3: >8}    ",
                                 item.date,
                                 item.description.bold(),
-                                format!("{0:.2}", item.amount).to_string().bold(),
-                                format!("{0:.2}", item.amount).to_string().bold()
+                                format!("{0:.2}", optional_amount).to_string().bold(),
+                                format!("{0:.2}", optional_amount).to_string().bold()
                             );
 
                             for i in elements {
@@ -98,7 +104,7 @@ pub fn register(filename: &String, option: &String) -> Result<(), std::io::Error
                             }
 
                             credit -= last.amount;
-                            let check: f64 = item.amount - credit;
+                            let check: f64 = optional_amount - credit;
 
                             println!(
                                 "{0: <35}{1: <20}    {2: >8}    {3: >8}",
@@ -137,12 +143,12 @@ pub fn register(filename: &String, option: &String) -> Result<(), std::io::Error
                                 );
                             }
 
-                            let check: f64 = item.amount - credit;
+                            let check: f64 = optional_amount - credit;
 
                             println!(
                                 "{0: <35}{1: <20}    {2: >8}    ",
                                 "",
-                                format!("-{0:.2}", item.amount).to_string().bold(),
+                                format!("-{0:.2}", optional_amount).to_string().bold(),
                                 if check != 0.0 {
                                     (check).to_string().red().bold()
                                 } else {
