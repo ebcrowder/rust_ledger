@@ -60,7 +60,7 @@ pub fn balance(filename: &String) -> Result<(), std::io::Error> {
                     credit += amount;
                     transactions_vec.push(TransactionAccount {
                         account: i.account,
-                        offset_account,
+                        offset_account: offset_account.to_owned(), // TODO - value moved here, so clone it
                         amount: i.amount,
                     })
                 }
@@ -89,10 +89,10 @@ pub fn balance(filename: &String) -> Result<(), std::io::Error> {
                 account.amount += &transaction.amount;
             }
 
-            let thing = String::from("");
-
-            let transaction_offset_account: String =
-                transaction.offset_account.unwrap_or("empty".to_string());
+            let transaction_offset_account = match &transaction.offset_account {
+                Some(value) => value.to_string(),
+                None => "none".to_string(),
+            };
 
             if account
                 .account

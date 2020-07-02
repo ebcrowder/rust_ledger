@@ -8,15 +8,15 @@ pub struct Account {
 
 #[derive(Debug, PartialEq, Serialize, Deserialize)]
 pub struct TransactionList {
-    pub amount: f64,
     pub account: String,
+    pub amount: f64,
 }
 
 #[derive(Debug, PartialEq, Serialize, Deserialize)]
 pub struct Transaction {
     pub date: String,
-    pub amount: f64,
     pub account: String,
+    pub amount: f64,
     pub description: String,
     pub offset_account: Option<String>,
     pub transaction: Option<Vec<TransactionList>>,
