@@ -1,15 +1,17 @@
 accounts:
   - account: asset:cash_checking
     amount: 1500
-  - account: asset:cash_savings 
+  - account: asset:cash_savings
     amount: 2000
-  - account: liability:credit_card_amex 
+  - account: liability:credit_card_amex
     amount: 0
   - account: equity:equity
     amount: -3500
   - account: expense:grocery
     amount: 0
   - account: expense:general
+    amount: 0
+  - account: expense:mortgage
     amount: 0
   - account: income:general
     amount: 0
@@ -18,8 +20,21 @@ transactions:
   - date: 11/4/2019
     amount: 455
     description: weekly groceries
-    account: expense:grocery 
+    account: expense:grocery
     offset_account: liability:credit_card_amex
+  - date: 07/04/2020
+    amount: 2000
+    description: mortage
+    account: expense:mortgage
+    offset_account: asset:cash_checking
+  - date: 07/04/2020
+    amount: 1000
+    description: stuff
+    transaction: 
+      - amount: 1000
+        account: expense:general
+      - amount: -1000
+        account: asset:cash_savings
   - date: 06/21/2020
     description: grocery store
     transaction:
@@ -27,3 +42,5 @@ transactions:
         account: expense:general
       - amount: 180
         account: expense:grocery
+      - amount: -200
+        account: asset:cash_checking

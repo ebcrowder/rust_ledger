@@ -60,7 +60,7 @@ pub fn balance(filename: &String) -> Result<(), std::io::Error> {
                     amount,
                 });
 
-                if offset_account.is_empty() {
+                if !offset_account.is_empty() {
                     transactions_vec.push(TransactionAccount {
                         account: offset_account,
                         amount: -amount,
