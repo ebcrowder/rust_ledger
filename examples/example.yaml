@@ -28,7 +28,6 @@ transactions:
     account: expense:mortgage
     offset_account: asset:cash_checking
   - date: 07/04/2020
-    amount: 1000
     description: stuff
     transaction: 
       - amount: 1000

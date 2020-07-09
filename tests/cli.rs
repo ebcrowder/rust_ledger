@@ -6,6 +6,8 @@ use tempfile;
 
 use std::env;
 
+
+
 #[test]
 fn file_does_not_exist() -> Result<(), std::io::Error> {
     let mut cmd = Command::new("./target/debug/rust_ledger");
@@ -24,28 +26,35 @@ fn file_path_found_as_env() -> Result<(), Box<dyn std::error::Error>> {
     let mut file = tempfile::Builder::new().suffix(".yaml").tempfile().unwrap();
 
     let account_yml = br#"
-        owner: test
-        currencies:
-            id: $
-            name: US Dollar
-            alias: USD
-            note: US Currency 
-        accounts:
-            -   id: 0
-                acct_name: operating
-                acct_type: asset
-                debit_credit: 1500
-            -   id: 1
-                acct_name: equity
-                acct_type: equity
-                debit_credit: -1500
-        transactions:
-            -   acct_name: expense-test-acct
-                debit_credit: 1
-                acct_type: expense 
-                date: 2019-01-01
-                acct_offset_name: credit_card
-                name: 'expense transaction'
+    accounts:
+      - account: asset:cash_checking
+        amount: 1500
+      - account: asset:cash_savings
+        amount: 2000
+      - account: liability:credit_card_amex
+        amount: 0
+      - account: equity:equity
+        amount: -3500
+      - account: expense:grocery
+        amount: 0
+      - account: expense:general
+        amount: 0
+
+    transactions:
+      - date: 11/4/2019
+        amount: 455
+        description: weekly groceries
+        account: expense:grocery
+        offset_account: liability:credit_card_amex
+      - date: 06/21/2020
+        description: grocery store
+        transaction:
+          - amount: 20
+            account: expense:general
+          - amount: 180
+            account: expense:grocery
+          - amount: -200
+            account: asset:cash_checking
         "#;
 
     file.write_all(account_yml).unwrap();
@@ -66,28 +75,35 @@ fn accounts_test() -> Result<(), Box<dyn std::error::Error>> {
     let mut file = tempfile::Builder::new().suffix(".yaml").tempfile().unwrap();
 
     let account_yml = br#"
-        owner: test
-        currencies:
-            id: $
-            name: US Dollar
-            alias: USD
-            note: US Currency 
-        accounts:
-            -   id: 0
-                acct_name: operating
-                acct_type: asset
-                debit_credit: 1500
-            -   id: 1
-                acct_name: equity
-                acct_type: equity
-                debit_credit: -1500
-        transactions:
-            -   acct_name: expense-test-acct
-                debit_credit: 1
-                acct_type: expense 
-                date: 2019-01-01
-                acct_offset_name: credit_card
-                name: 'expense transaction'
+    accounts:
+      - account: asset:cash_checking
+        amount: 1500
+      - account: asset:cash_savings
+        amount: 2000
+      - account: liability:credit_card_amex
+        amount: 0
+      - account: equity:equity
+        amount: -3500
+      - account: expense:grocery
+        amount: 0
+      - account: expense:general
+        amount: 0
+
+    transactions:
+      - date: 11/4/2019
+        amount: 455
+        description: weekly groceries
+        account: expense:grocery
+        offset_account: liability:credit_card_amex
+      - date: 06/21/2020
+        description: grocery store
+        transaction:
+          - amount: 20
+            account: expense:general
+          - amount: 180
+            account: expense:grocery
+          - amount: -200
+            account: asset:cash_checking
         "#;
 
     file.write_all(account_yml).unwrap();
@@ -97,7 +113,7 @@ fn accounts_test() -> Result<(), Box<dyn std::error::Error>> {
     cmd.arg("-l").arg(file.path()).arg("accounts");
     cmd.assert()
         .success()
-        .stdout(predicate::str::contains("operating                    asset"));
+        .stdout(predicate::str::contains("asset:cash_checking"));
 
     Ok(())
 }
@@ -106,39 +122,46 @@ fn accounts_test() -> Result<(), Box<dyn std::error::Error>> {
 fn balances_test() -> Result<(), Box<dyn std::error::Error>> {
     let mut file = tempfile::Builder::new().suffix(".yaml").tempfile().unwrap();
 
-    let balance_yml = br#"
-        owner: test
-        currencies:
-            id: $
-            name: US Dollar
-            alias: USD
-            note: US Currency 
-        accounts:
-            -   id: 0
-                acct_name: operating
-                acct_type: asset
-                debit_credit: 1500
-            -   id: 1
-                acct_name: equity
-                acct_type: equity
-                debit_credit: -1500
-        transactions:
-            -   acct_name: expense-test-acct
-                debit_credit: 1
-                acct_type: expense 
-                date: 2019-01-01
-                acct_offset_name: credit_card
-                name: 'expense transaction'
+    let account_yml = br#"
+    accounts:
+      - account: asset:cash_checking
+        amount: 1500
+      - account: asset:cash_savings
+        amount: 2000
+      - account: liability:credit_card_amex
+        amount: 0
+      - account: equity:equity
+        amount: -3500
+      - account: expense:grocery
+        amount: 0
+      - account: expense:general
+        amount: 0
+
+    transactions:
+      - date: 11/4/2019
+        amount: 455
+        description: weekly groceries
+        account: expense:grocery
+        offset_account: liability:credit_card_amex
+      - date: 06/21/2020
+        description: grocery store
+        transaction:
+          - amount: 20
+            account: expense:general
+          - amount: 180
+            account: expense:grocery
+          - amount: -200
+            account: asset:cash_checking
         "#;
 
-    file.write_all(balance_yml).unwrap();
+    file.write_all(account_yml).unwrap();
     file.flush().unwrap();
 
     let mut cmd = Command::new("./target/debug/rust_ledger");
     cmd.arg("-l").arg(file.path()).arg("balances");
     cmd.assert()
         .success()
-        .stdout(predicate::str::contains("  equity                       -1500.00"));
+        .stdout(predicate::str::contains("equity:equity                -3500.00 "));
 
     Ok(())
 }
@@ -147,41 +170,47 @@ fn balances_test() -> Result<(), Box<dyn std::error::Error>> {
 fn register_test() -> Result<(), Box<dyn std::error::Error>> {
     let mut file = tempfile::Builder::new().suffix(".yaml").tempfile().unwrap();
 
-    let balance_yml = br#"
-        owner: test
-        currencies:
-            id: $
-            name: US Dollar
-            alias: USD
-            note: US Currency 
-        accounts:
-            -   id: 0
-                acct_name: operating
-                acct_type: asset
-                debit_credit: 1500
-            -   id: 1
-                acct_name: equity
-                acct_type: equity
-                debit_credit: -1500
-        transactions:
-            -   acct_name: expense-test-acct
-                debit_credit: 1
-                acct_type: expense 
-                date: 2019-01-01
-                acct_offset_name: credit_card
-                name: test memo
+    let account_yml = br#"
+    accounts:
+      - account: asset:cash_checking
+        amount: 1500
+      - account: asset:cash_savings
+        amount: 2000
+      - account: liability:credit_card_amex
+        amount: 0
+      - account: equity:equity
+        amount: -3500
+      - account: expense:grocery
+        amount: 0
+      - account: expense:general
+        amount: 0
+
+    transactions:
+      - date: 11/4/2019
+        amount: 455
+        description: weekly groceries
+        account: expense:grocery
+        offset_account: liability:credit_card_amex
+      - date: 06/21/2020
+        description: grocery store
+        transaction:
+          - amount: 20
+            account: expense:general
+          - amount: 180
+            account: expense:grocery
+          - amount: -200
+            account: asset:cash_checking
         "#;
 
-    file.write_all(balance_yml).unwrap();
+    file.write_all(account_yml).unwrap();
     file.flush().unwrap();
 
     let mut cmd = Command::new("./target/debug/rust_ledger");
     cmd.arg("-l")
         .arg(file.path())
-        .arg("register")
-        .arg("-f=credit_card");
+        .arg("register");
     cmd.assert().success().stdout(predicate::str::contains(
-        "2019-01-01 test memo               expense-test-acct           1.00        1.00",
+        "06/21/2020 grocery store",
     ));
 
     Ok(())
