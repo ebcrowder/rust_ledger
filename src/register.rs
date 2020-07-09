@@ -46,9 +46,10 @@ pub fn register(filename: &String, option: &String) -> Result<(), std::io::Error
                 match account_type[0] {
                     "income" => {
                         println!(
-                            "{0: <10} {1: <20}    {2: <20}    {3: >8}   ",
+                            "{0: <10} {1: <20}    {2: <20}    {3: >8}   {4: >8}",
                             item.date,
                             item.description.bold(),
+                            optional_account,
                             format!("{0:.2}", optional_amount).to_string().bold(),
                             format!("{0:.2}", optional_amount).to_string().bold()
                         );
@@ -70,8 +71,9 @@ pub fn register(filename: &String, option: &String) -> Result<(), std::io::Error
                             format!("{0:.2}", optional_amount).to_string().bold()
                         );
                         println!(
-                            "{0: <35}{1: <20}    {2: >8}   ",
+                            "{0: <35}{1: <20}    {2: >8}   {3: >8}",
                             "",
+                            optional_account,
                             format!("-{0:.2}", optional_amount).to_string().bold(),
                             format!("{0:.2}", (optional_amount - optional_amount))
                                 .to_string()
@@ -85,9 +87,10 @@ pub fn register(filename: &String, option: &String) -> Result<(), std::io::Error
                     "income" => {
                         if let Some((last, elements)) = split.split_last() {
                             println!(
-                                "{0: <10} {1: <20}    {2: <20}    {3: >8}    ",
+                                "{0: <10} {1: <20}    {2: <20}    {3: >8}    {4: >8}",
                                 item.date,
                                 item.description.bold(),
+                                optional_account,
                                 format!("{0:.2}", optional_amount).to_string().bold(),
                                 format!("{0:.2}", optional_amount).to_string().bold()
                             );
@@ -146,8 +149,9 @@ pub fn register(filename: &String, option: &String) -> Result<(), std::io::Error
                             let check: f64 = optional_amount - credit;
 
                             println!(
-                                "{0: <35}{1: <20}    {2: >8}    ",
+                                "{0: <35}{1: <20}    {2: >8}    {3: >8}",
                                 "",
+                                optional_account,
                                 format!("-{0:.2}", optional_amount).to_string().bold(),
                                 if check != 0.0 {
                                     (check).to_string().red().bold()
