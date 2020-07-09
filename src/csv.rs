@@ -8,7 +8,7 @@ use std::{fs, io::Write};
 struct CSV {
     date: String,
     transaction: String,
-    description: String,
+    name: String,
     amount: f64,
 }
 
@@ -22,7 +22,7 @@ struct CSVOutput {
 }
 
 struct CSVMatches {
-    acct_name: String,
+    account: String,
     description: String,
 }
 
@@ -47,14 +47,14 @@ fn write_ledger_file(
 
 fn insert_match_acct(csv_matches: &[CSVMatches], record: &CSV) -> String {
     for match_item in csv_matches {
-        if match_item.description == record.description {
-            return match_item.acct_name.to_string();
+        if match_item.description == record.name {
+            return match_item.account.to_string();
         }
     }
     if record.amount < 1.0 {
-        "expense_general".to_string()
+        "expense:general".to_string()
     } else {
-        "income_general".to_string()
+        "income:general".to_string()
     }
 }
 
@@ -81,9 +81,9 @@ pub fn csv(ledger_file: &String, csv_file: &String) -> Result<(), std::io::Error
                 Some(name) => name.to_string(),
             };
 
-            if transaction.description.trim() == record.description.trim() {
+            if transaction.description.trim() == record.name.trim() {
                 csv_matches.push(CSVMatches {
-                    acct_name: optional_account.to_string(),
+                    account: optional_account.to_string(),
                     description: transaction.description.trim().to_string(),
                 })
             }
@@ -99,7 +99,7 @@ pub fn csv(ledger_file: &String, csv_file: &String) -> Result<(), std::io::Error
                 amount: -record.amount as f64,
                 account: matched_acct_name,
                 offset_account: "credit_card".to_string(),
-                description: record.description.trim().to_string(),
+                description: record.name.trim().to_string(),
             })
         } else {
             // if amount is positive, post as income
@@ -108,7 +108,7 @@ pub fn csv(ledger_file: &String, csv_file: &String) -> Result<(), std::io::Error
                 amount: record.amount as f64,
                 account: matched_acct_name,
                 offset_account: "credit_card".to_string(),
-                description: record.description.trim().to_string(),
+                description: record.name.trim().to_string(),
             })
         }
     }
