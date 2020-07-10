@@ -28,6 +28,11 @@ pub fn register(filename: &String, option: &String) -> Result<(), std::io::Error
                     Some(name) => name.to_string(),
                 };
 
+                let optional_offset_account = match &x.offset_account {
+                    None => "".to_string(),
+                    Some(name) => name.to_string(),
+                };
+
                 let optional_amount = match x.amount {
                     None => 0.00,
                     Some(number) => number,
@@ -36,6 +41,7 @@ pub fn register(filename: &String, option: &String) -> Result<(), std::io::Error
                 x.date.contains(option)
                     || optional_amount.to_string().contains(option)
                     || optional_account.contains(option)
+                    || optional_offset_account.contains(option)
                     || x.description.contains(option)
             }
         })
@@ -43,6 +49,11 @@ pub fn register(filename: &String, option: &String) -> Result<(), std::io::Error
 
     for item in filtered_items {
         let optional_account = match item.account {
+            None => "".to_string(),
+            Some(name) => name,
+        };
+
+        let optional_offset_account = match item.offset_account {
             None => "".to_string(),
             Some(name) => name,
         };
@@ -64,7 +75,7 @@ pub fn register(filename: &String, option: &String) -> Result<(), std::io::Error
                             "{0: <10} {1: <20}    {2: <20}    {3: >8}   {4: >8}",
                             item.date,
                             item.description.bold(),
-                            optional_account,
+                            optional_offset_account,
                             format!("{0:.2}", optional_amount).to_string().bold(),
                             format!("{0:.2}", optional_amount).to_string().bold()
                         );
@@ -88,7 +99,7 @@ pub fn register(filename: &String, option: &String) -> Result<(), std::io::Error
                         println!(
                             "{0: <35}{1: <20}    {2: >8}   {3: >8}",
                             "",
-                            optional_account,
+                            optional_offset_account,
                             format!("-{0:.2}", optional_amount).to_string().bold(),
                             format!("{0:.2}", (optional_amount - optional_amount))
                                 .to_string()
@@ -105,7 +116,7 @@ pub fn register(filename: &String, option: &String) -> Result<(), std::io::Error
                                 "{0: <10} {1: <20}    {2: <20}    {3: >8}    {4: >8}",
                                 item.date,
                                 item.description.bold(),
-                                optional_account,
+                                optional_offset_account,
                                 format!("{0:.2}", optional_amount).to_string().bold(),
                                 format!("{0:.2}", optional_amount).to_string().bold()
                             );
@@ -166,7 +177,7 @@ pub fn register(filename: &String, option: &String) -> Result<(), std::io::Error
                             println!(
                                 "{0: <35}{1: <20}    {2: >8}    {3: >8}",
                                 "",
-                                optional_account,
+                                optional_offset_account,
                                 format!("-{0:.2}", optional_amount).to_string().bold(),
                                 if check != 0.0 {
                                     (check).to_string().red().bold()
