@@ -22,7 +22,22 @@ pub fn register(filename: &String, option: &String) -> Result<(), std::io::Error
         .into_iter()
         .filter(|x| match option.as_str() {
             "all" => true,
-            _ => x.date.contains(option) || x.description.contains(option),
+                _ => {
+
+        let optional_account = match &x.account {
+            None => "".to_string(),
+            Some(name) => name.to_string(),
+        };
+
+        let optional_amount = match x.amount {
+            None => 0.00,
+            Some(number) => number,
+        };
+                    x.date.contains(option)
+                    || optional_amount.to_string().contains(option)
+                    || optional_account.contains(option)
+                    || x.description.contains(option)
+            }
         })
         .collect();
 
