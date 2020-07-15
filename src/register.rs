@@ -24,12 +24,12 @@ pub fn register(filename: &String, option: &String) -> Result<(), std::io::Error
             "all" => true,
             _ => {
                 let optional_account = match &x.account {
-                    None => "".to_string(),
+                    None => "optional:account".to_string(),
                     Some(name) => name.to_string(),
                 };
 
                 let optional_offset_account = match &x.offset_account {
-                    None => "".to_string(),
+                    None => "optional:offset_account".to_string(),
                     Some(name) => name.to_string(),
                 };
 
