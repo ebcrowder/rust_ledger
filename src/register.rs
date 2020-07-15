@@ -80,7 +80,7 @@ pub fn register(filename: &String, option: &String) -> Result<(), std::io::Error
                             format!("{0:.2}", optional_amount).to_string().bold()
                         );
                         println!(
-                            "{0: <35}{1: <20}    {2: >15}    {3: >15}",
+                            "{0: <35}{1: <20}    {2: >8}    {3: >15}",
                             "",
                             optional_account,
                             format!("-{0:.2}", optional_amount).to_string().bold(),
@@ -97,7 +97,7 @@ pub fn register(filename: &String, option: &String) -> Result<(), std::io::Error
                             format!("{0:.2}", optional_amount).to_string().bold()
                         );
                         println!(
-                            "{0: <35}{1: <20}    {2: >15}   {3: >15}",
+                            "{0: <35}{1: <20}    {2: >8}    {3: >15}",
                             "",
                             optional_offset_account,
                             format!("-{0:.2}", optional_amount).to_string().bold(),
@@ -124,7 +124,7 @@ pub fn register(filename: &String, option: &String) -> Result<(), std::io::Error
                             for i in elements {
                                 credit -= i.amount;
                                 println!(
-                                    "{0: <35}{1: <20}    {2: >15}    {3: >15}",
+                                    "{0: <35}{1: <20}    {2: >8}    {3: >15}",
                                     "",
                                     i.account,
                                     format!("{0:.2}", i.amount).to_string().bold(),
@@ -136,7 +136,7 @@ pub fn register(filename: &String, option: &String) -> Result<(), std::io::Error
                             let check: f64 = optional_amount - credit;
 
                             println!(
-                                "{0: <35}{1: <20}    {2: >15}    {3: >15}",
+                                "{0: <35}{1: <20}    {2: >8}    {3: >15}",
                                 "",
                                 last.account,
                                 format!("{0:.2}", last.amount).to_string().bold(),
@@ -164,7 +164,7 @@ pub fn register(filename: &String, option: &String) -> Result<(), std::io::Error
                             for i in elements {
                                 credit += i.amount;
                                 println!(
-                                    "{0: <35}{1: <20}    {2: >15}    {3: >15}",
+                                    "{0: <35}{1: <20}    {2: >8}    {3: >15}",
                                     "",
                                     i.account,
                                     format!("{0:.2}", i.amount).to_string().bold(),
@@ -175,7 +175,7 @@ pub fn register(filename: &String, option: &String) -> Result<(), std::io::Error
                             let check: f64 = optional_amount - credit;
 
                             println!(
-                                "{0: <35}{1: <20}    {2: >15}    {3: >15}",
+                                "{0: <35}{1: <20}    {2: >8}    {3: >15}",
                                 "",
                                 optional_offset_account,
                                 format!("-{0:.2}", optional_amount).to_string().bold(),
