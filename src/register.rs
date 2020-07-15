@@ -76,40 +76,60 @@ pub fn register(filename: &String, option: &String) -> Result<(), std::io::Error
             None => {
                 match account_type {
                     "income" => {
-                        println!(
-                            "{0: <10} {1: <20}    {2: <20}    {3: >8}   {4: >8}",
-                            item.date,
-                            item.description.bold(),
-                            offset_account_name,
-                            format!("{0:.2}", optional_amount).to_string().bold(),
-                            format!("{0:.2}", optional_amount).to_string().bold()
-                        );
-                        println!(
-                            "{0: <35}{1: <20}    {2: >8}    {3: >8}",
-                            "",
-                            account_name,
-                            format!("-{0:.2}", optional_amount).to_string().bold(),
-                            "0".bold() // hack for now. No need to do any math
-                        );
+                        match offset_account_name {
+                            "optional:offset_account" => continue,
+                            _ => {
+                                println!(
+                                    "{0: <10} {1: <20}    {2: <20}    {3: >8}   {4: >8}",
+                                    item.date,
+                                    item.description.bold(),
+                                    offset_account_name,
+                                    format!("{0:.2}", optional_amount).to_string().bold(),
+                                    format!("{0:.2}", optional_amount).to_string().bold()
+                                );
+                            }
+                        }
+                        match account_name {
+                            "optional:account" => continue,
+                            _ => {
+                                println!(
+                                    "{0: <35}{1: <20}    {2: >8}    {3: >8}",
+                                    "",
+                                    account_name,
+                                    format!("-{0:.2}", optional_amount).to_string().bold(),
+                                    "0".bold() // hack for now. No need to do any math
+                                );
+                            }
+                        }
                     }
                     _ => {
-                        println!(
-                            "{0: <10} {1: <20}    {2: <20}    {3: >8}    {4: >8}",
-                            item.date,
-                            item.description.bold(),
-                            account_name,
-                            format!("{0:.2}", optional_amount).to_string().bold(),
-                            format!("{0:.2}", optional_amount).to_string().bold()
-                        );
-                        println!(
-                            "{0: <35}{1: <20}    {2: >8}    {3: >8}",
-                            "",
-                            offset_account_name,
-                            format!("-{0:.2}", optional_amount).to_string().bold(),
-                            format!("{0:.2}", (optional_amount - optional_amount))
-                                .to_string()
-                                .bold()
-                        );
+                        match account_name {
+                            "optional:account" => continue,
+                            _ => {
+                                println!(
+                                    "{0: <10} {1: <20}    {2: <20}    {3: >8}    {4: >8}",
+                                    item.date,
+                                    item.description.bold(),
+                                    account_name,
+                                    format!("{0:.2}", optional_amount).to_string().bold(),
+                                    format!("{0:.2}", optional_amount).to_string().bold()
+                                );
+                            }
+                        }
+                        match offset_account_name {
+                            "optional:offset_account" => continue,
+                            _ => {
+                                println!(
+                                    "{0: <35}{1: <20}    {2: >8}    {3: >8}",
+                                    "",
+                                    offset_account_name,
+                                    format!("-{0:.2}", optional_amount).to_string().bold(),
+                                    format!("{0:.2}", (optional_amount - optional_amount))
+                                        .to_string()
+                                        .bold()
+                                );
+                            }
+                        }
                     }
                 };
             }
