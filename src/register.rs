@@ -77,7 +77,7 @@ pub fn register(filename: &String, option: &String) -> Result<(), std::io::Error
                 match account_type {
                     "income" => {
                         println!(
-                            "{0: <10} {1: <20}    {2: <20}    {3: >15}   {4: >8}",
+                            "{0: <10} {1: <20}    {2: <20}    {3: >8}   {4: >8}",
                             item.date,
                             item.description.bold(),
                             offset_account_name,
@@ -85,7 +85,7 @@ pub fn register(filename: &String, option: &String) -> Result<(), std::io::Error
                             format!("{0:.2}", optional_amount).to_string().bold()
                         );
                         println!(
-                            "{0: <35}{1: <20}    {2: >8}    {3: >15}",
+                            "{0: <35}{1: <20}    {2: >8}    {3: >8}",
                             "",
                             account_name,
                             format!("-{0:.2}", optional_amount).to_string().bold(),
@@ -94,7 +94,7 @@ pub fn register(filename: &String, option: &String) -> Result<(), std::io::Error
                     }
                     _ => {
                         println!(
-                            "{0: <10} {1: <20}    {2: <20}    {3: >15}    {4: >8}",
+                            "{0: <10} {1: <20}    {2: <20}    {3: >8}    {4: >8}",
                             item.date,
                             item.description.bold(),
                             account_name,
@@ -102,7 +102,7 @@ pub fn register(filename: &String, option: &String) -> Result<(), std::io::Error
                             format!("{0:.2}", optional_amount).to_string().bold()
                         );
                         println!(
-                            "{0: <35}{1: <20}    {2: >8}    {3: >15}",
+                            "{0: <35}{1: <20}    {2: >8}    {3: >8}",
                             "",
                             offset_account_name,
                             format!("-{0:.2}", optional_amount).to_string().bold(),
@@ -118,7 +118,7 @@ pub fn register(filename: &String, option: &String) -> Result<(), std::io::Error
                     "income" => {
                         if let Some((last, elements)) = split.split_last() {
                             println!(
-                                "{0: <10} {1: <20}    {2: <20}    {3: >15}    {4: >8}",
+                                "{0: <10} {1: <20}    {2: <20}    {3: >8}    {4: >8}",
                                 item.date,
                                 item.description.bold(),
                                 offset_account_name,
@@ -131,7 +131,7 @@ pub fn register(filename: &String, option: &String) -> Result<(), std::io::Error
                                 let i_account_vec: Vec<&str> = i.account.split(":").collect();
                                 let i_account_name = i_account_vec[1];
                                 println!(
-                                    "{0: <35}{1: <20}    {2: >8}    {3: >15}",
+                                    "{0: <35}{1: <20}    {2: >8}    {3: >8}",
                                     "",
                                     i_account_name,
                                     format!("{0:.2}", i.amount).to_string().bold(),
@@ -146,7 +146,7 @@ pub fn register(filename: &String, option: &String) -> Result<(), std::io::Error
                             let last_account_name = last_account_vec[1];
 
                             println!(
-                                "{0: <35}{1: <20}    {2: >8}    {3: >15}",
+                                "{0: <35}{1: <20}    {2: >8}    {3: >8}",
                                 "",
                                 last_account_name,
                                 format!("{0:.2}", last.amount).to_string().bold(),
@@ -166,7 +166,7 @@ pub fn register(filename: &String, option: &String) -> Result<(), std::io::Error
                             let first_account_name = first_account_vec[1];
 
                             println!(
-                                "{0: <10} {1: <20}    {2: <20}    {3: >15}    {4: >8}",
+                                "{0: <10} {1: <20}    {2: <20}    {3: >8}    {4: >8}",
                                 item.date,
                                 item.description.bold(),
                                 first_account_name,
@@ -179,7 +179,7 @@ pub fn register(filename: &String, option: &String) -> Result<(), std::io::Error
                                 let i_account_vec: Vec<&str> = i.account.split(":").collect();
                                 let i_account_name = i_account_vec[1];
                                 println!(
-                                    "{0: <35}{1: <20}    {2: >8}    {3: >15}",
+                                    "{0: <35}{1: <20}    {2: >8}    {3: >8}",
                                     "",
                                     i_account_name,
                                     format!("{0:.2}", i.amount).to_string().bold(),
@@ -190,7 +190,7 @@ pub fn register(filename: &String, option: &String) -> Result<(), std::io::Error
                             let check: f64 = optional_amount - credit;
 
                             println!(
-                                "{0: <35}{1: <20}    {2: >8}    {3: >15}",
+                                "{0: <35}{1: <20}    {2: >8}    {3: >8}",
                                 "",
                                 offset_account_name,
                                 format!("-{0:.2}", optional_amount).to_string().bold(),
