@@ -49,12 +49,12 @@ pub fn register(filename: &String, option: &String) -> Result<(), std::io::Error
 
     for item in filtered_items {
         let optional_account = match item.account {
-            None => "".to_string(),
+            None => "optional:account".to_string(),
             Some(name) => name,
         };
 
         let optional_offset_account = match item.offset_account {
-            None => "".to_string(),
+            None => "optional:offset_account".to_string(),
             Some(name) => name,
         };
 
@@ -65,24 +65,29 @@ pub fn register(filename: &String, option: &String) -> Result<(), std::io::Error
 
         let mut credit: f64 = 0.0;
 
-        let account_type: Vec<&str> = optional_account.split(":").collect();
+        let account_vec: Vec<&str> = optional_account.split(":").collect();
+        let account_type = account_vec[0];
+        let account_name = account_vec[1];
+
+        let offset_account_vec: Vec<&str> = optional_offset_account.split(":").collect();
+        let offset_account_name = offset_account_vec[1];
 
         match item.transaction {
             None => {
-                match account_type[0] {
+                match account_type {
                     "income" => {
                         println!(
                             "{0: <10} {1: <20}    {2: <20}    {3: >15}   {4: >8}",
                             item.date,
                             item.description.bold(),
-                            optional_offset_account,
+                            offset_account_name,
                             format!("{0:.2}", optional_amount).to_string().bold(),
                             format!("{0:.2}", optional_amount).to_string().bold()
                         );
                         println!(
                             "{0: <35}{1: <20}    {2: >8}    {3: >15}",
                             "",
-                            optional_account,
+                            account_name,
                             format!("-{0:.2}", optional_amount).to_string().bold(),
                             "0".bold() // hack for now. No need to do any math
                         );
@@ -92,14 +97,14 @@ pub fn register(filename: &String, option: &String) -> Result<(), std::io::Error
                             "{0: <10} {1: <20}    {2: <20}    {3: >15}    {4: >8}",
                             item.date,
                             item.description.bold(),
-                            optional_account,
+                            account_name,
                             format!("{0:.2}", optional_amount).to_string().bold(),
                             format!("{0:.2}", optional_amount).to_string().bold()
                         );
                         println!(
                             "{0: <35}{1: <20}    {2: >8}    {3: >15}",
                             "",
-                            optional_offset_account,
+                            offset_account_name,
                             format!("-{0:.2}", optional_amount).to_string().bold(),
                             format!("{0:.2}", (optional_amount - optional_amount))
                                 .to_string()
@@ -109,24 +114,26 @@ pub fn register(filename: &String, option: &String) -> Result<(), std::io::Error
                 };
             }
             Some(split) => {
-                match account_type[0] {
+                match account_type {
                     "income" => {
                         if let Some((last, elements)) = split.split_last() {
                             println!(
                                 "{0: <10} {1: <20}    {2: <20}    {3: >15}    {4: >8}",
                                 item.date,
                                 item.description.bold(),
-                                optional_offset_account,
+                                offset_account_name,
                                 format!("{0:.2}", optional_amount).to_string().bold(),
                                 format!("{0:.2}", optional_amount).to_string().bold()
                             );
 
                             for i in elements {
                                 credit -= i.amount;
+                                let i_account_vec: Vec<&str> = i.account.split(":").collect();
+                                let i_account_name = i_account_vec[1];
                                 println!(
                                     "{0: <35}{1: <20}    {2: >8}    {3: >15}",
                                     "",
-                                    i.account,
+                                    i_account_name,
                                     format!("{0:.2}", i.amount).to_string().bold(),
                                     format!("{0:.2}", credit).to_string().bold()
                                 );
@@ -135,10 +142,13 @@ pub fn register(filename: &String, option: &String) -> Result<(), std::io::Error
                             credit -= last.amount;
                             let check: f64 = optional_amount - credit;
 
+                            let last_account_vec: Vec<&str> = last.account.split(":").collect();
+                            let last_account_name = last_account_vec[1];
+
                             println!(
                                 "{0: <35}{1: <20}    {2: >8}    {3: >15}",
                                 "",
-                                last.account,
+                                last_account_name,
                                 format!("{0:.2}", last.amount).to_string().bold(),
                                 if check != 0.0 {
                                     format!("{0:.2}", check).to_string().red().bold()
@@ -152,21 +162,26 @@ pub fn register(filename: &String, option: &String) -> Result<(), std::io::Error
                         if let Some((first, elements)) = split.split_first() {
                             credit += first.amount;
 
+                            let first_account_vec: Vec<&str> = first.account.split(":").collect();
+                            let first_account_name = first_account_vec[1];
+
                             println!(
                                 "{0: <10} {1: <20}    {2: <20}    {3: >15}    {4: >8}",
                                 item.date,
                                 item.description.bold(),
-                                first.account,
+                                first_account_name,
                                 format!("{0:.2}", first.amount).to_string().bold(),
                                 format!("{0:.2}", first.amount).to_string().bold()
                             );
 
                             for i in elements {
                                 credit += i.amount;
+                                let i_account_vec: Vec<&str> = i.account.split(":").collect();
+                                let i_account_name = i_account_vec[1];
                                 println!(
                                     "{0: <35}{1: <20}    {2: >8}    {3: >15}",
                                     "",
-                                    i.account,
+                                    i_account_name,
                                     format!("{0:.2}", i.amount).to_string().bold(),
                                     format!("{0:.2}", credit).to_string().bold()
                                 );
@@ -177,7 +192,7 @@ pub fn register(filename: &String, option: &String) -> Result<(), std::io::Error
                             println!(
                                 "{0: <35}{1: <20}    {2: >8}    {3: >15}",
                                 "",
-                                optional_offset_account,
+                                offset_account_name,
                                 format!("-{0:.2}", optional_amount).to_string().bold(),
                                 if check != 0.0 {
                                     (check).to_string().red().bold()
