@@ -29,7 +29,7 @@ pub fn register(filename: &String, option: &String) -> Result<(), std::io::Error
                 };
 
                 let optional_offset_account = match &x.offset_account {
-                    None => "optional:offset_account".to_string(),
+                    None => "optional:account".to_string(),
                     Some(name) => name.to_string(),
                 };
 
@@ -54,7 +54,7 @@ pub fn register(filename: &String, option: &String) -> Result<(), std::io::Error
         };
 
         let optional_offset_account = match item.offset_account {
-            None => "optional:offset_account".to_string(),
+            None => "optional:account".to_string(),
             Some(name) => name,
         };
 
@@ -76,8 +76,8 @@ pub fn register(filename: &String, option: &String) -> Result<(), std::io::Error
             None => {
                 match account_type {
                     "income" => {
-                        match offset_account_name {
-                            "optional:offset_account" => continue,
+                        match &optional_offset_account[..] {
+                            "optional:account" => continue,
                             _ => {
                                 println!(
                                     "{0: <10} {1: <20}    {2: <20}    {3: >8}   {4: >8}",
@@ -89,7 +89,7 @@ pub fn register(filename: &String, option: &String) -> Result<(), std::io::Error
                                 );
                             }
                         }
-                        match account_name {
+                        match &optional_account[..] {
                             "optional:account" => continue,
                             _ => {
                                 println!(
@@ -103,7 +103,7 @@ pub fn register(filename: &String, option: &String) -> Result<(), std::io::Error
                         }
                     }
                     _ => {
-                        match account_name {
+                        match &optional_account[..] {
                             "optional:account" => continue,
                             _ => {
                                 println!(
@@ -116,8 +116,8 @@ pub fn register(filename: &String, option: &String) -> Result<(), std::io::Error
                                 );
                             }
                         }
-                        match offset_account_name {
-                            "optional:offset_account" => continue,
+                        match &optional_offset_account[..] {
+                            "optional:account" => continue,
                             _ => {
                                 println!(
                                     "{0: <35}{1: <20}    {2: >8}    {3: >8}",
@@ -137,26 +137,36 @@ pub fn register(filename: &String, option: &String) -> Result<(), std::io::Error
                 match account_type {
                     "income" => {
                         if let Some((last, elements)) = split.split_last() {
-                            println!(
-                                "{0: <10} {1: <20}    {2: <20}    {3: >8}    {4: >8}",
-                                item.date,
-                                item.description.bold(),
-                                offset_account_name,
-                                format!("{0:.2}", optional_amount).to_string().bold(),
-                                format!("{0:.2}", optional_amount).to_string().bold()
-                            );
-
+                            match &optional_offset_account[..] {
+                                "optional:account" => continue,
+                                _ => {
+                                    println!(
+                                        "{0: <10} {1: <20}    {2: <20}    {3: >8}    {4: >8}",
+                                        item.date,
+                                        item.description.bold(),
+                                        offset_account_name,
+                                        format!("{0:.2}", optional_amount).to_string().bold(),
+                                        format!("{0:.2}", optional_amount).to_string().bold()
+                                    );
+                                }
+                            }
                             for i in elements {
                                 credit -= i.amount;
                                 let i_account_vec: Vec<&str> = i.account.split(":").collect();
                                 let i_account_name = i_account_vec[1];
-                                println!(
-                                    "{0: <35}{1: <20}    {2: >8}    {3: >8}",
-                                    "",
-                                    i_account_name,
-                                    format!("{0:.2}", i.amount).to_string().bold(),
-                                    format!("{0:.2}", credit).to_string().bold()
-                                );
+
+                                match &i.account[..] {
+                                    "optional:account" => continue,
+                                    _ => {
+                                        println!(
+                                            "{0: <35}{1: <20}    {2: >8}    {3: >8}",
+                                            "",
+                                            i_account_name,
+                                            format!("{0:.2}", i.amount).to_string().bold(),
+                                            format!("{0:.2}", credit).to_string().bold()
+                                        );
+                                    }
+                                }
                             }
 
                             credit -= last.amount;
@@ -165,17 +175,22 @@ pub fn register(filename: &String, option: &String) -> Result<(), std::io::Error
                             let last_account_vec: Vec<&str> = last.account.split(":").collect();
                             let last_account_name = last_account_vec[1];
 
-                            println!(
-                                "{0: <35}{1: <20}    {2: >8}    {3: >8}",
-                                "",
-                                last_account_name,
-                                format!("{0:.2}", last.amount).to_string().bold(),
-                                if check != 0.0 {
-                                    format!("{0:.2}", check).to_string().red().bold()
-                                } else {
-                                    check.to_string().bold()
+                            match &last.account[..] {
+                                "optional:account" => continue,
+                                _ => {
+                                    println!(
+                                        "{0: <35}{1: <20}    {2: >8}    {3: >8}",
+                                        "",
+                                        last_account_name,
+                                        format!("{0:.2}", last.amount).to_string().bold(),
+                                        if check != 0.0 {
+                                            format!("{0:.2}", check).to_string().red().bold()
+                                        } else {
+                                            check.to_string().bold()
+                                        }
+                                    );
                                 }
-                            );
+                            }
                         }
                     }
                     _ => {
@@ -185,41 +200,57 @@ pub fn register(filename: &String, option: &String) -> Result<(), std::io::Error
                             let first_account_vec: Vec<&str> = first.account.split(":").collect();
                             let first_account_name = first_account_vec[1];
 
-                            println!(
-                                "{0: <10} {1: <20}    {2: <20}    {3: >8}    {4: >8}",
-                                item.date,
-                                item.description.bold(),
-                                first_account_name,
-                                format!("{0:.2}", first.amount).to_string().bold(),
-                                format!("{0:.2}", first.amount).to_string().bold()
-                            );
+                            match &first.account[..] {
+                                "optional:account" => continue,
+                                _ => {
+                                    println!(
+                                        "{0: <10} {1: <20}    {2: <20}    {3: >8}    {4: >8}",
+                                        item.date,
+                                        item.description.bold(),
+                                        first_account_name,
+                                        format!("{0:.2}", first.amount).to_string().bold(),
+                                        format!("{0:.2}", first.amount).to_string().bold()
+                                    );
+                                }
+                            }
 
                             for i in elements {
                                 credit += i.amount;
                                 let i_account_vec: Vec<&str> = i.account.split(":").collect();
                                 let i_account_name = i_account_vec[1];
-                                println!(
-                                    "{0: <35}{1: <20}    {2: >8}    {3: >8}",
-                                    "",
-                                    i_account_name,
-                                    format!("{0:.2}", i.amount).to_string().bold(),
-                                    format!("{0:.2}", credit).to_string().bold()
-                                );
+
+                                match &i.account[..] {
+                                    "optional:account" => continue,
+                                    _ => {
+                                        println!(
+                                            "{0: <35}{1: <20}    {2: >8}    {3: >8}",
+                                            "",
+                                            i_account_name,
+                                            format!("{0:.2}", i.amount).to_string().bold(),
+                                            format!("{0:.2}", credit).to_string().bold()
+                                        );
+                                    }
+                                }
                             }
 
                             let check: f64 = optional_amount - credit;
 
-                            println!(
-                                "{0: <35}{1: <20}    {2: >8}    {3: >8}",
-                                "",
-                                offset_account_name,
-                                format!("-{0:.2}", optional_amount).to_string().bold(),
-                                if check != 0.0 {
-                                    (check).to_string().red().bold()
-                                } else {
-                                    (check).to_string().bold()
+                            match &optional_offset_account[..] {
+                                "optional:account" => continue,
+                                _ => {
+                                    println!(
+                                        "{0: <35}{1: <20}    {2: >8}    {3: >8}",
+                                        "",
+                                        offset_account_name,
+                                        format!("-{0:.2}", optional_amount).to_string().bold(),
+                                        if check != 0.0 {
+                                            (check).to_string().red().bold()
+                                        } else {
+                                            (check).to_string().bold()
+                                        }
+                                    );
                                 }
-                            );
+                            }
                         }
                     }
                 };
