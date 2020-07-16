@@ -45,11 +45,13 @@ fn main() -> Result<(), std::io::Error> {
         None => "",
     };
 
-    match &pargs_commands[0][..] {
-        "accounts" => accounts::accounts(&ledger_file.to_string()),
-        "balances" => balance::balance(&ledger_file.to_string()),
-        "register" => register::register(&ledger_file.to_string(), &options_arg.to_string()),
-        "csv" => csv::csv(&ledger_file.to_string(), &options_arg.to_string()),
-        _ => error::error(),
-    }
+    Ok(for cmd in pargs_commands {
+        return match &cmd[..] {
+            "accounts" => accounts::accounts(&ledger_file.to_string()),
+            "balances" => balance::balance(&ledger_file.to_string()),
+            "register" => register::register(&ledger_file.to_string(), &options_arg.to_string()),
+            "csv" => csv::csv(&ledger_file.to_string(), &options_arg.to_string()),
+            _ => error::error(),
+        };
+    })
 }
