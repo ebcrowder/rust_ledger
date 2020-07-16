@@ -160,11 +160,9 @@ Date       Description             Accounts
                                    expense:mortgage        -2000.00       0.00
 07/04/2020 stuff                   expense:general          1000.00     1000.00
                                    asset:cash_savings      -1000.00        0.00
-                                                              -0.00           0
 06/21/2020 grocery store           expense:general            20.00       20.00
                                    expense:grocery           180.00      200.00
                                    asset:cash_checking      -200.00        0.00
-                                                              -0.00           0
 ```
 
 - csv
