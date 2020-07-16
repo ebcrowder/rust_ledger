@@ -15,16 +15,15 @@ struct CSV {
 #[derive(Debug, PartialEq, Serialize, Deserialize)]
 struct CSVOutput {
     date: String,
-    debit_credit: f64,
-    acct_name: String,
-    acct_type: String,
-    acct_offset_name: String,
-    name: String,
+    amount: f64,
+    account: String,
+    offset_account: String,
+    description: String,
 }
 
 struct CSVMatches {
-    acct_name: String,
-    name: String,
+    account: String,
+    description: String,
 }
 
 fn write<T>(writer: &mut T, csv_output: &[CSVOutput]) -> Result<(), serde_yaml::Error>
@@ -48,14 +47,14 @@ fn write_ledger_file(
 
 fn insert_match_acct(csv_matches: &[CSVMatches], record: &CSV) -> String {
     for match_item in csv_matches {
-        if match_item.name == record.name {
-            return match_item.acct_name.to_string();
+        if match_item.description == record.name {
+            return match_item.account.to_string();
         }
     }
     if record.amount < 1.0 {
-        "expense_general".to_string()
+        "expense:general".to_string()
     } else {
-        "income_general".to_string()
+        "income:general".to_string()
     }
 }
 
@@ -77,10 +76,15 @@ pub fn csv(ledger_file: &String, csv_file: &String) -> Result<(), std::io::Error
 
         // loop through transactions and find matching memos
         for transaction in &deserialized_file.transactions {
-            if transaction.name.trim() == record.name.trim() {
+            let optional_account = match &transaction.account {
+                None => "".to_string(),
+                Some(name) => name.to_string(),
+            };
+
+            if transaction.description.trim() == record.name.trim() {
                 csv_matches.push(CSVMatches {
-                    acct_name: transaction.acct_name.to_string(),
-                    name: transaction.name.trim().to_string(),
+                    account: optional_account.to_string(),
+                    description: transaction.description.trim().to_string(),
                 })
             }
         }
@@ -92,21 +96,19 @@ pub fn csv(ledger_file: &String, csv_file: &String) -> Result<(), std::io::Error
         if record.amount < 1.0 {
             csv_output.push(CSVOutput {
                 date: record.date,
-                debit_credit: -record.amount as f64,
-                acct_name: matched_acct_name,
-                acct_type: "expense".to_string(),
-                acct_offset_name: "credit_card".to_string(),
-                name: record.name.trim().to_string(),
+                amount: -record.amount as f64,
+                account: matched_acct_name,
+                offset_account: "credit_card".to_string(),
+                description: record.name.trim().to_string(),
             })
         } else {
             // if amount is positive, post as income
             csv_output.push(CSVOutput {
                 date: record.date,
-                debit_credit: record.amount as f64,
-                acct_name: matched_acct_name,
-                acct_type: "income".to_string(),
-                acct_offset_name: "credit_card".to_string(),
-                name: record.name.trim().to_string(),
+                amount: record.amount as f64,
+                account: matched_acct_name,
+                offset_account: "credit_card".to_string(),
+                description: record.name.trim().to_string(),
             })
         }
     }

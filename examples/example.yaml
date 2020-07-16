@@ -1,67 +1,45 @@
-owner: user 
-currencies:
-  id: $
-  name: US Dollar
-  alias: USD
-  note: Currency used in the United States
-
 accounts:
-  - id: 0
-    acct_name: cash_checking
-    acct_type: asset
-    debit_credit: 1500
-  - id: 1
-    acct_name: cash_savings 
-    acct_type: asset
-    debit_credit: 2000
-  - id: 2
-    acct_name: credit_card_amex 
-    acct_type: liability
-    debit_credit: 0
-  - id: 3
-    acct_name: equity
-    acct_type: equity
-    debit_credit: -3500
-  - id: 4
-    acct_name: grocery
-    acct_type: expense
-    debit_credit: 0
-  - id: 5
-    acct_name: general
-    acct_type: expense
-    debit_credit: 0
-  - id: 6
-    acct_name: general
-    acct_type: income
-    debit_credit: 0
+  - account: asset:cash_checking
+    amount: 1500
+  - account: asset:cash_savings
+    amount: 2000
+  - account: liability:credit_card_amex
+    amount: 0
+  - account: equity:equity
+    amount: -3500
+  - account: expense:grocery
+    amount: 0
+  - account: expense:general
+    amount: 0
+  - account: expense:mortgage
+    amount: 0
+  - account: income:general
+    amount: 0
 
 transactions:
   - date: 11/4/2019
-    debit_credit: 455
-    acct_offset_name: credit_card_amex
-    name: weekly groceries
-    acct_type: expense
-    acct_name: grocery 
-  - date: 11/4/2019
-    debit_credit: 50
-    acct_offset_name: credit_card_amex
-    name: raspberry pi
-    acct_type: expense
-    acct_name: general
-  - date: 05/23/2020
-    debit_credit: 600
-    acct_offset_name: cash_checking 
-    name: business stuff
-    acct_type: income
-    acct_name: general
+    amount: 455
+    description: weekly groceries
+    account: expense:grocery
+    offset_account: liability:credit_card_amex
+  - date: 07/04/2020
+    amount: 2000
+    description: mortage
+    account: expense:mortgage
+    offset_account: asset:cash_checking
+  - date: 07/04/2020
+    description: stuff
+    transaction: 
+      - amount: 1000
+        account: expense:general
+      - amount: -1000
+        account: asset:cash_savings
   - date: 06/21/2020
-    debit_credit: 200
-    acct_offset_name: credit_card_amex
-    name: grocery store
-    acct_type: expense
-    acct_name:
-    split:
+    description: grocery store
+    transaction:
       - amount: 20
-        account: general
+        account: expense:general
       - amount: 180
-        account: grocery
+        account: expense:grocery
+      - amount: -200
+        account: asset:cash_checking
