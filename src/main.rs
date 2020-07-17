@@ -8,7 +8,7 @@ mod register;
 use pargs;
 use std::env;
 
-fn main() -> Result<(), std::io::Error> {
+fn main() -> Result<(), error::LedgerError> {
     // collect args from user input
     let args: Vec<String> = env::args().collect();
 
@@ -51,7 +51,7 @@ fn main() -> Result<(), std::io::Error> {
             "balances" => balance::balance(&ledger_file.to_string()),
             "register" => register::register(&ledger_file.to_string(), &options_arg.to_string()),
             "csv" => csv::csv(&ledger_file.to_string(), &options_arg.to_string()),
-            _ => error::error(),
+            _ => break,
         };
     })
 }

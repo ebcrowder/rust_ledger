@@ -1,10 +1,11 @@
 extern crate serde_yaml;
 
 use super::models::{LedgerFile, Transaction};
+use crate::error::LedgerError;
 use colored::*;
 
 /// returns all general ledger transactions
-pub fn register(filename: &String, option: &String) -> Result<(), std::io::Error> {
+pub fn register(filename: &String, option: &String) -> Result<(), LedgerError> {
     let file = std::fs::File::open(filename)?;
     let deserialized_file: LedgerFile = serde_yaml::from_reader(file).unwrap();
 
