@@ -66,50 +66,37 @@ OPTION (denoted by `-f`) - allows you to filter the output of the `register` com
 
 ### Features
 
-#### Transaction
+#### Transactions
 
+Transactions can be expressed in two different ways. One is a "simplified" format for transactions that only impact two accounts: 
+
+```yaml
+- date: 01/01/2020
+  amount: 200
+  offset_account: liability:credit_card_amex
+  description: grocery store
+  account: expense:expense_general
 ```
-- date: 05/23/2020
-  debit_credit: 200
-  acct_offset_name: credit_card_amex
-  name: grocery store
-  acct_type: expense
-  acct_name: expense_general
-```
 
-**Required Fields**
-* date
-* debit_credit
-* acct_offset_name
-* name
-* acct_type
-* acct_name - This field is required but can be empty
+The sign (debit / credit) associated with the `offset_account` value is the opposite of the sign of the value contained in `amount` field.  
 
-#### Split Transactions
+In the above example transaction, since `expense_general` was debited by 200, the `credit_card_amex` account will be credited by the same amount. 
 
-Each transaction can be split to multiple expense categories.
+Transactions that involve more than two accounts are expressed in the following manner:
 
-In order to add a split to a transaction add `split` to a transaction with `amount` and `account` added to each split.
-
-Splits should add up to equal the `debit_credit`.
-
-```
-- date: 05/23/2020
-  debit_credit: 200
-  acct_offset_name: credit_card_amex
-  name: grocery store
-  acct_type: expense
-  acct_name:
-  split:
+```yaml
+- date: 01/01/2020
+  description: grocery store
+  transaction:
     - amount: 20
-      account: expense_general
+      account: expense:general
     - amount: 180
-      account: expense_food
+      account: expense:grocery
+    - amount: -200
+      account: liability:credit_card_amex
 ```
 
-**Required Fields**
-* amount
-* account
+Transactions that only involve two accounts can also be expressed in the above format. 
 
 ### Test
 
@@ -122,15 +109,16 @@ Splits should add up to equal the `debit_credit`.
   - example output:
 
 ```
- Account                       Type
+ Account                      
 ---------------------------------------
-cash_checking                asset
-cash_savings                 asset
-credit_card_amex             liability
-equity                       equity
-grocery                      expense
-general                      expense
-general                      income
+asset:cash_checking         
+asset:cash_savings          
+liability:credit_card_amex  
+equity:equity               
+expense:grocery             
+expense:general             
+expense:mortgage            
+income:general   
 ```
 
 - balance
@@ -138,23 +126,24 @@ general                      income
   - example output:
 
 ```
- Account                       Balance
+ Account                       Balance             
 ---------------------------------------
 asset
-  cash_checking                2,100
-  cash_savings                 2,000
+  asset:cash_checking          -700.00             
+  asset:cash_savings           1000.00             
 liability
-  credit_card_amex             -505
+  liability:credit_card_amex   -455.00             
 equity
-  equity                       -3,500
+  equity:equity                -3500.00            
 expense
-  grocery                      455
-  general                      50
+  expense:grocery              635.00              
+  expense:general              1020.00             
+  expense:mortgage             2000.00             
 income
-  general                      -600
+  income:general               0                   
 
 ---------------------------------------
-check                          0
+check                          0          
 ```
 
 - register
@@ -163,14 +152,17 @@ check                          0
   - example output:
 
 ```
-Date       Description             Accounts
+Date       Description             Accounts            
 -------------------------------------------------------------------------------
-11/4/2019  weekly groceries        grocery                      455         455
-                                   credit_card_amex            -455           0
-11/4/2019  raspberry pi            general                       50          50
-                                   credit_card_amex             -50           0
-05/23/2020 business stuff          cash_checking                600         600
-                                   general                     -600           0
+11/4/2019  weekly groceries        expense:grocery           455.00      455.00
+                                   expense:grocery          -455.00       0.00
+07/04/2020 mortage                 expense:mortgage         2000.00     2000.00
+                                   expense:mortgage        -2000.00       0.00
+07/04/2020 stuff                   expense:general          1000.00     1000.00
+                                   asset:cash_savings      -1000.00        0.00
+06/21/2020 grocery store           expense:general            20.00       20.00
+                                   expense:grocery           180.00      200.00
+                                   asset:cash_checking      -200.00        0.00
 ```
 
 - csv
@@ -185,60 +177,26 @@ Date       Description             Accounts
 - rust_ledger utilizes `yaml` files in the following format:
 
 ```yaml
-owner: user
-currencies:
-  id: $
-  name: US Dollar
-  alias: USD
-  note: Currency used in the United States
-
 accounts:
-  - id: 0
-    acct_name: cash_checking
-    acct_type: asset
-    debit_credit: 1500
-  - id: 1
-    acct_name: cash_savings 
-    acct_type: asset
-    debit_credit: 2000
-  - id: 2
-    acct_name: credit_card_amex 
-    acct_type: liability
-    debit_credit: 0
-  - id: 3
-    acct_name: equity
-    acct_type: equity
-    debit_credit: -3500
-  - id: 4
-    acct_name: grocery
-    acct_type: expense
-    debit_credit: 0
-  - id: 5
-    acct_name: general
-    acct_type: expense
-    debit_credit: 0
-  - id: 6
-    acct_name: general
-    acct_type: income
-    debit_credit: 0
+  - account: 
+    amount:  
 
 transactions:
-  - date: 11/4/2019
-    debit_credit: 455
-    acct_offset_name: credit_card_amex
-    name: weekly groceries
-    acct_type: expense
-    acct_name: grocery 
-  - date: 11/4/2019
-    debit_credit: 50
-    acct_offset_name: credit_card_amex
-    name: raspberry pi
-    acct_type: expense
-    acct_name: general
-  - date: 05/23/2020
-    debit_credit: 600
-    acct_offset_name: cash_checking 
-    name: business stuff
-    acct_type: income
-    acct_name: general
+  - date: 
+    amount: 
+    description: 
+    account: 
+    offset_account: 
+  - date: 
+    description: 
+    transaction: 
+      - amount: 
+        account: 
+      - amount: 
+        account: 
 ```
+
+The ledger format schema is purposely lightweight. The only requirements are as follows:
+    - the `account` field should be expressed in the following format: `account_classification:account_name`.
+    - the `amount` field should be a number. It can include up to two (2) decimal points.  
+    - the `date` field should be in the following format: `MM-DD-YYYY`. 

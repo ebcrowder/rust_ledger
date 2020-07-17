@@ -1,20 +1,16 @@
 extern crate serde_yaml;
 
-use colored::*;
 use super::models::LedgerFile;
-use num_format::{Locale, ToFormattedString};
+use colored::*;
 
 struct BalanceAccount {
     account: String,
-    account_type: String,
-    amount: i32,
+    amount: f64,
 }
 
 struct TransactionAccount {
     account: String,
-    account_type: String,
-    offset_account: String,
-    amount: i32,
+    amount: f64,
 }
 
 /// returns balances of all general ledger accounts
@@ -28,53 +24,67 @@ pub fn balance(filename: &String) -> Result<(), std::io::Error> {
     // push opening balances into Vec
     for account in deserialized_file.accounts {
         accounts_vec.push(BalanceAccount {
-            account: account.acct_name,
-            account_type: account.acct_type,
-            amount: account.debit_credit,
+            account: account.account,
+            amount: account.amount,
         });
     }
 
     // push transactions into Vec
     for transaction in deserialized_file.transactions {
-        let offset_account = &transaction.acct_offset_name;
+        let optional_account = match transaction.account {
+            None => "".to_string(),
+            Some(name) => name,
+        };
 
-        match transaction.split {
+        let optional_amount = match transaction.amount {
+            None => 0.00,
+            Some(number) => number,
+        };
+
+        let account_type: Vec<&str> = optional_account.split(":").collect();
+
+        match transaction.transaction {
             None => {
-                let amount = match transaction.acct_type.as_ref() {
-                    "income" => -transaction.debit_credit,
-                    _ => transaction.debit_credit,
+                let offset_account = match transaction.offset_account {
+                    None => "".to_string(),
+                    Some(name) => name,
+                };
+
+                let amount = match account_type[0] {
+                    "income" => -optional_amount,
+                    _ => optional_amount,
                 };
 
                 transactions_vec.push(TransactionAccount {
-                    account: transaction.acct_name,
-                    account_type: transaction.acct_type,
-                    offset_account: offset_account.to_string(),
-                    amount: amount,
+                    account: optional_account,
+                    amount,
                 });
-            },
+
+                if !offset_account.is_empty() {
+                    transactions_vec.push(TransactionAccount {
+                        account: offset_account,
+                        amount: -amount,
+                    });
+                }
+            }
             Some(split) => {
-                let mut credit: i32 = 0;
-                
+                let mut credit: f64 = 0.0;
+
                 for i in split {
-                    let acct_type = transaction.acct_type.as_ref();
-                    let amount = match acct_type {
+                    let amount = match account_type[0] {
                         "income" => -i.amount,
                         _ => i.amount,
                     };
                     credit += amount;
                     transactions_vec.push(TransactionAccount {
                         account: i.account,
-                        account_type: i.account_type.unwrap_or(acct_type.to_string()),
-                        offset_account: offset_account.to_string(),
                         amount: i.amount,
                     })
                 }
 
                 transactions_vec.push(TransactionAccount {
-                    account: transaction.acct_name,
-                    account_type: transaction.acct_type,
-                    offset_account: offset_account.to_string(),
-                    amount: transaction.debit_credit - credit,
+                    account: optional_account,
+                    amount: optional_amount - credit,
                 });
             }
         }
@@ -84,20 +94,22 @@ pub fn balance(filename: &String) -> Result<(), std::io::Error> {
     // for each transaction
 
     for transaction in &transactions_vec {
+        let transaction_account_type: Vec<&str> = transaction.account.split(":").collect();
+
         for account in &mut accounts_vec {
-            if account.account == transaction.account 
-                && account.account_type == transaction.account_type {
+            let account_type: Vec<&str> = account.account.split(":").collect();
+
+            if account.account.eq_ignore_ascii_case(&transaction.account)
+                && account_type[0] == transaction_account_type[0]
+            {
                 account.amount += &transaction.amount;
-            }
-            if account.account == transaction.offset_account {
-                account.amount -= &transaction.amount;
             }
         }
     }
 
     // create output
 
-    let mut check_figure: i32 = 0;
+    let mut check_figure: f64 = 0.0;
 
     println!("\n {0: <29} {1: <20}", "Account".bold(), "Balance".bold());
 
@@ -107,39 +119,33 @@ pub fn balance(filename: &String) -> Result<(), std::io::Error> {
 
     for account in accounts_vec {
         check_figure += account.amount;
+        let account_type: Vec<&str> = account.account.split(":").collect();
 
-        if !current_account_type.eq(&account.account_type) {
-            current_account_type = account.account_type;
+        if !current_account_type.eq(account_type[0]) {
+            current_account_type = account_type[0].to_string();
             println!("{}", current_account_type);
         }
 
         println!(
             "  {0: <28} {1: <20}",
             account.account,
-            if account.amount < 0 {
-                if current_account_type.eq("asset") {
-                    (account.amount).to_formatted_string(&Locale::en).red().bold()
-                } else {
-                    (account.amount).to_formatted_string(&Locale::en).bold()
-                }
-            } else if account.amount == 0 {
-                (account.amount).to_formatted_string(&Locale::en).yellow().bold()
+            if account.amount < 0.0 {
+                format!("{0:.2}", account.amount).to_string().red().bold()
+            } else if account.amount == 0.0 {
+                account.amount.to_string().yellow().bold()
             } else {
-                (account.amount).to_formatted_string(&Locale::en).bold()
+                format!("{0:.2}", account.amount).to_string().bold()
             }
         );
     }
 
     println!("\n{:-<39}", "".bright_blue());
     print!("{: <30}", "check");
-    print!(" {:<20}\n", match check_figure {
-        0 => check_figure
-            .to_formatted_string(&Locale::en)
-            .bold(),
-        _ => check_figure
-            .to_formatted_string(&Locale::en)
-            .red().bold(),
-    });
+    if check_figure == 0.0 {
+        print!(" {:<20}\n", check_figure.to_string().bold());
+    } else {
+        print!(" {:<20}\n", format!("{0:.2}", check_figure).red().bold());
+    }
 
     println!("\n");
 
