@@ -118,7 +118,7 @@ equity:equity
 expense:grocery             
 expense:general             
 expense:mortgage            
-income:general   
+income:general
 ```
 
 - balance
@@ -129,21 +129,21 @@ income:general
  Account                       Balance             
 ---------------------------------------
 asset
-  asset:cash_checking          -700.00             
-  asset:cash_savings           1000.00             
+  asset:cash_checking          $ -700.00           
+  asset:cash_savings           $ 1000.00           
 liability
-  liability:credit_card_amex   -455.00             
+  liability:credit_card_amex   $ -455.00           
 equity
-  equity:equity                -3500.00            
+  equity:equity                $ -3500.00          
 expense
-  expense:grocery              635.00              
-  expense:general              1020.00             
-  expense:mortgage             2000.00             
+  expense:grocery              $ 635.00            
+  expense:general              $ 1020.00           
+  expense:mortgage             $ 2000.00           
 income
   income:general               0                   
 
 ---------------------------------------
-check                          0          
+check                          0           
 ```
 
 - register
@@ -152,17 +152,17 @@ check                          0
   - example output:
 
 ```
-Date       Description             Accounts            
--------------------------------------------------------------------------------
-11/4/2019  weekly groceries        expense:grocery           455.00      455.00
-                                   expense:grocery          -455.00       0.00
-07/04/2020 mortage                 expense:mortgage         2000.00     2000.00
-                                   expense:mortgage        -2000.00       0.00
-07/04/2020 stuff                   expense:general          1000.00     1000.00
-                                   asset:cash_savings      -1000.00        0.00
-06/21/2020 grocery store           expense:general            20.00       20.00
-                                   expense:grocery           180.00      200.00
-                                   asset:cash_checking      -200.00        0.00
+Date       Description             Accounts              
+---------------------------------------------------------------------------------
+11/4/2019  weekly groceries        grocery                  $ 455.00     $ 455.00
+                                   credit_card_amex        $ -455.00            0
+07/04/2020 mortage                 mortgage                $ 2000.00    $ 2000.00
+                                   cash_checking          $ -2000.00            0
+07/04/2020 stuff                   general                 $ 1000.00    $ 1000.00
+                                   cash_savings           $ -1000.00            0
+06/21/2020 grocery store           general                   $ 20.00      $ 20.00
+                                   grocery                  $ 180.00     $ 200.00
+                                   cash_checking           $ -200.00            0
 ```
 
 - csv
