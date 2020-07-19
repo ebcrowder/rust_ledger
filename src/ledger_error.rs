@@ -1,13 +1,13 @@
-use std::error;
 use std::fmt;
-use std::io::Error;
+use std::io;
 
 extern crate csv;
 
 #[derive(Debug)]
 pub enum LedgerError {
-    InputError(Error),
+    InputError(io::Error),
     CSVError(csv::Error),
+    Other(String),
 }
 
 impl fmt::Display for LedgerError {
@@ -17,28 +17,13 @@ impl fmt::Display for LedgerError {
                 write!(f, "Input error. Argument is not correct: {}", err)
             }
             LedgerError::CSVError(ref err) => write!(f, "CSV error: {}", err),
+            LedgerError::Other(ref s) => write!(f, "other error: {}", s),
         }
     }
 }
 
-impl error::Error for LedgerError {
-    fn description(&self) -> &str {
-        match *self {
-            LedgerError::InputError(ref err) => err.description(),
-            LedgerError::CSVError(ref err) => err.description(),
-        }
-    }
-
-    fn cause(&self) -> Option<&error::Error> {
-        match *self {
-            LedgerError::InputError(ref err) => Some(err),
-            LedgerError::CSVError(ref err) => Some(err),
-        }
-    }
-}
-
-impl From<Error> for LedgerError {
-    fn from(err: Error) -> LedgerError {
+impl From<io::Error> for LedgerError {
+    fn from(err: io::Error) -> LedgerError {
         LedgerError::InputError(err)
     }
 }
@@ -46,5 +31,11 @@ impl From<Error> for LedgerError {
 impl From<csv::Error> for LedgerError {
     fn from(err: csv::Error) -> LedgerError {
         LedgerError::CSVError(err)
+    }
+}
+
+impl From<String> for LedgerError {
+    fn from(err: String) -> LedgerError {
+        LedgerError::Other(err)
     }
 }

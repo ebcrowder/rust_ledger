@@ -1,14 +1,15 @@
 mod accounts;
 mod balance;
 mod csv;
-mod error;
+mod ledger_error;
 mod models;
 mod register;
 
 use pargs;
 use std::env;
+use std::io::{Error, ErrorKind};
 
-fn main() -> Result<(), error::LedgerError> {
+fn main() -> Result<(), ledger_error::LedgerError> {
     // collect args from user input
     let args: Vec<String> = env::args().collect();
 
@@ -45,13 +46,20 @@ fn main() -> Result<(), error::LedgerError> {
         None => "",
     };
 
-    Ok(for cmd in pargs_commands {
-        return match &cmd[..] {
+    match &pargs_commands.len() {
+        0 => Err(ledger_error::LedgerError::InputError(Error::new(
+            ErrorKind::InvalidInput,
+            "Invalid argument was entered. Please try again.",
+        ))),
+        _ => match &pargs_commands[0][..] {
             "accounts" => accounts::accounts(&ledger_file.to_string()),
             "balances" => balance::balance(&ledger_file.to_string()),
             "register" => register::register(&ledger_file.to_string(), &options_arg.to_string()),
             "csv" => csv::csv(&ledger_file.to_string(), &options_arg.to_string()),
-            _ => break,
-        };
-    })
+            _ => Err(ledger_error::LedgerError::InputError(Error::new(
+                ErrorKind::InvalidInput,
+                "Invalid argument was entered. Please try again.",
+            ))),
+        },
+    }
 }

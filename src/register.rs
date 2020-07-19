@@ -1,7 +1,7 @@
 extern crate serde_yaml;
 
 use super::models::{LedgerFile, Transaction};
-use crate::error::LedgerError;
+use crate::ledger_error::LedgerError;
 use colored::*;
 
 /// returns all general ledger transactions
