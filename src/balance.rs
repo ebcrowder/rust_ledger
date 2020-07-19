@@ -3,6 +3,7 @@ extern crate serde_yaml;
 use super::models::LedgerFile;
 use crate::ledger_error::LedgerError;
 use colored::*;
+use monee::*;
 
 struct BalanceAccount {
     account: String,
@@ -131,11 +132,11 @@ pub fn balance(filename: &String) -> Result<(), LedgerError> {
             "  {0: <28} {1: <20}",
             account.account,
             if account.amount < 0.0 {
-                format!("{0:.2}", account.amount).to_string().red().bold()
+                format!("{: >1}", money!(account.amount, "USD")).to_string().red().bold()
             } else if account.amount == 0.0 {
                 account.amount.to_string().yellow().bold()
             } else {
-                format!("{0:.2}", account.amount).to_string().bold()
+                format!("{: >1}", money!(account.amount, "USD")).to_string().bold()
             }
         );
     }
