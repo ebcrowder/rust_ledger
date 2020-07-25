@@ -1,6 +1,6 @@
 extern crate serde_yaml;
 
-use crate::model::*;
+use crate::model::ledger::LedgerFile;
 use colored::*;
 
 struct BalanceAccount {
@@ -10,7 +10,7 @@ struct BalanceAccount {
 /// returns all general ledger accounts
 pub fn accounts(filename: &String) -> Result<(), std::io::Error> {
     let file = std::fs::File::open(filename)?;
-    let deserialized_file: crate::model::LedgerFile = serde_yaml::from_reader(file).unwrap();
+    let deserialized_file: LedgerFile = serde_yaml::from_reader(file).unwrap();
 
     let mut account_vec: Vec<BalanceAccount> = Vec::new();
 

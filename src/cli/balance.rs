@@ -1,6 +1,6 @@
 extern crate serde_yaml;
 
-use super::models::LedgerFile;
+use crate::model::ledger::LedgerFile;
 use colored::*;
 use monee::*;
 
@@ -131,11 +131,16 @@ pub fn balance(filename: &String) -> Result<(), std::io::Error> {
             "  {0: <28} {1: <20}",
             account.account,
             if account.amount < 0.0 {
-                format!("{: >1}", money!(account.amount, "USD")).to_string().red().bold()
+                format!("{: >1}", money!(account.amount, "USD"))
+                    .to_string()
+                    .red()
+                    .bold()
             } else if account.amount == 0.0 {
                 account.amount.to_string().yellow().bold()
             } else {
-                format!("{: >1}", money!(account.amount, "USD")).to_string().bold()
+                format!("{: >1}", money!(account.amount, "USD"))
+                    .to_string()
+                    .bold()
             }
         );
     }

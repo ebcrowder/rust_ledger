@@ -1,6 +1,6 @@
 extern crate csv;
 
-use super::models::LedgerFile;
+use crate::model::ledger::LedgerFile;
 use serde::{Deserialize, Serialize};
 use std::{fs, io::Write};
 

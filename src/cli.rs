@@ -6,6 +6,10 @@ mod register;
 use pargs;
 use std::env;
 
+enum Options {
+    Balance,
+}
+
 pub fn run() -> Result<(), std::io::Error> {
     let args: Vec<String> = env::args().collect();
 

@@ -1,6 +1,6 @@
 extern crate serde_yaml;
 
-use super::models::{LedgerFile, Transaction};
+use crate::model::ledger::{LedgerFile, Transaction};
 use colored::*;
 use monee::*;
 
@@ -85,8 +85,12 @@ pub fn register(filename: &String, option: &String) -> Result<(), std::io::Error
                                     item.date,
                                     item.description.bold(),
                                     offset_account_name,
-                                    format!("{: >1}", money!(optional_amount, "USD")).to_string().bold(),
-                                    format!("{: >1}", money!(optional_amount, "USD")).to_string().bold()
+                                    format!("{: >1}", money!(optional_amount, "USD"))
+                                        .to_string()
+                                        .bold(),
+                                    format!("{: >1}", money!(optional_amount, "USD"))
+                                        .to_string()
+                                        .bold()
                                 );
                             }
                         }
@@ -97,7 +101,9 @@ pub fn register(filename: &String, option: &String) -> Result<(), std::io::Error
                                     "{0: <35}{1: <20} {2: >12} {3: >12}",
                                     "",
                                     account_name,
-                                    format!("{: >1}", money!(-optional_amount, "USD")).to_string().bold(),
+                                    format!("{: >1}", money!(-optional_amount, "USD"))
+                                        .to_string()
+                                        .bold(),
                                     "0".bold() // hack for now. No need to do any math
                                 );
                             }
@@ -112,8 +118,12 @@ pub fn register(filename: &String, option: &String) -> Result<(), std::io::Error
                                     item.date,
                                     item.description.bold(),
                                     account_name,
-                                    format!("{: >1}", money!(optional_amount, "USD")).to_string().bold(),
-                                    format!("{: >1}", money!(optional_amount, "USD")).to_string().bold()
+                                    format!("{: >1}", money!(optional_amount, "USD"))
+                                        .to_string()
+                                        .bold(),
+                                    format!("{: >1}", money!(optional_amount, "USD"))
+                                        .to_string()
+                                        .bold()
                                 );
                             }
                         }
@@ -124,10 +134,15 @@ pub fn register(filename: &String, option: &String) -> Result<(), std::io::Error
                                     "{0: <35}{1: <20} {2: >12} {3: >12}",
                                     "",
                                     offset_account_name,
-                                    format!("{: >1}", money!(-optional_amount, "USD")).to_string().bold(),
-                                    format!("{: >1}", money!((optional_amount - optional_amount), "USD"))
+                                    format!("{: >1}", money!(-optional_amount, "USD"))
                                         .to_string()
-                                        .bold()
+                                        .bold(),
+                                    format!(
+                                        "{: >1}",
+                                        money!((optional_amount - optional_amount), "USD")
+                                    )
+                                    .to_string()
+                                    .bold()
                                 );
                             }
                         }
@@ -146,8 +161,12 @@ pub fn register(filename: &String, option: &String) -> Result<(), std::io::Error
                                         item.date,
                                         item.description.bold(),
                                         offset_account_name,
-                                        format!("{: >1}", money!(optional_amount, "USD")).to_string().bold(),
-                                        format!("{: >1}", money!(optional_amount, "USD")).to_string().bold()
+                                        format!("{: >1}", money!(optional_amount, "USD"))
+                                            .to_string()
+                                            .bold(),
+                                        format!("{: >1}", money!(optional_amount, "USD"))
+                                            .to_string()
+                                            .bold()
                                     );
                                 }
                             }
@@ -163,8 +182,12 @@ pub fn register(filename: &String, option: &String) -> Result<(), std::io::Error
                                             "{0: <35}{1: <20} {2: >12} {3: >12}",
                                             "",
                                             i_account_name,
-                                            format!("{: >1}", money!(i.amount, "USD")).to_string().bold(),
-                                            format!("{: >1}", money!(credit, "USD")).to_string().bold()
+                                            format!("{: >1}", money!(i.amount, "USD"))
+                                                .to_string()
+                                                .bold(),
+                                            format!("{: >1}", money!(credit, "USD"))
+                                                .to_string()
+                                                .bold()
                                         );
                                     }
                                 }
@@ -183,9 +206,14 @@ pub fn register(filename: &String, option: &String) -> Result<(), std::io::Error
                                         "{0: <35}{1: <20} {2: >12} {3: >12}",
                                         "",
                                         last_account_name,
-                                        format!("{: >1}", money!(last.amount, "USD")).to_string().bold(),
+                                        format!("{: >1}", money!(last.amount, "USD"))
+                                            .to_string()
+                                            .bold(),
                                         if check != 0.0 {
-                                            format!("{: >1}", money!(check, "USD")).to_string().red().bold()
+                                            format!("{: >1}", money!(check, "USD"))
+                                                .to_string()
+                                                .red()
+                                                .bold()
                                         } else {
                                             check.to_string().bold()
                                         }
@@ -209,8 +237,12 @@ pub fn register(filename: &String, option: &String) -> Result<(), std::io::Error
                                         item.date,
                                         item.description.bold(),
                                         first_account_name,
-                                        format!("{: >1}", money!(first.amount, "USD")).to_string().bold(),
-                                        format!("{: >1}", money!(first.amount, "USD")).to_string().bold()
+                                        format!("{: >1}", money!(first.amount, "USD"))
+                                            .to_string()
+                                            .bold(),
+                                        format!("{: >1}", money!(first.amount, "USD"))
+                                            .to_string()
+                                            .bold()
                                     );
                                 }
                             }
@@ -227,8 +259,12 @@ pub fn register(filename: &String, option: &String) -> Result<(), std::io::Error
                                             "{0: <35}{1: <20} {2: >12} {3: >12}",
                                             "",
                                             i_account_name,
-                                            format!("{: >1}", money!(i.amount, "USD")).to_string().bold(),
-                                            format!("{: >1}", money!(credit, "USD")).to_string().bold()
+                                            format!("{: >1}", money!(i.amount, "USD"))
+                                                .to_string()
+                                                .bold(),
+                                            format!("{: >1}", money!(credit, "USD"))
+                                                .to_string()
+                                                .bold()
                                         );
                                     }
                                 }
@@ -243,7 +279,9 @@ pub fn register(filename: &String, option: &String) -> Result<(), std::io::Error
                                         "{0: <35}{1: <20} {2: >12} {3: >12}",
                                         "",
                                         offset_account_name,
-                                        format!("{: >1}", money!(-optional_amount, "USD")).to_string().bold(),
+                                        format!("{: >1}", money!(-optional_amount, "USD"))
+                                            .to_string()
+                                            .bold(),
                                         if check != 0.0 {
                                             (check).to_string().red().bold()
                                         } else {
