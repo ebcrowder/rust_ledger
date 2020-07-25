@@ -6,10 +6,6 @@ mod register;
 use pargs;
 use std::env;
 
-enum Options {
-    Balance,
-}
-
 pub fn run() -> Result<(), std::io::Error> {
     let args: Vec<String> = env::args().collect();
 
@@ -51,5 +47,6 @@ pub fn run() -> Result<(), std::io::Error> {
         "balance" => balance::balance(&ledger_file.to_string()),
         "register" => register::register(&ledger_file.to_string(), &options_arg.to_string()),
         "csv" => csv::csv(&ledger_file.to_string(), &options_arg.to_string()),
+        _ => panic!("wtf"),
     }
 }
