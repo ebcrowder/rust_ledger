@@ -1,7 +1,5 @@
 use std::error::Error as StdError;
-use std::{fmt, io, result};
-
-pub type Result<T> = result::Result<T, Error>;
+use std::{fmt, io};
 
 #[derive(Debug)]
 pub struct Error(Box<ErrorKind>, Option<String>);
