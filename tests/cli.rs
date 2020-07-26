@@ -4,16 +4,14 @@ use std::io::Write;
 use std::process::Command;
 use tempfile;
 
-use crate::error::Error;
-
 use std::env;
 
 #[test]
-fn file_does_not_exist() -> Result<(), Error> {
+fn file_does_not_exist() -> Result<(), Box<dyn std::error::Error>> {
     let mut cmd = Command::new("./target/debug/rust_ledger");
     cmd.arg("-l")
         .arg("test/file/does/not/exist.txt")
-        .arg("accounts");
+        .arg("account");
     cmd.assert()
         .failure()
         .stderr(predicate::str::contains("No such file or directory"));
@@ -63,7 +61,7 @@ fn file_path_found_as_env() -> Result<(), Box<dyn std::error::Error>> {
     env::set_var("RLEDGER_FILE", file.path());
 
     let mut cmd = Command::new("./target/debug/rust_ledger");
-    cmd.arg("accounts");
+    cmd.arg("account");
 
     cmd.assert().success();
 
@@ -71,7 +69,7 @@ fn file_path_found_as_env() -> Result<(), Box<dyn std::error::Error>> {
 }
 
 #[test]
-fn accounts_test() -> Result<(), Box<dyn std::error::Error>> {
+fn account_test() -> Result<(), Box<dyn std::error::Error>> {
     let mut file = tempfile::Builder::new().suffix(".yaml").tempfile().unwrap();
 
     let account_yml = br#"
@@ -110,7 +108,7 @@ fn accounts_test() -> Result<(), Box<dyn std::error::Error>> {
     file.flush().unwrap();
 
     let mut cmd = Command::new("./target/debug/rust_ledger");
-    cmd.arg("-l").arg(file.path()).arg("accounts");
+    cmd.arg("-l").arg(file.path()).arg("account");
     cmd.assert()
         .success()
         .stdout(predicate::str::contains("asset:cash_checking"));
@@ -119,7 +117,7 @@ fn accounts_test() -> Result<(), Box<dyn std::error::Error>> {
 }
 
 #[test]
-fn balances_test() -> Result<(), Box<dyn std::error::Error>> {
+fn balance_test() -> Result<(), Box<dyn std::error::Error>> {
     let mut file = tempfile::Builder::new().suffix(".yaml").tempfile().unwrap();
 
     let account_yml = br#"
@@ -158,7 +156,7 @@ fn balances_test() -> Result<(), Box<dyn std::error::Error>> {
     file.flush().unwrap();
 
     let mut cmd = Command::new("./target/debug/rust_ledger");
-    cmd.arg("-l").arg(file.path()).arg("balances");
+    cmd.arg("-l").arg(file.path()).arg("balance");
     cmd.assert().success().stdout(predicate::str::contains(
         "equity:equity                $ -3500.00 ",
     ));

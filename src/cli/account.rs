@@ -9,7 +9,7 @@ struct BalanceAccount {
 }
 
 /// returns all general ledger accounts
-pub fn accounts(filename: &String) -> Result<(), Error> {
+pub fn account(filename: &String) -> Result<(), Error> {
     let file = std::fs::File::open(filename)?;
     let deserialized_file: LedgerFile = serde_yaml::from_reader(file).unwrap();
 

@@ -12,8 +12,8 @@ pub fn run() -> Result<(), Error> {
 
     // define expected args for pargs
     let command_args: Vec<String> = vec![
-        String::from("accounts"),
-        String::from("balances"),
+        String::from("account"),
+        String::from("balance"),
         String::from("register"),
         String::from("csv"),
     ];
@@ -44,7 +44,7 @@ pub fn run() -> Result<(), Error> {
     };
 
     match &pargs_commands[0][..] {
-        "account" => account::accounts(&ledger_file.to_string()),
+        "account" => account::account(&ledger_file.to_string()),
         "balance" => balance::balance(&ledger_file.to_string()),
         "register" => register::register(&ledger_file.to_string(), &options_arg.to_string()),
         "csv" => csv::csv(&ledger_file.to_string(), &options_arg.to_string()),
