@@ -4,12 +4,12 @@ use std::io::Write;
 use std::process::Command;
 use tempfile;
 
+use crate::error::Error;
+
 use std::env;
 
-
-
 #[test]
-fn file_does_not_exist() -> Result<(), std::io::Error> {
+fn file_does_not_exist() -> Result<(), Error> {
     let mut cmd = Command::new("./target/debug/rust_ledger");
     cmd.arg("-l")
         .arg("test/file/does/not/exist.txt")
@@ -159,9 +159,9 @@ fn balances_test() -> Result<(), Box<dyn std::error::Error>> {
 
     let mut cmd = Command::new("./target/debug/rust_ledger");
     cmd.arg("-l").arg(file.path()).arg("balances");
-    cmd.assert()
-        .success()
-        .stdout(predicate::str::contains("equity:equity                $ -3500.00 "));
+    cmd.assert().success().stdout(predicate::str::contains(
+        "equity:equity                $ -3500.00 ",
+    ));
 
     Ok(())
 }
@@ -206,12 +206,10 @@ fn register_test() -> Result<(), Box<dyn std::error::Error>> {
     file.flush().unwrap();
 
     let mut cmd = Command::new("./target/debug/rust_ledger");
-    cmd.arg("-l")
-        .arg(file.path())
-        .arg("register");
-    cmd.assert().success().stdout(predicate::str::contains(
-        "06/21/2020",
-    ));
+    cmd.arg("-l").arg(file.path()).arg("register");
+    cmd.assert()
+        .success()
+        .stdout(predicate::str::contains("06/21/2020"));
 
     Ok(())
 }

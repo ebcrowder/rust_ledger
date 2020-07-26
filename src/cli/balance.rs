@@ -1,5 +1,6 @@
 extern crate serde_yaml;
 
+use crate::error::Error;
 use crate::model::ledger::LedgerFile;
 use colored::*;
 use monee::*;
@@ -15,7 +16,7 @@ struct TransactionAccount {
 }
 
 /// returns balances of all general ledger accounts
-pub fn balance(filename: &String) -> Result<(), std::io::Error> {
+pub fn balance(filename: &String) -> Result<(), Error> {
     let file = std::fs::File::open(filename)?;
     let deserialized_file: LedgerFile = serde_yaml::from_reader(file).unwrap();
 

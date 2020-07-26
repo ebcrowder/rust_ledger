@@ -2,6 +2,6 @@ mod cli;
 mod error;
 mod model;
 
-fn main() -> Result<(), std::io::Error> {
+fn main() -> Result<(), error::Error> {
     cli::run()
 }
