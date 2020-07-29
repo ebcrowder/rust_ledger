@@ -51,7 +51,7 @@ impl StdError for Error {
 
 impl fmt::Display for Error {
     fn fmt(&self, f: &mut fmt::Formatter) -> fmt::Result {
-        write!(f, "Oops :: ")?;
+        write!(f, "Error:")?;
         if let Some(message) = &self.1 {
             writeln!(f, "{}\n", message)?;
         }

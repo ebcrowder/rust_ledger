@@ -31,26 +31,34 @@ pub fn run() -> Result<(), Error> {
         None => {
             let ledger_file_env = match std::env::var("RLEDGER_FILE") {
                 Ok(p) => format!("{}", p),
-                Err(_) => format!("{}", ""),
+                Err(err) => format!("{}", err),
             };
 
             ledger_file_env.to_string()
         }
     };
 
+    
+
     let options_arg = match pargs_options.get("-f") {
         Some(value) => value,
         None => "",
     };
 
-    match &pargs_commands[0][..] {
-        "account" => account::account(&ledger_file.to_string()),
-        "balance" => balance::balance(&ledger_file.to_string()),
-        "register" => register::register(&ledger_file.to_string(), &options_arg.to_string()),
-        "csv" => csv::csv(&ledger_file.to_string(), &options_arg.to_string()),
-        _ => Err(Error::new(
-            ErrorKind::InvalidInput("invalid input".to_string()),
-            None,
-        )),
+        match &pargs_commands.len() {
+            0 => Err(Error::new(
+                ErrorKind::InvalidInput("invalid input".to_string()),
+                None,
+            )),
+            _ => match &pargs_commands[0][..] {
+            "account" => account::account(&ledger_file.to_string()),
+            "balance" => balance::balance(&ledger_file.to_string()),
+            "register" => register::register(&ledger_file.to_string(), &options_arg.to_string()),
+            "csv" => csv::csv(&ledger_file.to_string(), &options_arg.to_string()),
+            _ => Err(Error::new(
+                ErrorKind::InvalidInput("invalid input".to_string()),
+                None,
+            )),
+        }
     }
 }
