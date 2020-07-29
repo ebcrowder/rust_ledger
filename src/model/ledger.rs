@@ -1,3 +1,4 @@
+use colored::*;
 use serde::{Deserialize, Serialize};
 
 #[derive(Debug, PartialEq, Serialize, Deserialize)]
@@ -26,4 +27,17 @@ pub struct Transaction {
 pub struct LedgerFile {
     pub accounts: Vec<Account>,
     pub transactions: Vec<Transaction>,
+}
+
+impl LedgerFile {
+    pub fn print_accounts(self) {
+        println!("{0: <29}", "Account");
+        println!("{:-<39}", "".bright_blue());
+
+        for account in self.accounts {
+            println!("{0: <28}", account.account);
+        }
+
+        println!("\n");
+    }
 }
