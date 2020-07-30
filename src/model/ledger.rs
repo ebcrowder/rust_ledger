@@ -480,20 +480,20 @@ fn print_accounts_to_stdout() {
     let file: LedgerFile = LedgerFile {
         accounts: vec![
             Account {
-                account: "assets::cash".to_string(),
+                account: "assets:cash".to_string(),
                 amount: 100.00,
             },
             Account {
-                account: "expenses::foo".to_string(),
+                account: "expenses:foo".to_string(),
                 amount: 0.00,
             },
         ],
         transactions: vec![Transaction {
             date: "2020-01-01".to_string(),
-            account: Some("assets::cash".to_string()),
+            account: Some("assets:cash".to_string()),
             amount: Some(10.00),
             description: "test".to_string(),
-            offset_account: Some("expenses::foo".to_string()),
+            offset_account: Some("expenses:foo".to_string()),
             transaction: None,
         }],
     };
@@ -507,20 +507,20 @@ fn print_balances_to_stdout() {
     let file: LedgerFile = LedgerFile {
         accounts: vec![
             Account {
-                account: "assets::cash".to_string(),
+                account: "assets:cash".to_string(),
                 amount: 100.00,
             },
             Account {
-                account: "expenses::foo".to_string(),
+                account: "expenses:foo".to_string(),
                 amount: 0.00,
             },
         ],
         transactions: vec![Transaction {
             date: "2020-01-01".to_string(),
-            account: Some("assets::cash".to_string()),
+            account: Some("assets:cash".to_string()),
             amount: Some(10.00),
             description: "test".to_string(),
-            offset_account: Some("expenses::foo".to_string()),
+            offset_account: Some("expenses:foo".to_string()),
             transaction: None,
         }],
     };
@@ -534,20 +534,20 @@ fn print_register_to_stdout() {
     let file: LedgerFile = LedgerFile {
         accounts: vec![
             Account {
-                account: "assets::cash".to_string(),
+                account: "assets:cash".to_string(),
                 amount: 100.00,
             },
             Account {
-                account: "expenses::foo".to_string(),
+                account: "expenses:foo".to_string(),
                 amount: 0.00,
             },
         ],
         transactions: vec![Transaction {
             date: "2020-01-01".to_string(),
-            account: Some("assets::cash".to_string()),
+            account: Some("assets:cash".to_string()),
             amount: Some(10.00),
             description: "test".to_string(),
-            offset_account: Some("expenses::foo".to_string()),
+            offset_account: Some("expenses:foo".to_string()),
             transaction: None,
         }],
     };
