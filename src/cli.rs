@@ -38,27 +38,25 @@ pub fn run() -> Result<(), Error> {
         }
     };
 
-    
-
     let options_arg = match pargs_options.get("-f") {
         Some(value) => value,
         None => "",
     };
 
-        match &pargs_commands.len() {
-            0 => Err(Error::new(
-                ErrorKind::InvalidInput("invalid input".to_string()),
-                None,
-            )),
-            _ => match &pargs_commands[0][..] {
+    match &pargs_commands.len() {
+        0 => Err(Error::new(
+            ErrorKind::InvalidInput("invalid input".to_string()),
+            Some("please try another command.".to_string()),
+        )),
+        _ => match &pargs_commands[0][..] {
             "account" => account::account(&ledger_file.to_string()),
             "balance" => balance::balance(&ledger_file.to_string()),
             "register" => register::register(&ledger_file.to_string(), &options_arg.to_string()),
             "csv" => csv::csv(&ledger_file.to_string(), &options_arg.to_string()),
             _ => Err(Error::new(
                 ErrorKind::InvalidInput("invalid input".to_string()),
-                None,
+                Some("please try another command".to_string()),
             )),
-        }
+        },
     }
 }
