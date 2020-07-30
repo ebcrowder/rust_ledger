@@ -473,3 +473,85 @@ impl LedgerFile {
         println!("\n");
     }
 }
+
+#[cfg(test)]
+#[test]
+fn print_accounts_to_stdout() {
+    let file: LedgerFile = LedgerFile {
+        accounts: vec![
+            Account {
+                account: "assets::cash".to_string(),
+                amount: 100.00,
+            },
+            Account {
+                account: "expenses::foo".to_string(),
+                amount: 0.00,
+            },
+        ],
+        transactions: vec![Transaction {
+            date: "2020-01-01".to_string(),
+            account: Some("assets::cash".to_string()),
+            amount: Some(10.00),
+            description: "test".to_string(),
+            offset_account: Some("expenses::foo".to_string()),
+            transaction: None,
+        }],
+    };
+
+    let result = LedgerFile::print_accounts(file);
+    assert_eq!(result, ())
+}
+
+#[test]
+fn print_balances_to_stdout() {
+    let file: LedgerFile = LedgerFile {
+        accounts: vec![
+            Account {
+                account: "assets::cash".to_string(),
+                amount: 100.00,
+            },
+            Account {
+                account: "expenses::foo".to_string(),
+                amount: 0.00,
+            },
+        ],
+        transactions: vec![Transaction {
+            date: "2020-01-01".to_string(),
+            account: Some("assets::cash".to_string()),
+            amount: Some(10.00),
+            description: "test".to_string(),
+            offset_account: Some("expenses::foo".to_string()),
+            transaction: None,
+        }],
+    };
+
+    let result = LedgerFile::print_balances(file);
+    assert_eq!(result, ())
+}
+
+#[test]
+fn print_register_to_stdout() {
+    let file: LedgerFile = LedgerFile {
+        accounts: vec![
+            Account {
+                account: "assets::cash".to_string(),
+                amount: 100.00,
+            },
+            Account {
+                account: "expenses::foo".to_string(),
+                amount: 0.00,
+            },
+        ],
+        transactions: vec![Transaction {
+            date: "2020-01-01".to_string(),
+            account: Some("assets::cash".to_string()),
+            amount: Some(10.00),
+            description: "test".to_string(),
+            offset_account: Some("expenses::foo".to_string()),
+            transaction: None,
+        }],
+    };
+
+    let result = LedgerFile::print_register(file, &"".to_string());
+    assert_eq!(result, ())
+}
