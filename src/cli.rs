@@ -3,7 +3,7 @@ mod balance;
 mod csv;
 mod register;
 
-use crate::error::{Error, ErrorKind};
+use crate::error::Error;
 use pargs;
 use std::env;
 
@@ -44,19 +44,13 @@ pub fn run() -> Result<(), Error> {
     };
 
     match &pargs_commands.len() {
-        0 => Err(Error::new(
-            ErrorKind::InvalidInput("invalid input".to_string()),
-            Some("please try another command.".to_string()),
-        )),
+        0 => Err(Error::InvalidArg("please enter a command.".to_string())),
         _ => match &pargs_commands[0][..] {
             "account" => account::account(&ledger_file.to_string()),
             "balance" => balance::balance(&ledger_file.to_string()),
             "register" => register::register(&ledger_file.to_string(), &options_arg.to_string()),
             "csv" => csv::csv(&ledger_file.to_string(), &options_arg.to_string()),
-            _ => Err(Error::new(
-                ErrorKind::InvalidInput("invalid input".to_string()),
-                Some("please try another command".to_string()),
-            )),
+            _ => Err(Error::InvalidArg("please enter a command".to_string())),
         },
     }
 }
