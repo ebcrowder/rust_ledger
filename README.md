@@ -54,7 +54,7 @@ RLEDGER_FILE=~/rledger.yaml rust_ledger balances
 export RLEDGER_FILE="$HOME/rledger.yaml"
 ```
 
-COMMAND - ledger command (accounts, balance, register, or csv)
+COMMAND - ledger command (account, balance, register, or csv)
 
 OPTION (denoted by `-f`) - allows you to filter the output of the `register` command by account type. For example, if you wish to only see "expense" transactions in the output, you would pass in `expense` as the option here.
 
@@ -104,7 +104,7 @@ Transactions that only involve two accounts can also be expressed in the above f
 
 ### API
 
-- accounts
+- account
   - lists accounts
   - example output:
 

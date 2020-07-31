@@ -1,6 +1,7 @@
 extern crate csv;
 
-use super::models::LedgerFile;
+use crate::error::Error;
+use crate::model::ledger::LedgerFile;
 use serde::{Deserialize, Serialize};
 use std::{fs, io::Write};
 
@@ -59,7 +60,7 @@ fn insert_match_acct(csv_matches: &[CSVMatches], record: &CSV) -> String {
 }
 
 /// convert csv to yaml format
-pub fn csv(ledger_file: &String, csv_file: &String) -> Result<(), std::io::Error> {
+pub fn csv(ledger_file: &String, csv_file: &String) -> Result<(), Error> {
     // open csv file
     let raw_csv_file = fs::File::open(csv_file)?;
     let mut csv_reader = csv::Reader::from_reader(raw_csv_file);
