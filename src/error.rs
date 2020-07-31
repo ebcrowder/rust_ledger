@@ -1,7 +1,10 @@
 use std::fmt;
 use std::io;
+use std::result;
 
 extern crate csv;
+
+pub type Result<T> = result::Result<T, Error>;
 
 #[derive(Debug)]
 pub enum Error {

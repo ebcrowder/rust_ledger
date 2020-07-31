@@ -3,11 +3,11 @@ mod balance;
 mod csv;
 mod register;
 
-use crate::error::Error;
+use crate::error::{Error, Result};
 use pargs;
 use std::env;
 
-pub fn run() -> Result<(), Error> {
+pub fn run() -> Result<()> {
     let args: Vec<String> = env::args().collect();
 
     // define expected args for pargs
@@ -50,7 +50,7 @@ pub fn run() -> Result<(), Error> {
             "balance" => balance::balance(&ledger_file.to_string()),
             "register" => register::register(&ledger_file.to_string(), &options_arg.to_string()),
             "csv" => csv::csv(&ledger_file.to_string(), &options_arg.to_string()),
-            _ => Err(Error::InvalidArg("please enter a command".to_string())),
+            _ => panic!("command not found.".to_string()),
         },
     }
 }
