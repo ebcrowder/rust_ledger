@@ -29,14 +29,14 @@ transactions:
     offset_account: asset:cash_checking
   - date: 07/04/2020
     description: stuff
-    transaction: 
+    transactions: 
       - amount: 1000
         account: expense:general
       - amount: -1000
         account: asset:cash_savings
   - date: 06/21/2020
     description: grocery store
-    transaction:
+    transactions:
       - amount: 20
         account: expense:general
       - amount: 180

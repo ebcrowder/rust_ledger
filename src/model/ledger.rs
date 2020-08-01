@@ -1,6 +1,15 @@
 use colored::*;
 use monee::*;
 use serde::{Deserialize, Serialize};
+use std::collections::HashMap;
+
+/// root data structure that contains the deserialized ledger file data
+/// and associated structs
+#[derive(Debug, PartialEq, Serialize, Deserialize)]
+pub struct LedgerFile {
+    pub accounts: Vec<Account>,
+    pub transactions: Vec<Transaction>,
+}
 
 #[derive(Debug, PartialEq, Serialize, Deserialize)]
 pub struct Account {
@@ -8,26 +17,175 @@ pub struct Account {
     pub amount: f64,
 }
 
-#[derive(Debug, PartialEq, Serialize, Deserialize)]
-pub struct TransactionList {
-    pub account: String,
-    pub amount: f64,
-}
-
-#[derive(Debug, PartialEq, Serialize, Deserialize)]
+#[derive(Debug, PartialEq, Clone, Serialize, Deserialize)]
 pub struct Transaction {
     pub date: String,
     pub account: Option<String>,
     pub amount: Option<f64>,
     pub description: String,
     pub offset_account: Option<String>,
-    pub transaction: Option<Vec<TransactionList>>,
+    pub transactions: Option<Vec<TransactionList>>,
 }
 
-#[derive(Debug, PartialEq, Serialize, Deserialize)]
-pub struct LedgerFile {
-    pub accounts: Vec<Account>,
-    pub transactions: Vec<Transaction>,
+#[derive(Debug, PartialEq, Clone, Serialize, Deserialize)]
+pub struct TransactionList {
+    pub account: String,
+    pub amount: f64,
+}
+
+/// enumerates all possible "group" values for pattern matching
+#[derive(Debug, PartialEq)]
+pub enum Group {
+    Month,
+    Year,
+    None,
+}
+
+/// data structure for handling optional values contained
+/// within the LedgerFile for ease of program access
+#[derive(Debug, PartialEq)]
+struct OptionalKeys {
+    account: String,
+    offset_account: String,
+    amount: f64,
+    transactions: Vec<TransactionList>,
+}
+
+impl OptionalKeys {
+    fn match_optional_fields(transaction: &Transaction) -> Self {
+        let account = match &transaction.account {
+            None => "optional:account".to_string(),
+            Some(name) => name.to_string(),
+        };
+
+        let offset_account = match &transaction.offset_account {
+            None => "optional:account".to_string(),
+            Some(name) => name.to_string(),
+        };
+
+        let amount = match transaction.amount {
+            None => 0.00,
+            Some(number) => number,
+        };
+
+        let transactions = match transaction.transactions.clone() {
+            None => vec![],
+            Some(list) => list,
+        };
+
+        return Self {
+            account,
+            offset_account,
+            amount,
+            transactions,
+        };
+    }
+}
+/// data structure for maintaining summarized register data
+/// keyed by range
+#[derive(Debug, PartialEq)]
+struct GroupMap {
+    group_map: HashMap<String, f64>,
+}
+
+impl GroupMap {
+    fn new() -> GroupMap {
+        GroupMap {
+            group_map: HashMap::new(),
+        }
+    }
+
+    fn populate_group_map(
+        &mut self,
+        range: String,
+        amount: f64,
+        transactions: Vec<TransactionList>,
+    ) {
+        let prev_value = match self.group_map.get(&range) {
+            Some(value) => value,
+            None => &0.00,
+        };
+
+        if amount != 0.00 {
+            let inc_value = prev_value + amount;
+            self.group_map.insert(range, inc_value);
+        } else if !transactions.is_empty() {
+            for t in transactions {
+                self.group_map.insert(range.clone(), t.amount);
+            }
+        }
+    }
+}
+
+/// flatten abbreviated and detailed LedgerFile transactions into
+/// a Vec containing individual detailed transactions.
+/// all downstream logic expects this data structure.
+fn flatten_transactions(transactions: LedgerFile) -> Vec<Transaction> {
+    let mut flattened_transactions: Vec<Transaction> = Vec::new();
+
+    for t in transactions.transactions {
+        let OptionalKeys { amount, .. } = OptionalKeys::match_optional_fields(&t);
+        match t.transactions {
+            Some(subt) => {
+                for s in subt {
+                    flattened_transactions.push(Transaction {
+                        date: t.date.clone(),
+                        account: Some(s.account),
+                        amount: Some(s.amount),
+                        transactions: None,
+                        description: t.description.clone(),
+                        offset_account: None,
+                    });
+                }
+            }
+            None => {
+                // push entry
+                flattened_transactions.push(Transaction {
+                    account: t.account.clone(),
+                    offset_account: None,
+                    amount: t.amount.clone(),
+                    ..t.clone()
+                });
+
+                // push offset entry
+                flattened_transactions.push(Transaction {
+                    account: t.offset_account,
+                    offset_account: None,
+                    amount: Some(amount * -1.00),
+                    ..t
+                });
+            }
+        }
+    }
+
+    return flattened_transactions;
+}
+
+/// filter transactions by option. Downstream logic pairs this with
+/// the "group" argument for more extensive filtering
+fn filter_transactions_by_option(transactions: LedgerFile, option: &String) -> Vec<Transaction> {
+    let flattened_transactions = flatten_transactions(transactions);
+
+    return flattened_transactions
+        .into_iter()
+        .filter(|x| match option.as_str() {
+            "" => true,
+            _ => {
+                let OptionalKeys {
+                    account,
+                    offset_account,
+                    amount,
+                    ..
+                } = OptionalKeys::match_optional_fields(&x);
+
+                x.date.contains(option)
+                    || amount.to_string().contains(option)
+                    || account.contains(option)
+                    || offset_account.contains(option)
+                    || x.description.contains(option)
+            }
+        })
+        .collect();
 }
 
 impl LedgerFile {
@@ -56,68 +214,34 @@ impl LedgerFile {
 
         // push transactions into Vec
         for transaction in self.transactions {
-            let optional_account = match transaction.account {
-                None => "".to_string(),
-                Some(name) => name,
+            let OptionalKeys {
+                account,
+                offset_account,
+                amount,
+                ..
+            } = OptionalKeys::match_optional_fields(&transaction);
+            let account_type: Vec<&str> = account.split(":").collect();
+
+            let debit_credit = match account_type[0] {
+                "income" => -amount,
+                _ => amount,
             };
 
-            let optional_amount = match transaction.amount {
-                None => 0.00,
-                Some(number) => number,
-            };
+            transactions_vec.push(Account {
+                account: account.clone(),
+                amount: debit_credit,
+            });
 
-            let account_type: Vec<&str> = optional_account.split(":").collect();
-
-            match transaction.transaction {
-                None => {
-                    let offset_account = match transaction.offset_account {
-                        None => "".to_string(),
-                        Some(name) => name,
-                    };
-
-                    let amount = match account_type[0] {
-                        "income" => -optional_amount,
-                        _ => optional_amount,
-                    };
-
-                    transactions_vec.push(Account {
-                        account: optional_account,
-                        amount,
-                    });
-
-                    if !offset_account.is_empty() {
-                        transactions_vec.push(Account {
-                            account: offset_account,
-                            amount: -amount,
-                        });
-                    }
-                }
-                Some(split) => {
-                    let mut credit: f64 = 0.0;
-
-                    for i in split {
-                        let amount = match account_type[0] {
-                            "income" => -i.amount,
-                            _ => i.amount,
-                        };
-                        credit += amount;
-                        transactions_vec.push(Account {
-                            account: i.account,
-                            amount: i.amount,
-                        })
-                    }
-
-                    transactions_vec.push(Account {
-                        account: optional_account,
-                        amount: optional_amount - credit,
-                    });
-                }
+            if !offset_account.is_empty() {
+                transactions_vec.push(Account {
+                    account: offset_account.clone(),
+                    amount: -amount.clone(),
+                });
             }
         }
 
         // loop over Vecs and increment(+)/decrement(-) totals
         // for each transaction
-
         for transaction in &transactions_vec {
             let transaction_account_type: Vec<&str> = transaction.account.split(":").collect();
 
@@ -133,14 +257,11 @@ impl LedgerFile {
         }
 
         // create output
-
         let mut check_figure: f64 = 0.0;
+        let mut current_account_type = String::new();
 
         println!("{0: <29} {1: <20}", "Account".bold(), "Balance".bold());
-
         println!("{0:-<39}", "".bright_blue());
-
-        let mut current_account_type = String::new();
 
         for account in accounts_vec {
             check_figure += account.amount;
@@ -171,6 +292,7 @@ impl LedgerFile {
 
         println!("\n{:-<39}", "".bright_blue());
         print!("{: <30}", "check");
+
         if check_figure == 0.0 {
             print!(" {:<20}\n", check_figure.to_string().bold());
         } else {
@@ -178,6 +300,40 @@ impl LedgerFile {
         }
 
         println!("\n");
+    }
+
+    pub fn print_register_group(self, option: &String, group: Group) {
+        let mut group_map = GroupMap::new();
+        let filtered_transactions = filter_transactions_by_option(self, option);
+
+        println!("\n{0: <10} {1: <23} ", "Date".bold(), "Total".bold());
+        println!("{0:-<81}", "".bright_blue());
+
+        for transaction in filtered_transactions {
+            let OptionalKeys {
+                amount,
+                transactions,
+                ..
+            } = OptionalKeys::match_optional_fields(&transaction);
+
+            let date: Vec<&str> = transaction.date.split("/").collect();
+            let month = date[0].to_string();
+            let year = date[2].to_string();
+
+            match group {
+                Group::Month => group_map.populate_group_map(month, amount, transactions),
+                Group::Year => group_map.populate_group_map(year, amount, transactions),
+                Group::None => (),
+            }
+        }
+
+        for (k, v) in group_map.group_map.iter() {
+            println!(
+                "{0: <10} {1: <23}",
+                k,
+                format!("{: >1}", money!(v, "USD")).to_string().bold()
+            );
+        }
     }
 
     pub fn print_register(self, option: &String) {
@@ -190,284 +346,76 @@ impl LedgerFile {
 
         println!("{0:-<81}", "".bright_blue());
 
-        let filtered_items: Vec<Transaction> = self
-            .transactions
-            .into_iter()
-            .filter(|x| match option.as_str() {
-                "all" => true,
-                _ => {
-                    let optional_account = match &x.account {
-                        None => "optional:account".to_string(),
-                        Some(name) => name.to_string(),
-                    };
+        let filtered_transactions = filter_transactions_by_option(self, option);
 
-                    let optional_offset_account = match &x.offset_account {
-                        None => "optional:account".to_string(),
-                        Some(name) => name.to_string(),
-                    };
+        for t in filtered_transactions {
+            let OptionalKeys {
+                account,
+                offset_account,
+                amount,
+                ..
+            } = OptionalKeys::match_optional_fields(&t);
 
-                    let optional_amount = match x.amount {
-                        None => 0.00,
-                        Some(number) => number,
-                    };
-
-                    x.date.contains(option)
-                        || optional_amount.to_string().contains(option)
-                        || optional_account.contains(option)
-                        || optional_offset_account.contains(option)
-                        || x.description.contains(option)
-                }
-            })
-            .collect();
-
-        for item in filtered_items {
-            let optional_account = match item.account {
-                None => "optional:account".to_string(),
-                Some(name) => name,
-            };
-
-            let optional_offset_account = match item.offset_account {
-                None => "optional:account".to_string(),
-                Some(name) => name,
-            };
-
-            let optional_amount = match item.amount {
-                None => 0.00,
-                Some(number) => number,
-            };
-
-            let mut credit: f64 = 0.0;
-
-            let account_vec: Vec<&str> = optional_account.split(":").collect();
+            let account_vec: Vec<&str> = account.split(":").collect();
             let account_type = account_vec[0];
             let account_name = account_vec[1];
 
-            let offset_account_vec: Vec<&str> = optional_offset_account.split(":").collect();
+            let offset_account_vec: Vec<&str> = offset_account.split(":").collect();
             let offset_account_name = offset_account_vec[1];
 
-            match item.transaction {
-                None => {
-                    match account_type {
-                        "income" => {
-                            match &optional_offset_account[..] {
-                                "optional:account" => continue,
-                                _ => {
-                                    println!(
-                                        "{0: <10} {1: <23} {2: <20} {3: >12} {4: >12}",
-                                        item.date,
-                                        item.description.bold(),
-                                        offset_account_name,
-                                        format!("{: >1}", money!(optional_amount, "USD"))
-                                            .to_string()
-                                            .bold(),
-                                        format!("{: >1}", money!(optional_amount, "USD"))
-                                            .to_string()
-                                            .bold()
-                                    );
-                                }
-                            }
-                            match &optional_account[..] {
-                                "optional:account" => continue,
-                                _ => {
-                                    println!(
-                                        "{0: <35}{1: <20} {2: >12} {3: >12}",
-                                        "",
-                                        account_name,
-                                        format!("{: >1}", money!(-optional_amount, "USD"))
-                                            .to_string()
-                                            .bold(),
-                                        "0".bold() // hack for now. No need to do any math
-                                    );
-                                }
-                            }
-                        }
+            match account_type {
+                "income" => {
+                    match &offset_account[..] {
+                        "optional:account" => continue,
                         _ => {
-                            match &optional_account[..] {
-                                "optional:account" => continue,
-                                _ => {
-                                    println!(
-                                        "{0: <10} {1: <23} {2: <20} {3: >12} {4: >12}",
-                                        item.date,
-                                        item.description.bold(),
-                                        account_name,
-                                        format!("{: >1}", money!(optional_amount, "USD"))
-                                            .to_string()
-                                            .bold(),
-                                        format!("{: >1}", money!(optional_amount, "USD"))
-                                            .to_string()
-                                            .bold()
-                                    );
-                                }
-                            }
-                            match &optional_offset_account[..] {
-                                "optional:account" => continue,
-                                _ => {
-                                    println!(
-                                        "{0: <35}{1: <20} {2: >12} {3: >12}",
-                                        "",
-                                        offset_account_name,
-                                        format!("{: >1}", money!(-optional_amount, "USD"))
-                                            .to_string()
-                                            .bold(),
-                                        format!(
-                                            "{: >1}",
-                                            money!((optional_amount - optional_amount), "USD")
-                                        )
-                                        .to_string()
-                                        .bold()
-                                    );
-                                }
-                            }
+                            println!(
+                                "{0: <10} {1: <23} {2: <20} {3: >12}",
+                                t.date,
+                                t.description.bold(),
+                                offset_account_name,
+                                format!("{: >1}", money!(amount, "USD")).to_string().bold(),
+                            );
                         }
-                    };
-                }
-                Some(split) => {
-                    match account_type {
-                        "income" => {
-                            if let Some((last, elements)) = split.split_last() {
-                                match &optional_offset_account[..] {
-                                    "optional:account" => continue,
-                                    _ => {
-                                        println!(
-                                            "{0: <10} {1: <23} {2: <20} {3: >12} {4: >12}",
-                                            item.date,
-                                            item.description.bold(),
-                                            offset_account_name,
-                                            format!("{: >1}", money!(optional_amount, "USD"))
-                                                .to_string()
-                                                .bold(),
-                                            format!("{: >1}", money!(optional_amount, "USD"))
-                                                .to_string()
-                                                .bold()
-                                        );
-                                    }
-                                }
-                                for i in elements {
-                                    credit -= i.amount;
-                                    let i_account_vec: Vec<&str> = i.account.split(":").collect();
-                                    let i_account_name = i_account_vec[1];
-
-                                    match &i.account[..] {
-                                        "optional:account" => continue,
-                                        _ => {
-                                            println!(
-                                                "{0: <35}{1: <20} {2: >12} {3: >12}",
-                                                "",
-                                                i_account_name,
-                                                format!("{: >1}", money!(i.amount, "USD"))
-                                                    .to_string()
-                                                    .bold(),
-                                                format!("{: >1}", money!(credit, "USD"))
-                                                    .to_string()
-                                                    .bold()
-                                            );
-                                        }
-                                    }
-                                }
-
-                                credit -= last.amount;
-                                let check: f64 = optional_amount - credit;
-
-                                let last_account_vec: Vec<&str> = last.account.split(":").collect();
-                                let last_account_name = last_account_vec[1];
-
-                                match &last.account[..] {
-                                    "optional:account" => continue,
-                                    _ => {
-                                        println!(
-                                            "{0: <35}{1: <20} {2: >12} {3: >12}",
-                                            "",
-                                            last_account_name,
-                                            format!("{: >1}", money!(last.amount, "USD"))
-                                                .to_string()
-                                                .bold(),
-                                            if check != 0.0 {
-                                                format!("{: >1}", money!(check, "USD"))
-                                                    .to_string()
-                                                    .red()
-                                                    .bold()
-                                            } else {
-                                                check.to_string().bold()
-                                            }
-                                        );
-                                    }
-                                }
-                            }
-                        }
+                    }
+                    match &account[..] {
+                        "optional:account" => continue,
                         _ => {
-                            if let Some((first, elements)) = split.split_first() {
-                                credit += first.amount;
-
-                                let first_account_vec: Vec<&str> =
-                                    first.account.split(":").collect();
-                                let first_account_name = first_account_vec[1];
-
-                                match &first.account[..] {
-                                    "optional:account" => continue,
-                                    _ => {
-                                        println!(
-                                            "{0: <10} {1: <23} {2: <20} {3: >12} {4: >12}",
-                                            item.date,
-                                            item.description.bold(),
-                                            first_account_name,
-                                            format!("{: >1}", money!(first.amount, "USD"))
-                                                .to_string()
-                                                .bold(),
-                                            format!("{: >1}", money!(first.amount, "USD"))
-                                                .to_string()
-                                                .bold()
-                                        );
-                                    }
-                                }
-
-                                for i in elements {
-                                    credit += i.amount;
-                                    let i_account_vec: Vec<&str> = i.account.split(":").collect();
-                                    let i_account_name = i_account_vec[1];
-
-                                    match &i.account[..] {
-                                        "optional:account" => continue,
-                                        _ => {
-                                            println!(
-                                                "{0: <35}{1: <20} {2: >12} {3: >12}",
-                                                "",
-                                                i_account_name,
-                                                format!("{: >1}", money!(i.amount, "USD"))
-                                                    .to_string()
-                                                    .bold(),
-                                                format!("{: >1}", money!(credit, "USD"))
-                                                    .to_string()
-                                                    .bold()
-                                            );
-                                        }
-                                    }
-                                }
-
-                                let check: f64 = optional_amount - credit;
-
-                                match &optional_offset_account[..] {
-                                    "optional:account" => continue,
-                                    _ => {
-                                        println!(
-                                            "{0: <35}{1: <20} {2: >12} {3: >12}",
-                                            "",
-                                            offset_account_name,
-                                            format!("{: >1}", money!(-optional_amount, "USD"))
-                                                .to_string()
-                                                .bold(),
-                                            if check != 0.0 {
-                                                (check).to_string().red().bold()
-                                            } else {
-                                                (check).to_string().bold()
-                                            }
-                                        );
-                                    }
-                                }
-                            }
+                            println!(
+                                "{0: <35}{1: <20} {2: >12} {3: >12}",
+                                "",
+                                account_name,
+                                format!("{: >1}", money!(-amount, "USD")).to_string().bold(),
+                                "0".bold()
+                            );
                         }
-                    };
+                    }
                 }
-            }
+                _ => {
+                    match &account[..] {
+                        "optional:account" => continue,
+                        _ => {
+                            println!(
+                                "{0: <10} {1: <23} {2: <20} {3: >12}",
+                                t.date,
+                                t.description.bold(),
+                                account_name,
+                                format!("{: >1}", money!(amount, "USD")).to_string().bold(),
+                            );
+                        }
+                    }
+                    match &offset_account[..] {
+                        "optional:account" => continue,
+                        _ => {
+                            println!(
+                                "{0: <35}{1: <20} {2: >12}",
+                                "",
+                                offset_account_name,
+                                format!("{: >1}", money!(-amount, "USD")).to_string().bold(),
+                            );
+                        }
+                    }
+                }
+            };
         }
 
         println!("\n");
@@ -494,7 +442,7 @@ fn print_accounts_to_stdout() {
             amount: Some(10.00),
             description: "test".to_string(),
             offset_account: Some("expenses:foo".to_string()),
-            transaction: None,
+            transactions: None,
         }],
     };
 
@@ -521,7 +469,7 @@ fn print_balances_to_stdout() {
             amount: Some(10.00),
             description: "test".to_string(),
             offset_account: Some("expenses:foo".to_string()),
-            transaction: None,
+            transactions: None,
         }],
     };
 
@@ -548,7 +496,7 @@ fn print_register_to_stdout() {
             amount: Some(10.00),
             description: "test".to_string(),
             offset_account: Some("expenses:foo".to_string()),
-            transaction: None,
+            transactions: None,
         }],
     };
 
