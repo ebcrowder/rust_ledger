@@ -350,71 +350,30 @@ impl LedgerFile {
 
         for t in filtered_transactions {
             let OptionalKeys {
-                account,
-                offset_account,
-                amount,
-                ..
+                account, amount, ..
             } = OptionalKeys::match_optional_fields(&t);
 
             let account_vec: Vec<&str> = account.split(":").collect();
             let account_type = account_vec[0];
             let account_name = account_vec[1];
 
-            let offset_account_vec: Vec<&str> = offset_account.split(":").collect();
-            let offset_account_name = offset_account_vec[1];
-
             match account_type {
                 "income" => {
-                    match &offset_account[..] {
-                        "optional:account" => continue,
-                        _ => {
-                            println!(
-                                "{0: <10} {1: <23} {2: <20} {3: >12}",
-                                t.date,
-                                t.description.bold(),
-                                offset_account_name,
-                                format!("{: >1}", money!(amount, "USD")).to_string().bold(),
-                            );
-                        }
-                    }
-                    match &account[..] {
-                        "optional:account" => continue,
-                        _ => {
-                            println!(
-                                "{0: <35}{1: <20} {2: >12} {3: >12}",
-                                "",
-                                account_name,
-                                format!("{: >1}", money!(-amount, "USD")).to_string().bold(),
-                                "0".bold()
-                            );
-                        }
-                    }
+                    println!(
+                        "{0: <35}{1: <20} {2: >12} {3: >20}",
+                        "",
+                        account_name,
+                        format!("{: >1}", money!(-amount, "USD")).to_string().bold(),
+                        "0".bold()
+                    );
                 }
-                _ => {
-                    match &account[..] {
-                        "optional:account" => continue,
-                        _ => {
-                            println!(
-                                "{0: <10} {1: <23} {2: <20} {3: >12}",
-                                t.date,
-                                t.description.bold(),
-                                account_name,
-                                format!("{: >1}", money!(amount, "USD")).to_string().bold(),
-                            );
-                        }
-                    }
-                    match &offset_account[..] {
-                        "optional:account" => continue,
-                        _ => {
-                            println!(
-                                "{0: <35}{1: <20} {2: >12}",
-                                "",
-                                offset_account_name,
-                                format!("{: >1}", money!(-amount, "USD")).to_string().bold(),
-                            );
-                        }
-                    }
-                }
+                _ => println!(
+                    "{0: <10} {1: <23} {2: <20} {3: >20}",
+                    t.date,
+                    t.description.bold(),
+                    account_name,
+                    format!("{: >1}", money!(amount, "USD")).to_string().bold(),
+                ),
             };
         }
 

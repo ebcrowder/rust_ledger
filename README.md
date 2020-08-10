@@ -189,7 +189,7 @@ transactions:
     offset_account: 
   - date: 
     description: 
-    transaction: 
+    transactions: 
       - amount: 
         account: 
       - amount: 
@@ -197,6 +197,7 @@ transactions:
 ```
 
 The ledger format schema is purposely lightweight. The only requirements are as follows:
-    - the `account` field should be expressed in the following format: `account_classification:account_name`.
-    - the `amount` field should be a number. It can include up to two (2) decimal points.  
-    - the `date` field should be in the following format: `MM-DD-YYYY`. 
+- the `account` field should be expressed in the following format: `account_classification:account_name`.
+- the `amount` field should be a number. It can include up to two (2) decimal points.  
+- the `date` field should be in the following format: `MM-DD-YYYY`. 
+
