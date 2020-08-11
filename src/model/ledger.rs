@@ -3,7 +3,7 @@ use monee::*;
 use serde::{Deserialize, Serialize};
 use std::collections::HashMap;
 
-/// root data structure that contains the deserialized ledger file data
+/// root data structure that contains the deserialized `LedgerFile` data
 /// and associated structs
 #[derive(Debug, PartialEq, Serialize, Deserialize)]
 pub struct LedgerFile {
@@ -33,7 +33,7 @@ pub struct TransactionList {
     pub amount: f64,
 }
 
-/// enumerates all possible "group" values for pattern matching
+/// enumerates all possible `group` values for pattern matching
 #[derive(Debug, PartialEq)]
 pub enum Group {
     Month,
@@ -41,8 +41,8 @@ pub enum Group {
     None,
 }
 
-/// data structure for handling optional values contained
-/// within the LedgerFile for ease of program access
+/// data structure for handling `Option` values contained
+/// within the `LedgerFile` for ease of program access
 #[derive(Debug, PartialEq)]
 struct OptionalKeys {
     account: String,
@@ -52,7 +52,7 @@ struct OptionalKeys {
 }
 
 impl OptionalKeys {
-    fn match_optional_fields(transaction: &Transaction) -> Self {
+    fn match_optional_keys(transaction: &Transaction) -> Self {
         let account = match &transaction.account {
             None => "optional:account".to_string(),
             Some(name) => name.to_string(),
@@ -118,14 +118,14 @@ impl GroupMap {
     }
 }
 
-/// flatten abbreviated and detailed LedgerFile transactions into
+/// flatten abbreviated and detailed `LedgerFile` transactions into
 /// a Vec containing individual detailed transactions.
 /// all downstream logic expects this data structure.
 fn flatten_transactions(transactions: LedgerFile) -> Vec<Transaction> {
     let mut flattened_transactions: Vec<Transaction> = Vec::new();
 
     for t in transactions.transactions {
-        let OptionalKeys { amount, .. } = OptionalKeys::match_optional_fields(&t);
+        let OptionalKeys { amount, .. } = OptionalKeys::match_optional_keys(&t);
         match t.transactions {
             Some(subt) => {
                 for s in subt {
@@ -177,7 +177,7 @@ fn filter_transactions_by_option(transactions: LedgerFile, option: &String) -> V
                     offset_account,
                     amount,
                     ..
-                } = OptionalKeys::match_optional_fields(&x);
+                } = OptionalKeys::match_optional_keys(&x);
 
                 x.date.contains(option)
                     || amount.to_string().contains(option)
@@ -220,7 +220,7 @@ impl LedgerFile {
                 offset_account,
                 amount,
                 ..
-            } = OptionalKeys::match_optional_fields(&transaction);
+            } = OptionalKeys::match_optional_keys(&transaction);
             let account_type: Vec<&str> = account.split(":").collect();
 
             let debit_credit = match account_type[0] {
@@ -315,7 +315,7 @@ impl LedgerFile {
                 amount,
                 transactions,
                 ..
-            } = OptionalKeys::match_optional_fields(&transaction);
+            } = OptionalKeys::match_optional_keys(&transaction);
 
             let date: Vec<&str> = transaction.date.split("/").collect();
             let month = date[0].to_string();
@@ -352,7 +352,7 @@ impl LedgerFile {
         for t in filtered_transactions {
             let OptionalKeys {
                 account, amount, ..
-            } = OptionalKeys::match_optional_fields(&t);
+            } = OptionalKeys::match_optional_keys(&t);
 
             let account_vec: Vec<&str> = account.split(":").collect();
             let account_type = account_vec[0];
@@ -383,107 +383,41 @@ impl LedgerFile {
 }
 
 #[cfg(test)]
-#[test]
-fn print_accounts_to_stdout() {
-    let file: LedgerFile = LedgerFile {
+fn get_file() -> LedgerFile {
+    LedgerFile {
         accounts: vec![
             Account {
-                account: "assets:cash".to_string(),
+                account: "asset:cash".to_string(),
                 amount: 100.00,
             },
             Account {
-                account: "expenses:foo".to_string(),
+                account: "expense:foo".to_string(),
                 amount: 0.00,
             },
-        ],
-        transactions: vec![Transaction {
-            date: "2020-01-01".to_string(),
-            account: Some("assets:cash".to_string()),
-            amount: Some(10.00),
-            description: "test".to_string(),
-            offset_account: Some("expenses:foo".to_string()),
-            transactions: None,
-        }],
-    };
-
-    let result = LedgerFile::print_accounts(file);
-    assert_eq!(result, ())
-}
-
-#[test]
-fn print_balances_to_stdout() {
-    let file: LedgerFile = LedgerFile {
-        accounts: vec![
             Account {
-                account: "assets:cash".to_string(),
-                amount: 100.00,
-            },
-            Account {
-                account: "expenses:foo".to_string(),
+                account: "expense:bar".to_string(),
                 amount: 0.00,
             },
-        ],
-        transactions: vec![Transaction {
-            date: "2020-01-01".to_string(),
-            account: Some("assets:cash".to_string()),
-            amount: Some(10.00),
-            description: "test".to_string(),
-            offset_account: Some("expenses:foo".to_string()),
-            transactions: None,
-        }],
-    };
-
-    let result = LedgerFile::print_balances(file);
-    assert_eq!(result, ())
-}
-
-#[test]
-fn print_register_to_stdout() {
-    let file: LedgerFile = LedgerFile {
-        accounts: vec![
             Account {
-                account: "assets:cash".to_string(),
-                amount: 100.00,
-            },
-            Account {
-                account: "expenses:foo".to_string(),
-                amount: 0.00,
-            },
-        ],
-        transactions: vec![Transaction {
-            date: "2020-01-01".to_string(),
-            account: Some("assets:cash".to_string()),
-            amount: Some(10.00),
-            description: "test".to_string(),
-            offset_account: Some("expenses:foo".to_string()),
-            transactions: None,
-        }],
-    };
-
-    let result = LedgerFile::print_register(file, &"".to_string());
-    assert_eq!(result, ())
-}
-
-#[test]
-fn rl_flatten_transactions() {
-    let file: LedgerFile = LedgerFile {
-        accounts: vec![
-            Account {
-                account: "assets:cash".to_string(),
-                amount: 100.00,
-            },
-            Account {
-                account: "expenses:foo".to_string(),
+                account: "expense:baz".to_string(),
                 amount: 0.00,
             },
         ],
         transactions: vec![
             Transaction {
                 date: "2020-01-01".to_string(),
-                account: Some("assets:cash".to_string()),
+                account: Some("asset:cash".to_string()),
                 amount: Some(10.00),
                 description: "summary_transaction".to_string(),
-                offset_account: Some("expenses:foo".to_string()),
+                offset_account: Some("expense:foo".to_string()),
+                transactions: None,
+            },
+            Transaction {
+                date: "2020-01-01".to_string(),
+                account: Some("asset:cash".to_string()),
+                amount: Some(-42.00),
+                description: "summary_transaction".to_string(),
+                offset_account: Some("expense:foo".to_string()),
                 transactions: None,
             },
             Transaction {
@@ -494,22 +428,95 @@ fn rl_flatten_transactions() {
                 offset_account: None,
                 transactions: Some(vec![
                     TransactionList {
-                        account: "assets:cash".to_string(),
+                        account: "asset:cash".to_string(),
                         amount: -50.00,
                     },
                     TransactionList {
-                        account: "expenses:bar".to_string(),
+                        account: "expense:bar".to_string(),
                         amount: 20.00,
                     },
                     TransactionList {
-                        account: "expenses:baz".to_string(),
+                        account: "expense:baz".to_string(),
                         amount: 30.00,
                     },
                 ]),
             },
         ],
-    };
+    }
+}
 
+#[test]
+fn print_accounts_to_stdout() {
+    let file = get_file();
+    let result = LedgerFile::print_accounts(file);
+
+    assert_eq!(result, ())
+}
+
+#[test]
+fn print_balances_to_stdout() {
+    let file = get_file();
+    let result = LedgerFile::print_balances(file);
+
+    assert_eq!(result, ())
+}
+
+#[test]
+fn print_register_to_stdout() {
+    let file = get_file();
+    let result = LedgerFile::print_register(file, &"".to_string());
+
+    assert_eq!(result, ())
+}
+
+#[test]
+fn flatten_ledgerfile_transactions() {
+    let file = get_file();
     let result = flatten_transactions(file);
-    assert_eq!(result.len(), 5)
+
+    assert_eq!(result.len(), 7)
+}
+
+#[test]
+fn optional_keys() {
+    let file = get_file();
+    let result = OptionalKeys::match_optional_keys(&file.transactions[0].clone());
+
+    assert_eq!(
+        result,
+        OptionalKeys {
+            account: "asset:cash".to_string(),
+            amount: 10.00,
+            offset_account: "expense:foo".to_string(),
+            transactions: vec![]
+        }
+    )
+}
+
+#[test]
+fn filter_transactions_by_option_42() {
+    let file = get_file();
+    let result = filter_transactions_by_option(file, &"42".to_string());
+
+    assert_eq!(
+        result,
+        vec![
+            Transaction {
+                date: "2020-01-01".to_string(),
+                account: Some("asset:cash".to_string()),
+                amount: Some(-42.00),
+                description: "summary_transaction".to_string(),
+                offset_account: None,
+                transactions: None,
+            },
+            Transaction {
+                date: "2020-01-01".to_string(),
+                account: Some("expense:foo".to_string()),
+                amount: Some(42.00),
+                description: "summary_transaction".to_string(),
+                offset_account: None,
+                transactions: None,
+            }
+        ]
+    )
 }
