@@ -73,7 +73,7 @@ GROUP (denoted by `-g`) - allows you to group the output of the `register` comma
 Transactions can be expressed in two different ways. One is a "simplified" format for transactions that only impact two accounts: 
 
 ```yaml
-- date: 01/01/2020
+- date: 2020-01-01
   amount: 200
   offset_account: liability:credit_card_amex
   description: grocery store
@@ -156,13 +156,13 @@ check                          0
 ```
 Date       Description             Accounts              
 ---------------------------------------------------------------------------------
-11/4/2019  weekly groceries        grocery                  $ 455.00     $ 455.00
+2019-12-31 weekly groceries        grocery                  $ 455.00     $ 455.00
                                    credit_card_amex        $ -455.00            0
-07/04/2020 mortage                 mortgage                $ 2000.00    $ 2000.00
+2020-01-01 mortage                 mortgage                $ 2000.00    $ 2000.00
                                    cash_checking          $ -2000.00            0
-07/04/2020 stuff                   general                 $ 1000.00    $ 1000.00
+2020-01-01 stuff                   general                 $ 1000.00    $ 1000.00
                                    cash_savings           $ -1000.00            0
-06/21/2020 grocery store           general                   $ 20.00      $ 20.00
+2020-01-01 grocery store           general                   $ 20.00      $ 20.00
                                    grocery                  $ 180.00     $ 200.00
                                    cash_checking           $ -200.00            0
 ```
@@ -201,5 +201,5 @@ transactions:
 The ledger format schema is purposely lightweight. The only requirements are as follows:
 - the `account` field should be expressed in the following format: `account_classification:account_name`.
 - the `amount` field should be a number. It can include up to two (2) decimal points.  
-- the `date` field should be in the following format: `MM-DD-YYYY`. 
+- the `date` field should be in the following format: `YYYY-MM-DD`. 
 

@@ -317,9 +317,9 @@ impl LedgerFile {
                 ..
             } = OptionalKeys::match_optional_keys(&transaction);
 
-            let date: Vec<&str> = transaction.date.split("/").collect();
-            let month = date[0].to_string();
-            let year = date[2].to_string();
+            let date: Vec<&str> = transaction.date.split("-").collect();
+            let year = date[0].to_string();
+            let month = year.clone() + "-" + date[1];
 
             match group {
                 Group::Month => group_map.populate_group_map(month, amount, transactions),
