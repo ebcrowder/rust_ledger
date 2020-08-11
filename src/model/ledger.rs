@@ -81,6 +81,7 @@ impl OptionalKeys {
         };
     }
 }
+
 /// data structure for maintaining summarized register data
 /// keyed by range
 #[derive(Debug, PartialEq)]
@@ -461,4 +462,54 @@ fn print_register_to_stdout() {
 
     let result = LedgerFile::print_register(file, &"".to_string());
     assert_eq!(result, ())
+}
+
+#[test]
+fn rl_flatten_transactions() {
+    let file: LedgerFile = LedgerFile {
+        accounts: vec![
+            Account {
+                account: "assets:cash".to_string(),
+                amount: 100.00,
+            },
+            Account {
+                account: "expenses:foo".to_string(),
+                amount: 0.00,
+            },
+        ],
+        transactions: vec![
+            Transaction {
+                date: "2020-01-01".to_string(),
+                account: Some("assets:cash".to_string()),
+                amount: Some(10.00),
+                description: "summary_transaction".to_string(),
+                offset_account: Some("expenses:foo".to_string()),
+                transactions: None,
+            },
+            Transaction {
+                date: "2020-01-01".to_string(),
+                account: None,
+                amount: None,
+                description: "detailed_transaction".to_string(),
+                offset_account: None,
+                transactions: Some(vec![
+                    TransactionList {
+                        account: "assets:cash".to_string(),
+                        amount: -50.00,
+                    },
+                    TransactionList {
+                        account: "expenses:bar".to_string(),
+                        amount: 20.00,
+                    },
+                    TransactionList {
+                        account: "expenses:baz".to_string(),
+                        amount: 30.00,
+                    },
+                ]),
+            },
+        ],
+    };
+
+    let result = flatten_transactions(file);
+    assert_eq!(result.len(), 5)
 }
