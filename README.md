@@ -37,12 +37,12 @@ Alternatively, clone this repo and do the following:
 
 ### Usage
 
-`rust_ledger -l LEDGER_FILE_PATH COMMAND -f OPTION`
+`rust_ledger -f LEDGER_FILE_PATH COMMAND -o OPTION`
 
-LEDGER_FILE_PATH (denoted by `-l`) - relative path to location of yaml ledger file
+LEDGER_FILE_PATH (denoted by `-f`) - relative path to location of yaml ledger file
 
   - Optionally, the ledger file path can be set via the environment variable `RLEDGER_FILE` in lieu of specifying whenever the program is invoked.
-  - If `-l` is provided with a file path the file provided will be used instead of any `RLEDGER_FILE` set.
+  - If `-f` is provided with a file path the file provided will be used instead of any `RLEDGER_FILE` set.
 
 ```
 RLEDGER_FILE=~/rledger.yaml rust_ledger balances
@@ -56,7 +56,9 @@ export RLEDGER_FILE="$HOME/rledger.yaml"
 
 COMMAND - ledger command (account, balance, register, or csv)
 
-OPTION (denoted by `-f`) - allows you to filter the output of the `register` command by account type. For example, if you wish to only see "expense" transactions in the output, you would pass in `expense` as the option here.
+OPTION (denoted by `-o`) - allows you to filter the output of the `register` command by account type. For example, if you wish to only see "expense" transactions in the output, you would pass in `expense` as the option here.
+
+GROUP (denoted by `-g`) - allows you to group the output of the `register` command by `year` or `month`. 
 
 ### Environment Variables
 
@@ -87,7 +89,7 @@ Transactions that involve more than two accounts are expressed in the following 
 ```yaml
 - date: 01/01/2020
   description: grocery store
-  transaction:
+  transactions:
     - amount: 20
       account: expense:general
     - amount: 180
