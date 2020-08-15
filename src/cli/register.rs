@@ -4,7 +4,7 @@ use crate::error::Result;
 use crate::model::ledger::{Group, LedgerFile};
 
 /// returns all general ledger transactions
-pub fn register(filename: &String, option: &String, group: Group) -> Result<()> {
+pub fn register(filename: &str, option: &str, group: Group) -> Result<()> {
     let file = std::fs::File::open(filename)?;
     let deserialized_file: LedgerFile = serde_yaml::from_reader(file).unwrap();
 

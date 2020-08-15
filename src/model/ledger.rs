@@ -8,13 +8,13 @@ use std::str::FromStr;
 
 /// root data structure that contains the deserialized `LedgerFile` data
 /// and associated structs
-#[derive(Debug, PartialEq, Serialize, Deserialize)]
+#[derive(Debug, PartialEq, Clone, Serialize, Deserialize)]
 pub struct LedgerFile {
     pub accounts: Vec<Account>,
     pub transactions: Vec<Transaction>,
 }
 
-#[derive(Debug, PartialEq, Serialize, Deserialize)]
+#[derive(Debug, PartialEq, Clone, Serialize, Deserialize)]
 pub struct Account {
     pub account: String,
     pub amount: f64,
@@ -89,12 +89,12 @@ impl OptionalKeys {
             Some(list) => list,
         };
 
-        return Self {
+        Self {
             account,
             offset_account,
             amount,
             transactions,
-        };
+        }
     }
 }
 
@@ -146,7 +146,7 @@ fn flatten_transactions(transactions: LedgerFile) -> Vec<Transaction> {
             Some(subt) => {
                 for s in subt {
                     flattened_transactions.push(Transaction {
-                        date: t.date.clone(),
+                        date: t.date,
                         account: Some(s.account),
                         amount: Some(s.amount),
                         transactions: None,
@@ -160,7 +160,7 @@ fn flatten_transactions(transactions: LedgerFile) -> Vec<Transaction> {
                 flattened_transactions.push(Transaction {
                     account: t.account.clone(),
                     offset_account: None,
-                    amount: t.amount.clone(),
+                    amount: t.amount,
                     ..t.clone()
                 });
 
@@ -174,18 +174,17 @@ fn flatten_transactions(transactions: LedgerFile) -> Vec<Transaction> {
             }
         }
     }
-
-    return flattened_transactions;
+    flattened_transactions
 }
 
 /// filter transactions by option. Downstream logic pairs this with
 /// the "group" argument for more extensive filtering
-fn filter_transactions_by_option(transactions: LedgerFile, option: &String) -> Vec<Transaction> {
+fn filter_transactions_by_option(transactions: LedgerFile, option: &str) -> Vec<Transaction> {
     let flattened_transactions = flatten_transactions(transactions);
 
-    return flattened_transactions
+    flattened_transactions
         .into_iter()
-        .filter(|x| match option.as_str() {
+        .filter(|x| match option {
             "" => true,
             _ => {
                 let OptionalKeys {
@@ -202,7 +201,7 @@ fn filter_transactions_by_option(transactions: LedgerFile, option: &String) -> V
                     || x.description.contains(option)
             }
         })
-        .collect();
+        .collect()
 }
 
 impl LedgerFile {
@@ -237,7 +236,7 @@ impl LedgerFile {
                 amount,
                 ..
             } = OptionalKeys::match_optional_keys(&transaction);
-            let account_type: Vec<&str> = account.split(":").collect();
+            let account_type: Vec<&str> = account.split(':').collect();
 
             let debit_credit = match account_type[0] {
                 "income" => -amount,
@@ -252,7 +251,7 @@ impl LedgerFile {
             if !offset_account.is_empty() {
                 transactions_vec.push(Account {
                     account: offset_account.clone(),
-                    amount: -amount.clone(),
+                    amount: -amount,
                 });
             }
         }
@@ -260,10 +259,10 @@ impl LedgerFile {
         // loop over Vecs and increment(+)/decrement(-) totals
         // for each transaction
         for transaction in &transactions_vec {
-            let transaction_account_type: Vec<&str> = transaction.account.split(":").collect();
+            let transaction_account_type: Vec<&str> = transaction.account.split(':').collect();
 
             for account in &mut accounts_vec {
-                let account_type: Vec<&str> = account.account.split(":").collect();
+                let account_type: Vec<&str> = account.account.split(':').collect();
 
                 if account.account.eq_ignore_ascii_case(&transaction.account)
                     && account_type[0] == transaction_account_type[0]
@@ -282,7 +281,7 @@ impl LedgerFile {
 
         for account in accounts_vec {
             check_figure += account.amount;
-            let account_type: Vec<&str> = account.account.split(":").collect();
+            let account_type: Vec<&str> = account.account.split(':').collect();
 
             if !current_account_type.eq(account_type[0]) {
                 current_account_type = account_type[0].to_string();
@@ -311,15 +310,15 @@ impl LedgerFile {
         print!("{: <30}", "check");
 
         if check_figure == 0.0 {
-            print!(" {:<20}\n", check_figure.to_string().bold());
+            println!(" {:<20}\n", check_figure.to_string().bold());
         } else {
-            print!(" {:<20}\n", format!("{0:.2}", check_figure).red().bold());
+            println!(" {:<20}\n", format!("{0:.2}", check_figure).red().bold());
         }
 
         println!("\n");
     }
 
-    pub fn print_register_group(self, option: &String, group: Group) {
+    pub fn print_register_group(self, option: &str, group: Group) {
         let mut group_map = GroupMap::new();
         let filtered_transactions = filter_transactions_by_option(self, option);
 
@@ -352,7 +351,7 @@ impl LedgerFile {
         }
     }
 
-    pub fn print_register(self, option: &String) {
+    pub fn print_register(self, option: &str) {
         println!(
             "\n{0: <10} {1: <23} {2: <22}",
             "Date".bold(),
@@ -369,7 +368,7 @@ impl LedgerFile {
                 account, amount, ..
             } = OptionalKeys::match_optional_keys(&t);
 
-            let account_vec: Vec<&str> = account.split(":").collect();
+            let account_vec: Vec<&str> = account.split(':').collect();
             let account_type = account_vec[0];
             let account_name = account_vec[1];
 

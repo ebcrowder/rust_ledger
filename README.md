@@ -56,9 +56,11 @@ export RLEDGER_FILE="$HOME/rledger.yaml"
 
 COMMAND - ledger command (account, balance, register, or csv)
 
-OPTION (denoted by `-o`) - allows you to filter the output of the `register` command by account type. For example, if you wish to only see "expense" transactions in the output, you would pass in `expense` as the option here.
+OPTION (denoted by `-o`) - allows you to filter the output of the `register` command by account type. For example, if you wish to only see "expense" transactions in the output, you would pass in `expense` as the option here. Additionally, the csv tool uses this parameter for specifying the csv file to be parsed.
 
 GROUP (denoted by `-g`) - allows you to group the output of the `register` command by `year` or `month`. 
+
+OFFSET (denoted by `-s`) - required for csv tool. Specifies the offsetting account that each transaction should be posted against. 
 
 ### Environment Variables
 
@@ -168,10 +170,15 @@ Date       Description             Accounts
 ```
 
 - csv
-  - converts `csv` files to `yaml` format expected by `rust_ledger`
-  - most financial institutions (banks, credit unions and credit card companies) will provide exports of transaction history in `csv` format
+  - converts `csv` files to `yaml` format expected by `rust_ledger`.
+  - should be invoked with `-f`, `-o`, and `s` arguments. These include the rust_ledger file location (unless specified via environment variable),
+  csv file location and account offset, respectively.
+  - the account offset (`s` argument) would be the offset transaction that the csv transactions should be posted against.
+  - the csv tool will look for existing transactions that have matching `description` fields and will populate the appropriate expense/income accounts
+  for any matches. Non-matches will use a default of `expense:general` or `income:general`, which is determined based on the sign of the `amount` field
+  contained in the transaction.
   - **note** - prior to importing your `csv` file into the tool, you must rename the columns in the first line of the `csv` file in the following schema:
-    `"date","transaction","name","memo","amount"`
+    `"date","transaction","name","memo","amount"`.
 
 ### rust_ledger `yaml` file format
 
