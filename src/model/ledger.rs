@@ -1,7 +1,10 @@
+use chrono::NaiveDate;
 use colored::*;
 use monee::*;
-use serde::{Deserialize, Serialize};
+use serde::{de, Deserialize, Deserializer, Serialize};
 use std::collections::HashMap;
+use std::fmt::Display;
+use std::str::FromStr;
 
 /// root data structure that contains the deserialized `LedgerFile` data
 /// and associated structs
@@ -19,12 +22,25 @@ pub struct Account {
 
 #[derive(Debug, PartialEq, Clone, Serialize, Deserialize)]
 pub struct Transaction {
-    pub date: String,
+    #[serde(deserialize_with = "deserialize_date_from_str")]
+    pub date: NaiveDate,
     pub account: Option<String>,
     pub amount: Option<f64>,
     pub description: String,
     pub offset_account: Option<String>,
     pub transactions: Option<Vec<TransactionList>>,
+}
+
+/// chrono::NaiveDate implements std::str::FromStr, so this is a generic
+/// deserializer fn that can deserialize YAML strings into the NaiveDate struct
+fn deserialize_date_from_str<'de, S, D>(deserializer: D) -> Result<S, D::Error>
+where
+    S: FromStr,
+    S::Err: Display,
+    D: Deserializer<'de>,
+{
+    let s: String = Deserialize::deserialize(deserializer)?;
+    S::from_str(&s).map_err(de::Error::custom)
 }
 
 #[derive(Debug, PartialEq, Clone, Serialize, Deserialize)]
@@ -179,7 +195,7 @@ fn filter_transactions_by_option(transactions: LedgerFile, option: &String) -> V
                     ..
                 } = OptionalKeys::match_optional_keys(&x);
 
-                x.date.contains(option)
+                x.date.to_string().contains(option)
                     || amount.to_string().contains(option)
                     || account.contains(option)
                     || offset_account.contains(option)
@@ -317,9 +333,8 @@ impl LedgerFile {
                 ..
             } = OptionalKeys::match_optional_keys(&transaction);
 
-            let date: Vec<&str> = transaction.date.split("-").collect();
-            let year = date[0].to_string();
-            let month = year.clone() + "-" + date[1];
+            let year = transaction.date.format("%Y").to_string();
+            let month = transaction.date.format("%Y-%m").to_string();
 
             match group {
                 Group::Month => group_map.populate_group_map(month, amount, transactions),
@@ -384,7 +399,12 @@ impl LedgerFile {
 
 #[cfg(test)]
 fn get_file() -> LedgerFile {
-    LedgerFile {
+    let date = match NaiveDate::parse_from_str("2020-01-01", "%Y-%m-%d") {
+        Ok(d) => d,
+        Err(e) => panic!("{:?}", e),
+    };
+
+    return LedgerFile {
         accounts: vec![
             Account {
                 account: "asset:cash".to_string(),
@@ -405,7 +425,7 @@ fn get_file() -> LedgerFile {
         ],
         transactions: vec![
             Transaction {
-                date: "2020-01-01".to_string(),
+                date,
                 account: Some("asset:cash".to_string()),
                 amount: Some(10.00),
                 description: "summary_transaction".to_string(),
@@ -413,7 +433,7 @@ fn get_file() -> LedgerFile {
                 transactions: None,
             },
             Transaction {
-                date: "2020-01-01".to_string(),
+                date,
                 account: Some("asset:cash".to_string()),
                 amount: Some(-42.00),
                 description: "summary_transaction".to_string(),
@@ -421,7 +441,7 @@ fn get_file() -> LedgerFile {
                 transactions: None,
             },
             Transaction {
-                date: "2020-01-01".to_string(),
+                date,
                 account: None,
                 amount: None,
                 description: "detailed_transaction".to_string(),
@@ -442,7 +462,7 @@ fn get_file() -> LedgerFile {
                 ]),
             },
         ],
-    }
+    };
 }
 
 #[test]
@@ -497,12 +517,16 @@ fn optional_keys() {
 fn filter_transactions_by_option_42() {
     let file = get_file();
     let result = filter_transactions_by_option(file, &"42".to_string());
+    let date = match NaiveDate::parse_from_str("2020-01-01", "%Y-%m-%d") {
+        Ok(d) => d,
+        Err(e) => panic!("{:?}", e),
+    };
 
     assert_eq!(
         result,
         vec![
             Transaction {
-                date: "2020-01-01".to_string(),
+                date,
                 account: Some("asset:cash".to_string()),
                 amount: Some(-42.00),
                 description: "summary_transaction".to_string(),
@@ -510,7 +534,7 @@ fn filter_transactions_by_option_42() {
                 transactions: None,
             },
             Transaction {
-                date: "2020-01-01".to_string(),
+                date,
                 account: Some("expense:foo".to_string()),
                 amount: Some(42.00),
                 description: "summary_transaction".to_string(),
