@@ -17,26 +17,26 @@ accounts:
     amount: 0
 
 transactions:
-  - date: 11/4/2019
+  - date: 2019-12-31 
     amount: 455
     description: weekly groceries
     account: expense:grocery
     offset_account: liability:credit_card_amex
-  - date: 07/04/2020
+  - date: 2020-01-01 
     amount: 2000
     description: mortage
     account: expense:mortgage
     offset_account: asset:cash_checking
-  - date: 07/04/2020
+  - date: 2020-01-01 
     description: stuff
-    transaction: 
+    transactions: 
       - amount: 1000
         account: expense:general
       - amount: -1000
         account: asset:cash_savings
-  - date: 06/21/2020
+  - date: 2020-01-01 
     description: grocery store
-    transaction:
+    transactions:
       - amount: 20
         account: expense:general
       - amount: 180

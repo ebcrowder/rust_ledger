@@ -37,12 +37,12 @@ Alternatively, clone this repo and do the following:
 
 ### Usage
 
-`rust_ledger -l LEDGER_FILE_PATH COMMAND -f OPTION`
+`rust_ledger -f LEDGER_FILE_PATH COMMAND -o OPTION`
 
-LEDGER_FILE_PATH (denoted by `-l`) - relative path to location of yaml ledger file
+LEDGER_FILE_PATH (denoted by `-f`) - relative path to location of yaml ledger file
 
   - Optionally, the ledger file path can be set via the environment variable `RLEDGER_FILE` in lieu of specifying whenever the program is invoked.
-  - If `-l` is provided with a file path the file provided will be used instead of any `RLEDGER_FILE` set.
+  - If `-f` is provided with a file path the file provided will be used instead of any `RLEDGER_FILE` set.
 
 ```
 RLEDGER_FILE=~/rledger.yaml rust_ledger balances
@@ -56,7 +56,9 @@ export RLEDGER_FILE="$HOME/rledger.yaml"
 
 COMMAND - ledger command (account, balance, register, or csv)
 
-OPTION (denoted by `-f`) - allows you to filter the output of the `register` command by account type. For example, if you wish to only see "expense" transactions in the output, you would pass in `expense` as the option here.
+OPTION (denoted by `-o`) - allows you to filter the output of the `register` command by account type. For example, if you wish to only see "expense" transactions in the output, you would pass in `expense` as the option here.
+
+GROUP (denoted by `-g`) - allows you to group the output of the `register` command by `year` or `month`. 
 
 ### Environment Variables
 
@@ -71,7 +73,7 @@ OPTION (denoted by `-f`) - allows you to filter the output of the `register` com
 Transactions can be expressed in two different ways. One is a "simplified" format for transactions that only impact two accounts: 
 
 ```yaml
-- date: 01/01/2020
+- date: 2020-01-01
   amount: 200
   offset_account: liability:credit_card_amex
   description: grocery store
@@ -87,7 +89,7 @@ Transactions that involve more than two accounts are expressed in the following 
 ```yaml
 - date: 01/01/2020
   description: grocery store
-  transaction:
+  transactions:
     - amount: 20
       account: expense:general
     - amount: 180
@@ -154,13 +156,13 @@ check                          0
 ```
 Date       Description             Accounts              
 ---------------------------------------------------------------------------------
-11/4/2019  weekly groceries        grocery                  $ 455.00     $ 455.00
+2019-12-31 weekly groceries        grocery                  $ 455.00     $ 455.00
                                    credit_card_amex        $ -455.00            0
-07/04/2020 mortage                 mortgage                $ 2000.00    $ 2000.00
+2020-01-01 mortage                 mortgage                $ 2000.00    $ 2000.00
                                    cash_checking          $ -2000.00            0
-07/04/2020 stuff                   general                 $ 1000.00    $ 1000.00
+2020-01-01 stuff                   general                 $ 1000.00    $ 1000.00
                                    cash_savings           $ -1000.00            0
-06/21/2020 grocery store           general                   $ 20.00      $ 20.00
+2020-01-01 grocery store           general                   $ 20.00      $ 20.00
                                    grocery                  $ 180.00     $ 200.00
                                    cash_checking           $ -200.00            0
 ```
@@ -189,7 +191,7 @@ transactions:
     offset_account: 
   - date: 
     description: 
-    transaction: 
+    transactions: 
       - amount: 
         account: 
       - amount: 
@@ -197,6 +199,7 @@ transactions:
 ```
 
 The ledger format schema is purposely lightweight. The only requirements are as follows:
-    - the `account` field should be expressed in the following format: `account_classification:account_name`.
-    - the `amount` field should be a number. It can include up to two (2) decimal points.  
-    - the `date` field should be in the following format: `MM-DD-YYYY`. 
+- the `account` field should be expressed in the following format: `account_classification:account_name`.
+- the `amount` field should be a number. It can include up to two (2) decimal points.  
+- the `date` field should be in the following format: `YYYY-MM-DD`. 
+
