@@ -87,7 +87,7 @@ In the above example transaction, since `expense_general` was debited by 200, th
 Transactions that involve more than two accounts are expressed in the following manner:
 
 ```yaml
-- date: 01/01/2020
+- date: 2020-01-01
   description: grocery store
   transactions:
     - amount: 20
