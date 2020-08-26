@@ -180,6 +180,9 @@ Date       Description             Accounts
   - **note** - prior to importing your `csv` file into the tool, you must rename the columns in the first line of the `csv` file in the following schema:
     `"date","transaction","name","memo","amount"`.
 
+- version
+  - prints release version to `stdout`.
+
 ### rust_ledger `yaml` file format
 
 - example ledger `yaml` file can be found at `examples/example.yaml`

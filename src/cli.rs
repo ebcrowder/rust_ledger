@@ -2,6 +2,7 @@ mod account;
 mod balance;
 mod csv;
 mod register;
+mod version;
 
 use crate::error::{Error, Result};
 use crate::model::ledger::Group;
@@ -17,6 +18,7 @@ pub fn run() -> Result<()> {
         String::from("balance"),
         String::from("register"),
         String::from("csv"),
+        String::from("version"),
     ];
     let expected_flag_args: Vec<String> = vec![];
     let expected_option_args: Vec<String> = vec![
@@ -73,6 +75,7 @@ pub fn run() -> Result<()> {
             "balance" => balance::balance(ledger_file),
             "register" => register::register(ledger_file, &options_arg, group_arg),
             "csv" => csv::csv(ledger_file, &options_arg, &offset_arg),
+            "version" => version::version(),
             _ => panic!("command not found."),
         },
     }
