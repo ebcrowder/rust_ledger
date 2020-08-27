@@ -1,6 +1,6 @@
 [package]
 name = "rust_ledger"
-version = "0.3.1"
+version = "0.4.0"
 authors = ["ebcrowder <ebcrowder@gmail.com>"]
 edition = "2018"
 license = "GPL-3.0"
@@ -14,7 +14,7 @@ readme = "README.md"
 serde_yaml = "0.8.13"
 serde = { version = "1.0.114", features = ["derive"] }
 csv = "1.1.3"
-pargs = "0.1.4" 
+pargs = "0.2.1" 
 colored = "2.0.0"
 monee = "0.0.5"
 chrono = { version = "0.4", features = ["serde"] }

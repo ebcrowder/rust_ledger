@@ -6,7 +6,7 @@ mod version;
 
 use crate::error::{Error, Result};
 use crate::model::ledger::Group;
-use pargs::*;
+use pargs::Pargs;
 use std::env;
 
 pub fn run() -> Result<()> {
@@ -28,11 +28,11 @@ pub fn run() -> Result<()> {
         String::from("-s"),
     ];
 
-    let Matches {
+    let Pargs {
         command_args,
         option_args,
         ..
-    } = pargs::parse(
+    } = Pargs::parse(
         args,
         expected_command_args,
         expected_flag_args,
