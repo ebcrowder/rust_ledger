@@ -27,6 +27,13 @@ As a former CPA, I could not resist building my own accounting system.
 
 `cargo install rust_ledger`
 
+#### Binaries for Linux, macOS, and Windows
+We distribute binaries for the above platforms. See [releases](https://github.com/ebcrowder/rust_ledger/releases) for a complete list by version.
+
+Additionally, we currently ship binaries through the following package managers:
+- Arch Linux AUR - rust_ledger-bin
+- Homebrew - rust_ledger
+
 #### Build from Source
 
 Alternatively, clone this repo and do the following:
