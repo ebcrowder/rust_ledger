@@ -32,7 +32,6 @@ We distribute binaries for the above platforms. See [releases](https://github.co
 
 Additionally, we currently ship binaries through the following package managers:
 - Arch Linux AUR - rust_ledger-bin
-- Homebrew - rust_ledger
 
 #### Build from Source
 
