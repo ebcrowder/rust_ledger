@@ -17,20 +17,23 @@ As a former CPA, I could not resist building my own accounting system.
 - Includes a tool to convert `csv` files to `yaml` format
 
 ### Contributing
+
 - See `CODE_OF_CONDUCT.md` for fundamental guidelines
 - PRs, issues and feature requests are welcome and encouraged
-- Join us on Matrix (#rust_ledger:matrix.org) at https://matrix.to/#/!dYISGJYNNiZcUrxhcm:matrix.org?via=matrix.org 
+- Join us on Matrix (#rust_ledger:matrix.org) at https://matrix.to/#/!dYISGJYNNiZcUrxhcm:matrix.org?via=matrix.org
 
 ### Install
 
-#### From Cargo 
+#### From Cargo
 
 `cargo install rust_ledger`
 
 #### Binaries for Linux, macOS, and Windows
+
 We distribute binaries for the above platforms. See [releases](https://github.com/ebcrowder/rust_ledger/releases) for a complete list by version.
 
 Additionally, we currently ship binaries through the following package managers:
+
 - Arch Linux AUR - rust_ledger-bin
 
 #### Build from Source
@@ -43,30 +46,43 @@ Alternatively, clone this repo and do the following:
 
 ### Usage
 
-`rust_ledger -f LEDGER_FILE_PATH COMMAND -o OPTION`
+`rust_ledger --help` will provide a menu of all available commands and optional arguments.
+
+```bash
+rust_ledger <version>
+Eric Crowder <ebcrowder@gmail.com>
+
+USAGE:
+    rust_ledger [SUBCOMMAND]
+
+FLAGS:
+    -h, --help       Prints help information
+    -V, --version    Prints version information
+
+SUBCOMMANDS:
+    account     account module
+    balance     balance module
+    csv         csv module
+    help        Prints this message or the help of the given subcommand(s)
+    register    register module
+```
+
+`rust_ledger COMMAND -f LEDGER_FILE_PATH`
 
 LEDGER_FILE_PATH (denoted by `-f`) - relative path to location of yaml ledger file
 
-  - Optionally, the ledger file path can be set via the environment variable `RLEDGER_FILE` in lieu of specifying whenever the program is invoked.
-  - If `-f` is provided with a file path the file provided will be used instead of any `RLEDGER_FILE` set.
+- Optionally, the ledger file path can be set via the environment variable `RLEDGER_FILE` in lieu of specifying whenever the program is invoked.
+- If `-f` is provided with a file path the file provided will be used instead of any `RLEDGER_FILE` set.
 
 ```
-RLEDGER_FILE=~/rledger.yaml rust_ledger balances
+RLEDGER_FILE=~/rledger.yaml rust_ledger balance
 ```
 
 `RLEDGER_FILE` can be set as a system or user environment variable.
 
 ```
-export RLEDGER_FILE="$HOME/rledger.yaml"
+export RLEDGER_FILE=$HOME/rledger.yaml
 ```
-
-COMMAND - ledger command (account, balance, register, or csv)
-
-OPTION (denoted by `-o`) - allows you to filter the output of the `register` command by account type. For example, if you wish to only see "expense" transactions in the output, you would pass in `expense` as the option here. Additionally, the csv tool uses this parameter for specifying the csv file to be parsed.
-
-GROUP (denoted by `-g`) - allows you to group the output of the `register` command by `year` or `month`. 
-
-OFFSET (denoted by `-s`) - required for csv tool. Specifies the offsetting account that each transaction should be posted against. 
 
 ### Environment Variables
 
@@ -74,11 +90,11 @@ OFFSET (denoted by `-s`) - required for csv tool. Specifies the offsetting accou
 
 `NO_COLOR` - Disables color output. ex: `NO_COLOR=true`
 
-### Features
+## Features
 
-#### Transactions
+### Transactions
 
-Transactions can be expressed in two different ways. One is a "simplified" format for transactions that only impact two accounts: 
+Transactions can be expressed in two different ways. One is a "simplified" format for transactions that only impact two accounts:
 
 ```yaml
 - date: 2020-01-01
@@ -88,9 +104,9 @@ Transactions can be expressed in two different ways. One is a "simplified" forma
   account: expense:expense_general
 ```
 
-The sign (debit / credit) associated with the `offset_account` value is the opposite of the sign of the value contained in `amount` field.  
+The sign (debit / credit) associated with the `offset_account` value is the opposite of the sign of the value contained in `amount` field.
 
-In the above example transaction, since `expense_general` was debited by 200, the `credit_card_amex` account will be credited by the same amount. 
+In the above example transaction, since `expense_general` was debited by 200, the `credit_card_amex` account will be credited by the same amount.
 
 Transactions that involve more than two accounts are expressed in the following manner:
 
@@ -106,63 +122,113 @@ Transactions that involve more than two accounts are expressed in the following 
       account: liability:credit_card_amex
 ```
 
-Transactions that only involve two accounts can also be expressed in the above format. 
+Transactions that only involve two accounts can also be expressed in the above format.
 
-### Test
+## Test
 
 - `cargo test`
 
-### API
+## API
 
-- account
-  - lists accounts
-  - example output:
+### account
 
 ```
- Account                      
+rust_ledger-account
+account module
+
+USAGE:
+    rust_ledger account [OPTIONS]
+
+FLAGS:
+    -h, --help       Prints help information
+    -V, --version    Prints version information
+
+OPTIONS:
+    -f, --filename <filename>    location of ledger file
+```
+
+- lists accounts
+- example output:
+
+```
+ Account
 ---------------------------------------
-asset:cash_checking         
-asset:cash_savings          
-liability:credit_card_amex  
-equity:equity               
-expense:grocery             
-expense:general             
-expense:mortgage            
+asset:cash_checking
+asset:cash_savings
+liability:credit_card_amex
+equity:equity
+expense:grocery
+expense:general
+expense:mortgage
 income:general
 ```
 
-- balance
-  - lists account balances to date
-  - example output:
+### balance
 
 ```
- Account                       Balance             
+rust_ledger-balance
+balance module
+
+USAGE:
+    rust_ledger balance [OPTIONS]
+
+FLAGS:
+    -h, --help       Prints help information
+    -V, --version    Prints version information
+
+OPTIONS:
+    -f, --filename <filename>    location of ledger file
+```
+
+- lists account balances to date
+- example output:
+
+```
+ Account                       Balance
 ---------------------------------------
 asset
-  asset:cash_checking          $ -700.00           
-  asset:cash_savings           $ 1000.00           
+  asset:cash_checking          $ -700.00
+  asset:cash_savings           $ 1000.00
 liability
-  liability:credit_card_amex   $ -455.00           
+  liability:credit_card_amex   $ -455.00
 equity
-  equity:equity                $ -3500.00          
+  equity:equity                $ -3500.00
 expense
-  expense:grocery              $ 635.00            
-  expense:general              $ 1020.00           
-  expense:mortgage             $ 2000.00           
+  expense:grocery              $ 635.00
+  expense:general              $ 1020.00
+  expense:mortgage             $ 2000.00
 income
-  income:general               0                   
+  income:general               0
 
 ---------------------------------------
-check                          0           
+check                          0
 ```
 
-- register
-  - lists general ledger transactions to date
-  - can filter output by any field via optional parameter
-  - example output:
+### register
 
 ```
-Date       Description             Accounts              
+rust_ledger-register
+register module
+
+USAGE:
+    rust_ledger register [OPTIONS]
+
+FLAGS:
+    -h, --help       Prints help information
+    -V, --version    Prints version information
+
+OPTIONS:
+    -f, --filename <filename>    location of ledger file
+    -g, --group <group>          group register output by value
+    -o, --option <option>        filter output by optional value
+```
+
+- lists general ledger transactions to date
+- can filter output by any field via optional parameter
+- example output:
+
+```
+Date       Description             Accounts
 ---------------------------------------------------------------------------------
 2019-12-31 weekly groceries        grocery                  $ 455.00     $ 455.00
                                    credit_card_amex        $ -455.00            0
@@ -175,47 +241,62 @@ Date       Description             Accounts
                                    cash_checking           $ -200.00            0
 ```
 
-- csv
-  - converts `csv` files to `yaml` format expected by `rust_ledger`.
-  - should be invoked with `-f`, `-o`, and `s` arguments. These include the rust_ledger file location (unless specified via environment variable),
+### csv
+
+```
+rust_ledger-csv
+csv module
+
+USAGE:
+    rust_ledger csv [OPTIONS]
+
+FLAGS:
+    -h, --help       Prints help information
+    -V, --version    Prints version information
+
+OPTIONS:
+    -c, --csv <csv>              path of csv file
+    -f, --filename <filename>    location of ledger file
+    -o, --offset <offset>        offset account for each csv transaction
+```
+
+- converts `csv` files to `yaml` format expected by `rust_ledger`.
+- should be invoked with `-f`, `-o`, and `s` arguments. These include the rust_ledger file location (unless specified via environment variable),
   csv file location and account offset, respectively.
-  - the account offset (`s` argument) would be the offset transaction that the csv transactions should be posted against.
-  - the csv tool will look for existing transactions that have matching `description` fields and will populate the appropriate expense/income accounts
+- the account offset (`s` argument) would be the offset transaction that the csv transactions should be posted against.
+- the csv tool will look for existing transactions that have matching `description` fields and will populate the appropriate expense/income accounts
   for any matches. Non-matches will use a default of `expense:general` or `income:general`, which is determined based on the sign of the `amount` field
   contained in the transaction.
-  - **note** - prior to importing your `csv` file into the tool, you must rename the columns in the first line of the `csv` file in the following schema:
-    `"date","transaction","name","memo","amount"`.
+- **note** - prior to importing your `csv` file into the tool, you must rename the columns in the first line of the `csv` file in the following schema:
+  `"date","transaction","name","memo","amount"`.
 
-- version
-  - prints release version to `stdout`.
-
-### rust_ledger `yaml` file format
+## rust_ledger `yaml` file format
 
 - example ledger `yaml` file can be found at `examples/example.yaml`
 - rust_ledger utilizes `yaml` files in the following format:
 
 ```yaml
 accounts:
-  - account: 
-    amount:  
+  - account:
+    amount:
 
 transactions:
-  - date: 
-    amount: 
-    description: 
-    account: 
-    offset_account: 
-  - date: 
-    description: 
-    transactions: 
-      - amount: 
-        account: 
-      - amount: 
-        account: 
+  - date:
+    amount:
+    description:
+    account:
+    offset_account:
+  - date:
+    description:
+    transactions:
+      - amount:
+        account:
+      - amount:
+        account:
 ```
 
 The ledger format schema is purposely lightweight. The only requirements are as follows:
-- the `account` field should be expressed in the following format: `account_classification:account_name`.
-- the `amount` field should be a number. It can include up to two (2) decimal points.  
-- the `date` field should be in the following format: `YYYY-MM-DD`. 
 
+- the `account` field should be expressed in the following format: `account_classification:account_name`.
+- the `amount` field should be a number. It can include up to two (2) decimal points.
+- the `date` field should be in the following format: `YYYY-MM-DD`.
