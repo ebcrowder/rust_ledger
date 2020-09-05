@@ -1,6 +1,6 @@
 extern crate clap;
 use crate::model::ledger::Group;
-use clap::{crate_version, App, Arg, SubCommand};
+use clap::{crate_version, App, Arg, ArgMatches, SubCommand};
 
 pub struct Args {
     pub ledger_file: String,
@@ -27,6 +27,16 @@ impl Args {
             offset_arg: String::from(""),
             command: Command::None,
         }
+    }
+
+    fn resolve_ledger_file(&mut self, sub: &ArgMatches) {
+        self.ledger_file = match sub.value_of("filename") {
+            Some(f) => String::from(f),
+            None => match std::env::var("RLEDGER_FILE") {
+                Ok(p) => p,
+                Err(err) => format!("{}", err),
+            },
+        };
     }
 
     pub fn populate_args(&mut self) {
@@ -108,13 +118,7 @@ impl Args {
             .get_matches();
 
         if let Some(sub) = matches.subcommand_matches("register") {
-            self.ledger_file = match sub.value_of("filename") {
-                Some(f) => String::from(f),
-                None => match std::env::var("RLEDGER_FILE") {
-                    Ok(p) => p,
-                    Err(err) => format!("{}", err),
-                },
-            };
+            Args::resolve_ledger_file(self, sub);
             self.options_arg = match sub.value_of("option") {
                 Some(v) => String::from(v),
                 None => String::from(""),
@@ -130,13 +134,7 @@ impl Args {
         }
 
         if let Some(sub) = matches.subcommand_matches("csv") {
-            self.ledger_file = match sub.value_of("filename") {
-                Some(f) => String::from(f),
-                None => match std::env::var("RLEDGER_FILE") {
-                    Ok(p) => p,
-                    Err(err) => format!("{}", err),
-                },
-            };
+            Args::resolve_ledger_file(self, sub);
             self.options_arg = match sub.value_of("csv") {
                 Some(v) => String::from(v),
                 None => String::from(""),
@@ -148,23 +146,11 @@ impl Args {
         }
 
         if let Some(sub) = matches.subcommand_matches("account") {
-            self.ledger_file = match sub.value_of("filename") {
-                Some(f) => String::from(f),
-                None => match std::env::var("RLEDGER_FILE") {
-                    Ok(p) => p,
-                    Err(err) => format!("{}", err),
-                },
-            };
+            Args::resolve_ledger_file(self, sub);
         }
 
         if let Some(sub) = matches.subcommand_matches("balance") {
-            self.ledger_file = match sub.value_of("filename") {
-                Some(f) => String::from(f),
-                None => match std::env::var("RLEDGER_FILE") {
-                    Ok(p) => p,
-                    Err(err) => format!("{}", err),
-                },
-            };
+            Args::resolve_ledger_file(self, sub);
         }
 
         match matches.subcommand_name() {

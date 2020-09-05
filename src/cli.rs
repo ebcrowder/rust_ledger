@@ -4,8 +4,6 @@ mod balance;
 mod csv;
 mod register;
 
-extern crate clap;
-
 use crate::error::Result;
 use args::{Args, Command};
 
