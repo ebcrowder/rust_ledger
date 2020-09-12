@@ -134,77 +134,77 @@ impl GroupMap {
     }
 }
 
-/// flatten abbreviated and detailed `LedgerFile` transactions into
-/// a Vec containing individual detailed transactions.
-/// all downstream logic expects this data structure.
-fn flatten_transactions(transactions: LedgerFile) -> Vec<Transaction> {
-    let mut flattened_transactions: Vec<Transaction> = Vec::new();
+impl LedgerFile {
+    /// flatten abbreviated and detailed `LedgerFile` transactions into
+    /// a Vec containing individual detailed transactions.
+    /// all downstream logic expects this data structure.
+    fn flatten_transactions(self) -> Vec<Transaction> {
+        let mut flattened_transactions: Vec<Transaction> = Vec::new();
 
-    for t in transactions.transactions {
-        let OptionalKeys { amount, .. } = OptionalKeys::match_optional_keys(&t);
-        match t.transactions {
-            Some(subt) => {
-                for s in subt {
+        for t in self.transactions {
+            let OptionalKeys { amount, .. } = OptionalKeys::match_optional_keys(&t);
+            match t.transactions {
+                Some(subt) => {
+                    for s in subt {
+                        flattened_transactions.push(Transaction {
+                            date: t.date,
+                            account: Some(s.account),
+                            amount: Some(s.amount),
+                            transactions: None,
+                            description: t.description.clone(),
+                            offset_account: None,
+                        });
+                    }
+                }
+                None => {
+                    // push entry
                     flattened_transactions.push(Transaction {
-                        date: t.date,
-                        account: Some(s.account),
-                        amount: Some(s.amount),
-                        transactions: None,
-                        description: t.description.clone(),
+                        account: t.account.clone(),
                         offset_account: None,
+                        amount: t.amount,
+                        ..t.clone()
+                    });
+
+                    // push offset entry
+                    flattened_transactions.push(Transaction {
+                        account: t.offset_account,
+                        offset_account: None,
+                        amount: Some(amount * -1.00),
+                        ..t
                     });
                 }
             }
-            None => {
-                // push entry
-                flattened_transactions.push(Transaction {
-                    account: t.account.clone(),
-                    offset_account: None,
-                    amount: t.amount,
-                    ..t.clone()
-                });
-
-                // push offset entry
-                flattened_transactions.push(Transaction {
-                    account: t.offset_account,
-                    offset_account: None,
-                    amount: Some(amount * -1.00),
-                    ..t
-                });
-            }
         }
+        flattened_transactions
     }
-    flattened_transactions
-}
 
-/// filter transactions by option. Downstream logic pairs this with
-/// the "group" argument for more extensive filtering
-fn filter_transactions_by_option(transactions: LedgerFile, option: &str) -> Vec<Transaction> {
-    let flattened_transactions = flatten_transactions(transactions);
+    /// filter transactions by option. Downstream logic pairs this with
+    /// the "group" argument for more extensive filtering
+    fn filter_transactions_by_option(self, option: &str) -> Vec<Transaction> {
+        let flattened_transactions = LedgerFile::flatten_transactions(self);
 
-    flattened_transactions
-        .into_iter()
-        .filter(|x| match option {
-            "" => true,
-            _ => {
-                let OptionalKeys {
-                    account,
-                    offset_account,
-                    amount,
-                    ..
-                } = OptionalKeys::match_optional_keys(&x);
+        flattened_transactions
+            .into_iter()
+            .filter(|x| match option {
+                "" => true,
+                _ => {
+                    let OptionalKeys {
+                        account,
+                        offset_account,
+                        amount,
+                        ..
+                    } = OptionalKeys::match_optional_keys(&x);
 
-                x.date.to_string().contains(option)
-                    || amount.to_string().contains(option)
-                    || account.contains(option)
-                    || offset_account.contains(option)
-                    || x.description.contains(option)
-            }
-        })
-        .collect()
-}
+                    x.date.to_string().contains(option)
+                        || amount.to_string().contains(option)
+                        || account.contains(option)
+                        || offset_account.contains(option)
+                        || x.description.contains(option)
+                }
+            })
+            .collect()
+    }
 
-impl LedgerFile {
     pub fn print_accounts(self) {
         println!("{0: <29}", "Account");
         println!("{:-<39}", "".bright_blue());
@@ -221,52 +221,29 @@ impl LedgerFile {
         let mut transactions_vec: Vec<Account> = Vec::new();
 
         // push opening balances into Vec
-        for account in self.accounts {
+        for account in &self.accounts {
             accounts_vec.push(Account {
-                account: account.account,
-                amount: account.amount,
+                account: account.account.to_owned(),
+                amount: account.amount.to_owned(),
             });
         }
 
+        let flattened_transactions = LedgerFile::flatten_transactions(self);
+
         // push transactions into Vec
-        for transaction in self.transactions {
+        for transaction in flattened_transactions {
             let OptionalKeys {
-                account,
-                offset_account,
-                amount,
-                ..
+                account, amount, ..
             } = OptionalKeys::match_optional_keys(&transaction);
-            let account_type: Vec<&str> = account.split(':').collect();
 
-            let debit_credit = match account_type[0] {
-                "income" => -amount,
-                _ => amount,
-            };
-
-            transactions_vec.push(Account {
-                account: account.clone(),
-                amount: debit_credit,
-            });
-
-            if !offset_account.is_empty() {
-                transactions_vec.push(Account {
-                    account: offset_account.clone(),
-                    amount: -amount,
-                });
-            }
+            transactions_vec.push(Account { account, amount });
         }
 
         // loop over Vecs and increment(+)/decrement(-) totals
         // for each transaction
         for transaction in &transactions_vec {
-            let transaction_account_type: Vec<&str> = transaction.account.split(':').collect();
-
             for account in &mut accounts_vec {
-                let account_type: Vec<&str> = account.account.split(':').collect();
-
-                if account.account.eq_ignore_ascii_case(&transaction.account)
-                    && account_type[0] == transaction_account_type[0]
-                {
+                if account.account.eq_ignore_ascii_case(&transaction.account) {
                     account.amount += &transaction.amount;
                 }
             }
@@ -320,7 +297,7 @@ impl LedgerFile {
 
     pub fn print_register_group(self, option: &str, group: Group) {
         let mut group_map = GroupMap::new();
-        let filtered_transactions = filter_transactions_by_option(self, option);
+        let filtered_transactions = LedgerFile::filter_transactions_by_option(self, option);
 
         println!("\n{0: <10} {1: <23} ", "Date".bold(), "Total".bold());
         println!("{0:-<81}", "".bright_blue());
@@ -353,43 +330,29 @@ impl LedgerFile {
 
     pub fn print_register(self, option: &str) {
         println!(
-            "\n{0: <10} {1: <23} {2: <22}",
+            "\n{0: <10} {1: <23} {2: <22} {3: <22}",
             "Date".bold(),
             "Description".bold(),
-            "Accounts".bold()
+            "Accounts".bold(),
+            "Amount".bold()
         );
 
         println!("{0:-<81}", "".bright_blue());
 
-        let filtered_transactions = filter_transactions_by_option(self, option);
+        let filtered_transactions = LedgerFile::filter_transactions_by_option(self, option);
 
         for t in filtered_transactions {
             let OptionalKeys {
                 account, amount, ..
             } = OptionalKeys::match_optional_keys(&t);
 
-            let account_vec: Vec<&str> = account.split(':').collect();
-            let account_type = account_vec[0];
-            let account_name = account_vec[1];
-
-            match account_type {
-                "income" => {
-                    println!(
-                        "{0: <35}{1: <20} {2: >12} {3: >20}",
-                        "",
-                        account_name,
-                        format!("{: >1}", money!(-amount, "USD")).to_string().bold(),
-                        "0".bold()
-                    );
-                }
-                _ => println!(
-                    "{0: <10} {1: <23} {2: <20} {3: >20}",
-                    t.date,
-                    t.description.bold(),
-                    account_name,
-                    format!("{: >1}", money!(amount, "USD")).to_string().bold(),
-                ),
-            };
+            println!(
+                "{0: <10} {1: <23} {2: <20} {3: >20}",
+                t.date,
+                t.description.bold(),
+                account,
+                format!("{: >1}", money!(amount, "USD")).to_string().bold(),
+            );
         }
 
         println!("\n");
@@ -491,7 +454,7 @@ fn print_register_to_stdout() {
 #[test]
 fn flatten_ledgerfile_transactions() {
     let file = get_file();
-    let result = flatten_transactions(file);
+    let result = LedgerFile::flatten_transactions(file);
 
     assert_eq!(result.len(), 7)
 }
@@ -515,7 +478,7 @@ fn optional_keys() {
 #[test]
 fn filter_transactions_by_option_42() {
     let file = get_file();
-    let result = filter_transactions_by_option(file, &"42".to_string());
+    let result = LedgerFile::filter_transactions_by_option(file, &"42".to_string());
     let date = match NaiveDate::parse_from_str("2020-01-01", "%Y-%m-%d") {
         Ok(d) => d,
         Err(e) => panic!("{:?}", e),

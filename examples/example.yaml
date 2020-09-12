@@ -43,3 +43,10 @@ transactions:
         account: expense:grocery
       - amount: -200
         account: asset:cash_checking
+  - date: 2020-01-01
+    description: donut sale to dale
+    transactions:
+      - amount: 300
+        account: asset:cash_checking
+      - amount: -300
+        account: income:general
