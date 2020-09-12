@@ -206,11 +206,11 @@ impl LedgerFile {
     }
 
     pub fn print_accounts(self) {
-        println!("{0: <29}", "Account");
-        println!("{:-<39}", "".bright_blue());
+        println!("{0}", "Account".bold());
+        println!("{:-<60}", "".bright_blue());
 
         for account in self.accounts {
-            println!("{0: <28}", account.account);
+            println!("{0}", account.account);
         }
 
         println!("\n");
@@ -253,8 +253,8 @@ impl LedgerFile {
         let mut check_figure: f64 = 0.0;
         let mut current_account_type = String::new();
 
-        println!("{0: <29} {1: <20}", "Account".bold(), "Balance".bold());
-        println!("{0:-<39}", "".bright_blue());
+        println!("{0: <40} {1: >19}", "Account".bold(), "Balance".bold());
+        println!("{0:-<60}", "".bright_blue());
 
         for account in accounts_vec {
             check_figure += account.amount;
@@ -266,7 +266,7 @@ impl LedgerFile {
             }
 
             println!(
-                "  {0: <28} {1: <20}",
+                "  {0: <40} {1: >17}",
                 account.account,
                 if account.amount < 0.0 {
                     format!("{: >1}", money!(account.amount, "USD"))
@@ -283,8 +283,8 @@ impl LedgerFile {
             );
         }
 
-        println!("\n{:-<39}", "".bright_blue());
-        print!("{: <30}", "check");
+        println!("\n{:-<60}", "".bright_blue());
+        print!("{: <58}", "check");
 
         if check_figure == 0.0 {
             println!(" {:<20}\n", check_figure.to_string().bold());
@@ -299,8 +299,8 @@ impl LedgerFile {
         let mut group_map = GroupMap::new();
         let filtered_transactions = LedgerFile::filter_transactions_by_option(self, option);
 
-        println!("\n{0: <10} {1: <23} ", "Date".bold(), "Total".bold());
-        println!("{0:-<81}", "".bright_blue());
+        println!("{0: <10} {1: <23} ", "Date".bold(), "Total".bold());
+        println!("{0:-<100}", "".bright_blue());
 
         for transaction in filtered_transactions {
             let OptionalKeys {
@@ -330,14 +330,14 @@ impl LedgerFile {
 
     pub fn print_register(self, option: &str) {
         println!(
-            "\n{0: <10} {1: <23} {2: <22} {3: <22}",
+            "\n{0: <10} {1: <25} {2: <30} {3: >30}",
             "Date".bold(),
             "Description".bold(),
             "Accounts".bold(),
             "Amount".bold()
         );
 
-        println!("{0:-<81}", "".bright_blue());
+        println!("{0:-<100}", "".bright_blue());
 
         let filtered_transactions = LedgerFile::filter_transactions_by_option(self, option);
 
@@ -347,7 +347,7 @@ impl LedgerFile {
             } = OptionalKeys::match_optional_keys(&t);
 
             println!(
-                "{0: <10} {1: <23} {2: <20} {3: >20}",
+                "{0: <10} {1: <25} {2: <30} {3: >30}",
                 t.date,
                 t.description.bold(),
                 account,
