@@ -151,8 +151,8 @@ OPTIONS:
 - example output:
 
 ```
- Account
----------------------------------------
+Account
+------------------------------------------------------------
 asset:cash_checking
 asset:cash_savings
 liability:credit_card_amex
@@ -184,24 +184,24 @@ OPTIONS:
 - example output:
 
 ```
- Account                       Balance
----------------------------------------
+Account                                              Balance
+------------------------------------------------------------
 asset
-  asset:cash_checking          $ -700.00
-  asset:cash_savings           $ 1000.00
+  asset:cash_checking                              $ -400.00
+  asset:cash_savings                              $ 1,000.00
 liability
-  liability:credit_card_amex   $ -455.00
+  liability:credit_card_amex                       $ -455.00
 equity
-  equity:equity                $ -3500.00
+  equity:equity                                  $ -3,500.00
 expense
-  expense:grocery              $ 635.00
-  expense:general              $ 1020.00
-  expense:mortgage             $ 2000.00
+  expense:grocery                                   $ 635.00
+  expense:general                                 $ 1,020.00
+  expense:mortgage                                $ 2,000.00
 income
-  income:general               0
+  income:general                                   $ -300.00
 
----------------------------------------
-check                          0
+------------------------------------------------------------
+check                                                      0
 ```
 
 ### register
@@ -228,17 +228,19 @@ OPTIONS:
 - example output:
 
 ```
-Date       Description             Accounts
----------------------------------------------------------------------------------
-2019-12-31 weekly groceries        grocery                  $ 455.00     $ 455.00
-                                   credit_card_amex        $ -455.00            0
-2020-01-01 mortage                 mortgage                $ 2000.00    $ 2000.00
-                                   cash_checking          $ -2000.00            0
-2020-01-01 stuff                   general                 $ 1000.00    $ 1000.00
-                                   cash_savings           $ -1000.00            0
-2020-01-01 grocery store           general                   $ 20.00      $ 20.00
-                                   grocery                  $ 180.00     $ 200.00
-                                   cash_checking           $ -200.00            0
+Date       Description               Account                                               Amount
+----------------------------------------------------------------------------------------------------
+2019-12-31 weekly groceries          expense:grocery                                      $ 455.00
+2019-12-31 weekly groceries          liability:credit_card_amex                          $ -455.00
+2020-01-01 mortage                   expense:mortgage                                   $ 2,000.00
+2020-01-01 mortage                   asset:cash_checking                               $ -2,000.00
+2020-01-01 stuff                     expense:general                                    $ 1,000.00
+2020-01-01 stuff                     asset:cash_savings                                $ -1,000.00
+2020-01-01 grocery store             expense:general                                       $ 20.00
+2020-01-01 grocery store             expense:grocery                                      $ 180.00
+2020-01-01 grocery store             asset:cash_checking                                 $ -200.00
+2020-01-01 donut sale to dale        asset:cash_checking                                  $ 300.00
+2020-01-01 donut sale to dale        income:general                                      $ -300.00
 ```
 
 ### csv

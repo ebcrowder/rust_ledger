@@ -333,7 +333,7 @@ impl LedgerFile {
             "\n{0: <10} {1: <25} {2: <30} {3: >30}",
             "Date".bold(),
             "Description".bold(),
-            "Accounts".bold(),
+            "Account".bold(),
             "Amount".bold()
         );
 
