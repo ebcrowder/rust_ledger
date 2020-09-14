@@ -42,7 +42,7 @@ impl Args {
     pub fn populate_args(&mut self) {
         let matches = App::new("rust_ledger")
             .version(crate_version!())
-            .author("Eric Crowder <ebcrowder@gmail.com>")
+            .author("Eric Crowder <eric@ebcrowder.dev>")
             .subcommand(
                 SubCommand::with_name("account")
                     .about("account module")

@@ -50,7 +50,7 @@ Alternatively, clone this repo and do the following:
 
 ```bash
 rust_ledger <version>
-Eric Crowder <ebcrowder@gmail.com>
+Eric Crowder <eric@ebcrowder.dev>
 
 USAGE:
     rust_ledger [SUBCOMMAND]
