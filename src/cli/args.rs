@@ -1,6 +1,6 @@
 extern crate clap;
 use crate::model::ledger::Group;
-use clap::{crate_version, App, Arg, ArgMatches, SubCommand};
+use clap::{crate_version, App, AppSettings, Arg, ArgMatches, SubCommand};
 
 pub struct Args {
     pub ledger_file: String,
@@ -43,6 +43,7 @@ impl Args {
         let matches = App::new("rust_ledger")
             .version(crate_version!())
             .author("Eric Crowder <eric@ebcrowder.dev>")
+            .setting(AppSettings::ArgRequiredElseHelp)
             .subcommand(
                 SubCommand::with_name("account")
                     .about("account module")

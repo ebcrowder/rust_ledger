@@ -29,6 +29,6 @@ pub fn run() -> Result<()> {
             options_arg.as_str(),
             offset_arg.as_str(),
         ),
-        Command::None => panic!("command not found"),
+        Command::None => unreachable!(),
     }
 }
