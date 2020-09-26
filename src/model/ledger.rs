@@ -206,7 +206,7 @@ impl LedgerFile {
             })
             .collect()
     }
-    /// filters out all income statement transactions
+    /// filters all income statement transactions by option
     fn filter_income_expense_transactions(self, option: &str, group: Group) -> Vec<Transaction> {
         let flattened_transactions = LedgerFile::flatten_transactions(self);
 
@@ -390,9 +390,14 @@ impl LedgerFile {
     pub fn print_budget_actual(self, option: &str, group: Group) {
         let mut group_map = GroupMap::new();
         let filtered_transactions =
-            LedgerFile::filter_income_expense_transactions(self, option, group);
+            LedgerFile::filter_income_expense_transactions(self.clone(), option, group);
 
-        println!("{0: <10} {1: <23} ", "Date".bold(), "Total".bold());
+        println!(
+            "{0: <10} {1: >20} {2: >23} ",
+            "Date".bold(),
+            "Budget".bold(),
+            "Actual".bold()
+        );
         println!("{0:-<100}", "".bright_blue());
 
         for transaction in filtered_transactions {
@@ -407,10 +412,20 @@ impl LedgerFile {
         }
 
         for (k, v) in group_map.group_map.iter() {
+            let account = match self.accounts.iter().find(|x| &x.account == k) {
+                Some(a) => a,
+                None => &Account {
+                    account: "".to_string(),
+                    amount: 0.0,
+                    budget_month: None,
+                    budget_year: None,
+                },
+            };
             println!(
-                "{0: <10} {1: <23}",
+                "{0: <10} {1: >20} {2: >23}",
                 k,
-                format!("{: >1}", money!(v, "USD")).to_string().bold()
+                format!("{: >1}", money!(v, "USD")).to_string().bold(),
+                format!("{: >1}", money!(v, "USD")).to_string().bold() //TODO - placeholder
             );
         }
     }
