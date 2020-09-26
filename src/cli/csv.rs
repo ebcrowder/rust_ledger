@@ -116,23 +116,31 @@ fn get_file() -> LedgerFile {
         Err(e) => panic!("{:?}", e),
     };
 
-    return LedgerFile {
+    LedgerFile {
         accounts: vec![
             Account {
                 account: "asset:cash".to_string(),
                 amount: 100.00,
+                budget_month: None,
+                budget_year: None,
             },
             Account {
                 account: "expense:foo".to_string(),
                 amount: 0.00,
+                budget_month: None,
+                budget_year: None,
             },
             Account {
                 account: "expense:bar".to_string(),
                 amount: 0.00,
+                budget_month: None,
+                budget_year: None,
             },
             Account {
                 account: "expense:baz".to_string(),
                 amount: 0.00,
+                budget_month: None,
+                budget_year: None,
             },
         ],
         transactions: vec![
@@ -174,7 +182,7 @@ fn get_file() -> LedgerFile {
                 ]),
             },
         ],
-    };
+    }
 }
 
 /// negative `amount`s that do not have `name` matches should

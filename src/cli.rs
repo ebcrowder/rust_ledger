@@ -1,6 +1,7 @@
 mod account;
 mod args;
 mod balance;
+mod budget;
 mod csv;
 mod register;
 
@@ -21,6 +22,7 @@ pub fn run() -> Result<()> {
     match command {
         Command::Account => account::account(ledger_file.as_str()),
         Command::Balance => balance::balance(ledger_file.as_str()),
+        Command::Budget => budget::budget(ledger_file.as_str(), options_arg.as_str(), group_arg),
         Command::Register => {
             register::register(ledger_file.as_str(), options_arg.as_str(), group_arg)
         }

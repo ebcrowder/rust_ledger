@@ -13,6 +13,7 @@ pub struct Args {
 pub enum Command {
     Account,
     Balance,
+    Budget,
     Register,
     CSV,
     None,
@@ -63,6 +64,31 @@ impl Args {
                             .short("f")
                             .long("filename")
                             .help("location of ledger file")
+                            .takes_value(true),
+                    ),
+            )
+            .subcommand(
+                SubCommand::with_name("budget")
+                    .about("budget module")
+                    .arg(
+                        Arg::with_name("filename")
+                            .short("f")
+                            .long("filename")
+                            .help("location of ledger file")
+                            .takes_value(true),
+                    )
+                    .arg(
+                        Arg::with_name("option")
+                            .short("o")
+                            .long("option")
+                            .help("filter output by optional value")
+                            .takes_value(true),
+                    )
+                    .arg(
+                        Arg::with_name("group")
+                            .short("g")
+                            .long("group")
+                            .help("group budget output by value")
                             .takes_value(true),
                     ),
             )
@@ -134,6 +160,22 @@ impl Args {
             };
         }
 
+        if let Some(sub) = matches.subcommand_matches("budget") {
+            Args::resolve_ledger_file(self, sub);
+            self.options_arg = match sub.value_of("option") {
+                Some(v) => String::from(v),
+                None => String::from(""),
+            };
+            self.group_arg = match sub.value_of("group") {
+                Some(v) => match v {
+                    "month" => Group::Month,
+                    "year" => Group::Year,
+                    _ => Group::None,
+                },
+                None => Group::None,
+            };
+        }
+
         if let Some(sub) = matches.subcommand_matches("csv") {
             Args::resolve_ledger_file(self, sub);
             self.options_arg = match sub.value_of("csv") {
@@ -157,6 +199,7 @@ impl Args {
         match matches.subcommand_name() {
             Some("account") => self.command = Command::Account,
             Some("balance") => self.command = Command::Balance,
+            Some("budget") => self.command = Command::Budget,
             Some("register") => self.command = Command::Register,
             Some("csv") => self.command = Command::CSV,
             _ => self.command = Command::None,

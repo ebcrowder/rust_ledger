@@ -18,6 +18,8 @@ pub struct LedgerFile {
 pub struct Account {
     pub account: String,
     pub amount: f64,
+    pub budget_month: Option<f64>,
+    pub budget_year: Option<f64>,
 }
 
 #[derive(Debug, PartialEq, Clone, Serialize, Deserialize)]
@@ -204,6 +206,26 @@ impl LedgerFile {
             })
             .collect()
     }
+    /// filters out all income statement transactions
+    fn filter_income_expense_transactions(self, option: &str, group: Group) -> Vec<Transaction> {
+        let flattened_transactions = LedgerFile::flatten_transactions(self);
+
+        flattened_transactions
+            .into_iter()
+            .filter(|x| {
+                let filter_period = match group {
+                    Group::Month => "%m",
+                    Group::Year => "%Y",
+                    Group::None => "%Y",
+                };
+                x.date.format(filter_period).to_string() == option
+            })
+            .filter(|x| {
+                let OptionalKeys { account, .. } = OptionalKeys::match_optional_keys(&x);
+                account.contains("income") || account.contains("expense")
+            })
+            .collect()
+    }
 
     pub fn print_accounts(self) {
         println!("{0}", "Account".bold());
@@ -225,6 +247,8 @@ impl LedgerFile {
             accounts_vec.push(Account {
                 account: account.account.to_owned(),
                 amount: account.amount.to_owned(),
+                budget_month: None,
+                budget_year: None,
             });
         }
 
@@ -236,7 +260,12 @@ impl LedgerFile {
                 account, amount, ..
             } = OptionalKeys::match_optional_keys(&transaction);
 
-            transactions_vec.push(Account { account, amount });
+            transactions_vec.push(Account {
+                account,
+                amount,
+                budget_month: None,
+                budget_year: None,
+            });
         }
 
         // loop over Vecs and increment(+)/decrement(-) totals
@@ -357,6 +386,34 @@ impl LedgerFile {
 
         println!("\n");
     }
+
+    pub fn print_budget_actual(self, option: &str, group: Group) {
+        let mut group_map = GroupMap::new();
+        let filtered_transactions =
+            LedgerFile::filter_income_expense_transactions(self, option, group);
+
+        println!("{0: <10} {1: <23} ", "Date".bold(), "Total".bold());
+        println!("{0:-<100}", "".bright_blue());
+
+        for transaction in filtered_transactions {
+            let OptionalKeys {
+                amount,
+                account,
+                transactions,
+                ..
+            } = OptionalKeys::match_optional_keys(&transaction);
+
+            group_map.populate_group_map(account, amount, transactions)
+        }
+
+        for (k, v) in group_map.group_map.iter() {
+            println!(
+                "{0: <10} {1: <23}",
+                k,
+                format!("{: >1}", money!(v, "USD")).to_string().bold()
+            );
+        }
+    }
 }
 
 #[cfg(test)]
@@ -366,23 +423,31 @@ fn get_file() -> LedgerFile {
         Err(e) => panic!("{:?}", e),
     };
 
-    return LedgerFile {
+    LedgerFile {
         accounts: vec![
             Account {
                 account: "asset:cash".to_string(),
                 amount: 100.00,
+                budget_month: None,
+                budget_year: None,
             },
             Account {
                 account: "expense:foo".to_string(),
                 amount: 0.00,
+                budget_month: None,
+                budget_year: None,
             },
             Account {
                 account: "expense:bar".to_string(),
                 amount: 0.00,
+                budget_month: None,
+                budget_year: None,
             },
             Account {
                 account: "expense:baz".to_string(),
                 amount: 0.00,
+                budget_month: None,
+                budget_year: None,
             },
         ],
         transactions: vec![
@@ -424,7 +489,7 @@ fn get_file() -> LedgerFile {
                 ]),
             },
         ],
-    };
+    }
 }
 
 #[test]
@@ -470,7 +535,7 @@ fn optional_keys() {
             account: "asset:cash".to_string(),
             amount: 10.00,
             offset_account: "expense:foo".to_string(),
-            transactions: vec![]
+            transactions: vec![],
         }
     )
 }
