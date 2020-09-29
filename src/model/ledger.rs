@@ -207,7 +207,7 @@ impl LedgerFile {
             .collect()
     }
     /// filters all income statement transactions by option
-    fn filter_income_expense_transactions(self, option: &str, group: Group) -> Vec<Transaction> {
+    fn filter_income_expense_transactions(self, option: &str, group: &Group) -> Vec<Transaction> {
         let flattened_transactions = LedgerFile::flatten_transactions(self);
 
         flattened_transactions
@@ -390,7 +390,7 @@ impl LedgerFile {
     pub fn print_budget_actual(self, option: &str, group: Group) {
         let mut group_map = GroupMap::new();
         let filtered_transactions =
-            LedgerFile::filter_income_expense_transactions(self.clone(), option, group);
+            LedgerFile::filter_income_expense_transactions(self.clone(), option, &group);
 
         println!(
             "{0: <10} {1: >20} {2: >23} ",
@@ -412,20 +412,35 @@ impl LedgerFile {
         }
 
         for (k, v) in group_map.group_map.iter() {
+            let b = &Account {
+                account: "".to_string(),
+                amount: 0.0,
+                budget_month: None,
+                budget_year: None,
+            };
             let account = match self.accounts.iter().find(|x| &x.account == k) {
                 Some(a) => a,
-                None => &Account {
-                    account: "".to_string(),
-                    amount: 0.0,
-                    budget_month: None,
-                    budget_year: None,
-                },
+                None => b,
             };
+
+            let budget = match &group {
+                Group::Month => account.budget_month,
+                Group::Year => account.budget_year,
+                Group::None => None,
+            };
+
+            let budget_amount = match budget {
+                Some(a) => a,
+                None => 0.00,
+            };
+
             println!(
                 "{0: <10} {1: >20} {2: >23}",
                 k,
                 format!("{: >1}", money!(v, "USD")).to_string().bold(),
-                format!("{: >1}", money!(v, "USD")).to_string().bold() //TODO - placeholder
+                format!("{: >1}", money!(budget_amount, "USD"))
+                    .to_string()
+                    .bold() //TODO - placeholder
             );
         }
     }
