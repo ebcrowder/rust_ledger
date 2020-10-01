@@ -393,10 +393,11 @@ impl LedgerFile {
             LedgerFile::filter_income_expense_transactions(self.clone(), option, &group);
 
         println!(
-            "{0: <10} {1: >20} {2: >23} ",
+            "{0: <20} {1: <35} {2: <20} {3: >10} ",
             "Date".bold(),
             "Budget".bold(),
-            "Actual".bold()
+            "Actual".bold(),
+            "Delta".bold()
         );
         println!("{0:-<100}", "".bright_blue());
 
@@ -434,13 +435,16 @@ impl LedgerFile {
                 None => 0.00,
             };
 
+            let delta = budget_amount - v;
+
             println!(
-                "{0: <10} {1: >20} {2: >23}",
+                "{0: <20} {1: <35} {2: <20} {3: >10}",
                 k,
                 format!("{: >1}", money!(v, "USD")).to_string().bold(),
                 format!("{: >1}", money!(budget_amount, "USD"))
                     .to_string()
-                    .bold() //TODO - placeholder
+                    .bold(),
+                format!("{: >1}", money!(delta, "USD")).to_string().bold()
             );
         }
     }
