@@ -6,21 +6,18 @@
 
 command line accounting tool
 
-As a former CPA, I could not resist building my own accounting system.
-
 ### Summary
 
 - Spiritual port of [ledger](https://github.com/ledger/ledger)
 - Uses double-entry accounting paradigm
 - Small feature set based on typical use cases
-- Uses `yaml` files as data store
-- Includes a tool to convert `csv` files to `yaml` format
+- Uses simple `yaml` format in lieu of plain-text file format utilized by `ledger`
+- Includes a tool to convert `csv` files to `yaml` 
 
 ### Contributing
 
 - See `CODE_OF_CONDUCT.md` for fundamental guidelines
 - PRs, issues and feature requests are welcome and encouraged
-- Join us on Matrix (#rust_ledger:matrix.org) at https://matrix.to/#/!dYISGJYNNiZcUrxhcm:matrix.org?via=matrix.org
 
 ### Install
 
