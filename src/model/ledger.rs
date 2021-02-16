@@ -440,10 +440,10 @@ impl LedgerFile {
             println!(
                 "{0: <20} {1: <35} {2: <20} {3: >10}",
                 k,
-                format!("{: >1}", money!(v, "USD")).to_string().bold(),
                 format!("{: >1}", money!(budget_amount, "USD"))
                     .to_string()
                     .bold(),
+                format!("{: >1}", money!(v, "USD")).to_string().bold(),
                 format!("{: >1}", money!(delta, "USD")).to_string().bold()
             );
         }
@@ -604,4 +604,25 @@ fn filter_transactions_by_option_42() {
             }
         ]
     )
+}
+
+#[test]
+fn group_map() {
+    let file = get_file();
+    let mut group_map = GroupMap::new();
+    let filtered_transactions = LedgerFile::filter_transactions_by_option(file, &"42".to_string());
+    for transaction in filtered_transactions {
+        let OptionalKeys {
+            amount,
+            account,
+            transactions,
+            ..
+        } = OptionalKeys::match_optional_keys(&transaction);
+
+        group_map.populate_group_map(account, amount, transactions)
+    }
+
+    assert_eq!(group_map.group_map.get("expense:foo"), Some(&42.00));
+    assert_eq!(group_map.group_map.get("asset:cash"), Some(&-42.00));
+    assert_eq!(group_map.group_map.keys().len(), 2);
 }
