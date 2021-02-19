@@ -476,6 +476,7 @@ fn get_file() -> LedgerFile {
 
 #[test]
 fn print_accounts_to_stdout() {
+    extern crate assert_cmd;
     use assert_cmd::Command;
     let mut cmd = Command::cargo_bin("rust_ledger").unwrap();
 
@@ -487,6 +488,7 @@ fn print_accounts_to_stdout() {
 
 #[test]
 fn print_balances_to_stdout() {
+    extern crate assert_cmd;
     use assert_cmd::Command;
     let mut cmd = Command::cargo_bin("rust_ledger").unwrap();
 
@@ -498,6 +500,7 @@ fn print_balances_to_stdout() {
 
 #[test]
 fn print_register_to_stdout() {
+    extern crate assert_cmd;
     use assert_cmd::Command;
     let mut cmd = Command::cargo_bin("rust_ledger").unwrap();
 
@@ -509,6 +512,7 @@ fn print_register_to_stdout() {
 
 #[test]
 fn print_budget_to_stdout() {
+    extern crate assert_cmd;
     use assert_cmd::Command;
     let mut cmd = Command::cargo_bin("rust_ledger").unwrap();
 
