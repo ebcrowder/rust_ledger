@@ -1,6 +1,6 @@
 use chrono::NaiveDate;
-use colored::*;
 use monee::*;
+use prettytable::{format, Table};
 use serde::{de, Deserialize, Deserializer, Serialize};
 use std::collections::HashMap;
 use std::fmt::Display;
@@ -228,14 +228,14 @@ impl LedgerFile {
     }
 
     pub fn print_accounts(self) {
-        println!("{0}", "Account".bold());
-        println!("{:-<60}", "".bright_blue());
+        let mut table = Table::new();
+        table.set_format(*format::consts::FORMAT_NO_BORDER_LINE_SEPARATOR);
+        table.set_titles(row!["Account"]);
 
         for account in self.accounts {
-            println!("{0}", account.account);
+            table.add_row(row![account.account]);
         }
-
-        println!("\n");
+        table.printstd();
     }
 
     pub fn print_balances(self) {
@@ -282,8 +282,8 @@ impl LedgerFile {
         let mut check_figure: f64 = 0.0;
         let mut current_account_type = String::new();
 
-        println!("{0: <40} {1: >19}", "Account".bold(), "Balance".bold());
-        println!("{0:-<60}", "".bright_blue());
+        println!("{0: <40} {1: >19}", "Account", "Balance");
+        println!("{0:-<60}", "");
 
         for account in accounts_vec {
             check_figure += account.amount;
@@ -298,27 +298,22 @@ impl LedgerFile {
                 "  {0: <40} {1: >17}",
                 account.account,
                 if account.amount < 0.0 {
-                    format!("{: >1}", money!(account.amount, "USD"))
-                        .to_string()
-                        .red()
-                        .bold()
+                    format!("{: >1}", money!(account.amount, "USD")).to_string()
                 } else if account.amount == 0.0 {
-                    account.amount.to_string().yellow().bold()
+                    account.amount.to_string()
                 } else {
-                    format!("{: >1}", money!(account.amount, "USD"))
-                        .to_string()
-                        .bold()
+                    format!("{: >1}", money!(account.amount, "USD")).to_string()
                 }
             );
         }
 
-        println!("\n{:-<60}", "".bright_blue());
+        println!("\n{:-<60}", "");
         print!("{: <58}", "check");
 
         if check_figure == 0.0 {
-            println!(" {:<20}\n", check_figure.to_string().bold());
+            println!(" {:<20}\n", check_figure.to_string());
         } else {
-            println!(" {:<20}\n", format!("{0:.2}", check_figure).red().bold());
+            println!(" {:<20}\n", format!("{0:.2}", check_figure));
         }
 
         println!("\n");
@@ -328,8 +323,8 @@ impl LedgerFile {
         let mut group_map = GroupMap::new();
         let filtered_transactions = LedgerFile::filter_transactions_by_option(self, option);
 
-        println!("{0: <10} {1: <23} ", "Date".bold(), "Total".bold());
-        println!("{0:-<100}", "".bright_blue());
+        println!("{0: <10} {1: <23} ", "Date", "Total");
+        println!("{0:-<100}", "");
 
         for transaction in filtered_transactions {
             let OptionalKeys {
@@ -348,11 +343,11 @@ impl LedgerFile {
             }
         }
 
-        for (k, v) in group_map.group_map.iter() {
+        for (acct, amount) in group_map.group_map.iter() {
             println!(
                 "{0: <10} {1: <23}",
-                k,
-                format!("{: >1}", money!(v, "USD")).to_string().bold()
+                acct,
+                format!("{: >1}", money!(amount, "USD")).to_string()
             );
         }
     }
@@ -360,13 +355,10 @@ impl LedgerFile {
     pub fn print_register(self, option: &str) {
         println!(
             "\n{0: <10} {1: <25} {2: <30} {3: >30}",
-            "Date".bold(),
-            "Description".bold(),
-            "Account".bold(),
-            "Amount".bold()
+            "Date", "Description", "Account", "Amount"
         );
 
-        println!("{0:-<100}", "".bright_blue());
+        println!("{0:-<100}", "");
 
         let filtered_transactions = LedgerFile::filter_transactions_by_option(self, option);
 
@@ -378,9 +370,9 @@ impl LedgerFile {
             println!(
                 "{0: <10} {1: <25} {2: <30} {3: >30}",
                 t.date,
-                t.description.bold(),
+                t.description,
                 account,
-                format!("{: >1}", money!(amount, "USD")).to_string().bold(),
+                format!("{: >1}", money!(amount, "USD")).to_string(),
             );
         }
 
@@ -394,12 +386,9 @@ impl LedgerFile {
 
         println!(
             "{0: <20} {1: <35} {2: <20} {3: >10} ",
-            "Date".bold(),
-            "Budget".bold(),
-            "Actual".bold(),
-            "Delta".bold()
+            "Date", "Budget", "Actual", "Delta"
         );
-        println!("{0:-<100}", "".bright_blue());
+        println!("{0:-<100}", "");
 
         for transaction in filtered_transactions {
             let OptionalKeys {
@@ -412,14 +401,14 @@ impl LedgerFile {
             group_map.populate_group_map(account, amount, transactions)
         }
 
-        for (k, v) in group_map.group_map.iter() {
+        for (acct, amount) in group_map.group_map.iter() {
             let b = &Account {
                 account: "".to_string(),
                 amount: 0.0,
                 budget_month: None,
                 budget_year: None,
             };
-            let account = match self.accounts.iter().find(|x| &x.account == k) {
+            let account = match self.accounts.iter().find(|x| &x.account == acct) {
                 Some(a) => a,
                 None => b,
             };
@@ -435,16 +424,14 @@ impl LedgerFile {
                 None => 0.00,
             };
 
-            let delta = budget_amount - v;
+            let delta = budget_amount - amount;
 
             println!(
                 "{0: <20} {1: <35} {2: <20} {3: >10}",
-                k,
-                format!("{: >1}", money!(budget_amount, "USD"))
-                    .to_string()
-                    .bold(),
-                format!("{: >1}", money!(v, "USD")).to_string().bold(),
-                format!("{: >1}", money!(delta, "USD")).to_string().bold()
+                acct,
+                format!("{: >1}", money!(budget_amount, "USD")).to_string(),
+                format!("{: >1}", money!(amount, "USD")).to_string(),
+                format!("{: >1}", money!(delta, "USD")).to_string()
             );
         }
     }

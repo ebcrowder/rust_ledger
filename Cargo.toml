@@ -15,7 +15,7 @@ readme = "README.md"
 serde_yaml = "0.8.17"
 serde = { version = "1.0.123", features = ["derive"] }
 csv = "1.1.5"
-colored = "2.0.0"
 monee = "0.0.6"
 chrono = { version = "0.4.19", features = ["serde"] }
 clap = "2.33.3"
+prettytable-rs = "0.8"
