@@ -81,10 +81,7 @@ impl OptionalKeys {
             Some(name) => name.to_string(),
         };
 
-        let amount = match transaction.amount {
-            None => 0.00,
-            Some(number) => number,
-        };
+        let amount = transaction.amount.unwrap_or(0.00);
 
         let transactions = match transaction.transactions.clone() {
             None => vec![],
@@ -120,10 +117,7 @@ impl GroupMap {
         amount: f64,
         transactions: Vec<TransactionList>,
     ) {
-        let prev_value = match self.group_map.get(&range) {
-            Some(value) => value,
-            None => &0.00,
-        };
+        let prev_value = self.group_map.get(&range).unwrap_or(&0.00);
 
         if amount != 0.00 {
             let inc_value = prev_value + amount;
@@ -239,6 +233,10 @@ impl LedgerFile {
     }
 
     pub fn print_balances(self) {
+        let mut table = Table::new();
+        table.set_format(*format::consts::FORMAT_NO_BORDER_LINE_SEPARATOR);
+        table.set_titles(row!["Account", "Balance"]);
+
         let mut accounts_vec: Vec<Account> = Vec::new();
         let mut transactions_vec: Vec<Account> = Vec::new();
 
@@ -282,49 +280,30 @@ impl LedgerFile {
         let mut check_figure: f64 = 0.0;
         let mut current_account_type = String::new();
 
-        println!("{0: <40} {1: >19}", "Account", "Balance");
-        println!("{0:-<60}", "");
-
         for account in accounts_vec {
             check_figure += account.amount;
             let account_type: Vec<&str> = account.account.split(':').collect();
 
             if !current_account_type.eq(account_type[0]) {
                 current_account_type = account_type[0].to_string();
-                println!("{}", current_account_type);
+                table.add_row(row![b->current_account_type]); // TODO this is supposed to be bold output
             }
 
-            println!(
-                "  {0: <40} {1: >17}",
-                account.account,
-                if account.amount < 0.0 {
-                    format!("{: >1}", money!(account.amount, "USD")).to_string()
-                } else if account.amount == 0.0 {
-                    account.amount.to_string()
-                } else {
-                    format!("{: >1}", money!(account.amount, "USD")).to_string()
-                }
-            );
+            table.add_row(row![account.account, money!(account.amount, "USD")]);
         }
 
-        println!("\n{:-<60}", "");
-        print!("{: <58}", "check");
-
-        if check_figure == 0.0 {
-            println!(" {:<20}\n", check_figure.to_string());
-        } else {
-            println!(" {:<20}\n", format!("{0:.2}", check_figure));
-        }
-
-        println!("\n");
+        table.add_empty_row();
+        table.add_row(row!["check", check_figure]);
+        table.printstd();
     }
 
     pub fn print_register_group(self, option: &str, group: Group) {
+        let mut table = Table::new();
+        table.set_format(*format::consts::FORMAT_NO_BORDER_LINE_SEPARATOR);
+        table.set_titles(row!["Date", "Total"]);
+
         let mut group_map = GroupMap::new();
         let filtered_transactions = LedgerFile::filter_transactions_by_option(self, option);
-
-        println!("{0: <10} {1: <23} ", "Date", "Total");
-        println!("{0:-<100}", "");
 
         for transaction in filtered_transactions {
             let OptionalKeys {
@@ -344,21 +323,15 @@ impl LedgerFile {
         }
 
         for (acct, amount) in group_map.group_map.iter() {
-            println!(
-                "{0: <10} {1: <23}",
-                acct,
-                format!("{: >1}", money!(amount, "USD")).to_string()
-            );
+            table.add_row(row![acct, money!(amount, "USD")]);
         }
+        table.printstd();
     }
 
     pub fn print_register(self, option: &str) {
-        println!(
-            "\n{0: <10} {1: <25} {2: <30} {3: >30}",
-            "Date", "Description", "Account", "Amount"
-        );
-
-        println!("{0:-<100}", "");
+        let mut table = Table::new();
+        table.set_format(*format::consts::FORMAT_NO_BORDER_LINE_SEPARATOR);
+        table.set_titles(row!["Date", "Description", "Account", "Amount"]);
 
         let filtered_transactions = LedgerFile::filter_transactions_by_option(self, option);
 
@@ -367,28 +340,19 @@ impl LedgerFile {
                 account, amount, ..
             } = OptionalKeys::match_optional_keys(&t);
 
-            println!(
-                "{0: <10} {1: <25} {2: <30} {3: >30}",
-                t.date,
-                t.description,
-                account,
-                format!("{: >1}", money!(amount, "USD")).to_string(),
-            );
+            table.add_row(row![t.date, t.description, account, money!(amount, "USD")]);
         }
-
-        println!("\n");
+        table.printstd();
     }
 
     pub fn print_budget_actual(self, option: &str, group: Group) {
+        let mut table = Table::new();
+        table.set_format(*format::consts::FORMAT_NO_BORDER_LINE_SEPARATOR);
+        table.set_titles(row!["Date", "Budget", "Actual", "Delta"]);
+
         let mut group_map = GroupMap::new();
         let filtered_transactions =
             LedgerFile::filter_income_expense_transactions(self.clone(), option, &group);
-
-        println!(
-            "{0: <20} {1: <35} {2: <20} {3: >10} ",
-            "Date", "Budget", "Actual", "Delta"
-        );
-        println!("{0:-<100}", "");
 
         for transaction in filtered_transactions {
             let OptionalKeys {
@@ -419,21 +383,18 @@ impl LedgerFile {
                 Group::None => None,
             };
 
-            let budget_amount = match budget {
-                Some(a) => a,
-                None => 0.00,
-            };
+            let budget_amount = budget.unwrap_or(0.00);
 
             let delta = budget_amount - amount;
 
-            println!(
-                "{0: <20} {1: <35} {2: <20} {3: >10}",
+            table.add_row(row![
                 acct,
-                format!("{: >1}", money!(budget_amount, "USD")).to_string(),
-                format!("{: >1}", money!(amount, "USD")).to_string(),
-                format!("{: >1}", money!(delta, "USD")).to_string()
-            );
+                money!(budget_amount, "USD"),
+                money!(amount, "USD"),
+                money!(delta, "USD")
+            ]);
         }
+        table.printstd();
     }
 }
 
