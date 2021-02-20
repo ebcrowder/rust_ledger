@@ -1,7 +1,7 @@
 extern crate serde_yaml;
 
 use crate::error::Result;
-use crate::model::ledger::{Group, LedgerFile};
+use crate::ledger::{Group, LedgerFile};
 
 /// returns all general ledger transactions
 pub fn register(filename: &str, option: &str, group: Group) -> Result<()> {

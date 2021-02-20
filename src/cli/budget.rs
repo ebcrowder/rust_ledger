@@ -1,7 +1,7 @@
 extern crate serde_yaml;
 
 use crate::error::Result;
-use crate::model::ledger::{Group, LedgerFile};
+use crate::ledger::{Group, LedgerFile};
 
 /// generates budget to actual report for transactions
 /// by month or year

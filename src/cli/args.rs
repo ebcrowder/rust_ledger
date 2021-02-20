@@ -1,5 +1,6 @@
 extern crate clap;
-use crate::model::ledger::Group;
+
+use crate::ledger::Group;
 use clap::{crate_version, App, AppSettings, Arg, ArgMatches, SubCommand};
 
 pub struct Args {

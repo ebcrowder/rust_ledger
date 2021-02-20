@@ -1,7 +1,7 @@
 extern crate serde_yaml;
 
 use crate::error::Result;
-use crate::model::ledger::LedgerFile;
+use crate::ledger::LedgerFile;
 
 /// returns balances of all general ledger accounts
 pub fn balance(filename: &str) -> Result<()> {

@@ -1,6 +1,6 @@
 mod cli;
 mod error;
-mod model;
+mod ledger;
 
 #[macro_use]
 extern crate prettytable;

@@ -1,7 +1,7 @@
 extern crate csv;
 
 use crate::error::Error;
-use crate::model::ledger::LedgerFile;
+use crate::ledger::LedgerFile;
 use serde::{Deserialize, Serialize};
 use std::{
     fs,
@@ -108,7 +108,7 @@ pub fn csv(ledger_file: &str, csv_file: &str, offset: &str) -> Result<(), Error>
 
 #[cfg(test)]
 fn get_file() -> LedgerFile {
-    use crate::model::ledger::{Account, Transaction, TransactionList};
+    use crate::ledger::{Account, Transaction, TransactionList};
     use chrono::NaiveDate;
 
     let date = match NaiveDate::parse_from_str("2020-01-01", "%Y-%m-%d") {
@@ -257,7 +257,7 @@ fn negative_csv_amount_should_be_debit() {
         date: record.date,
         amount: -record.amount as f64,
         account,
-        offset_account: offset.to_string(),
+        offset_account: offset,
         description: record.name.trim().to_string(),
     });
 
@@ -286,7 +286,7 @@ fn positive_csv_amount_should_be_credit() {
         date: record.date,
         amount: -record.amount as f64,
         account,
-        offset_account: offset.to_string(),
+        offset_account: offset,
         description: record.name.trim().to_string(),
     });
 
