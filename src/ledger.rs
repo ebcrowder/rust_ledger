@@ -1,6 +1,6 @@
 use chrono::NaiveDate;
-use colored::*;
 use monee::*;
+use prettytable::{format, Table};
 use serde::{de, Deserialize, Deserializer, Serialize};
 use std::collections::HashMap;
 use std::fmt::Display;
@@ -18,6 +18,8 @@ pub struct LedgerFile {
 pub struct Account {
     pub account: String,
     pub amount: f64,
+    pub budget_month: Option<f64>,
+    pub budget_year: Option<f64>,
 }
 
 #[derive(Debug, PartialEq, Clone, Serialize, Deserialize)]
@@ -79,10 +81,7 @@ impl OptionalKeys {
             Some(name) => name.to_string(),
         };
 
-        let amount = match transaction.amount {
-            None => 0.00,
-            Some(number) => number,
-        };
+        let amount = transaction.amount.unwrap_or(0.00);
 
         let transactions = match transaction.transactions.clone() {
             None => vec![],
@@ -118,10 +117,7 @@ impl GroupMap {
         amount: f64,
         transactions: Vec<TransactionList>,
     ) {
-        let prev_value = match self.group_map.get(&range) {
-            Some(value) => value,
-            None => &0.00,
-        };
+        let prev_value = self.group_map.get(&range).unwrap_or(&0.00);
 
         if amount != 0.00 {
             let inc_value = prev_value + amount;
@@ -204,19 +200,43 @@ impl LedgerFile {
             })
             .collect()
     }
+    /// filters all income statement transactions by option
+    fn filter_income_expense_transactions(self, option: &str, group: &Group) -> Vec<Transaction> {
+        let flattened_transactions = LedgerFile::flatten_transactions(self);
+
+        flattened_transactions
+            .into_iter()
+            .filter(|x| {
+                let filter_period = match group {
+                    Group::Month => "%m",
+                    Group::Year => "%Y",
+                    Group::None => "%Y",
+                };
+                x.date.format(filter_period).to_string() == option
+            })
+            .filter(|x| {
+                let OptionalKeys { account, .. } = OptionalKeys::match_optional_keys(&x);
+                account.contains("income") || account.contains("expense")
+            })
+            .collect()
+    }
 
     pub fn print_accounts(self) {
-        println!("{0}", "Account".bold());
-        println!("{:-<60}", "".bright_blue());
+        let mut table = Table::new();
+        table.set_format(*format::consts::FORMAT_NO_BORDER_LINE_SEPARATOR);
+        table.set_titles(row!["Account"]);
 
         for account in self.accounts {
-            println!("{0}", account.account);
+            table.add_row(row![account.account]);
         }
-
-        println!("\n");
+        table.printstd();
     }
 
     pub fn print_balances(self) {
+        let mut table = Table::new();
+        table.set_format(*format::consts::FORMAT_NO_BORDER_LINE_SEPARATOR);
+        table.set_titles(row!["Account", "Balance"]);
+
         let mut accounts_vec: Vec<Account> = Vec::new();
         let mut transactions_vec: Vec<Account> = Vec::new();
 
@@ -225,6 +245,8 @@ impl LedgerFile {
             accounts_vec.push(Account {
                 account: account.account.to_owned(),
                 amount: account.amount.to_owned(),
+                budget_month: None,
+                budget_year: None,
             });
         }
 
@@ -236,7 +258,12 @@ impl LedgerFile {
                 account, amount, ..
             } = OptionalKeys::match_optional_keys(&transaction);
 
-            transactions_vec.push(Account { account, amount });
+            transactions_vec.push(Account {
+                account,
+                amount,
+                budget_month: None,
+                budget_year: None,
+            });
         }
 
         // loop over Vecs and increment(+)/decrement(-) totals
@@ -253,54 +280,30 @@ impl LedgerFile {
         let mut check_figure: f64 = 0.0;
         let mut current_account_type = String::new();
 
-        println!("{0: <40} {1: >19}", "Account".bold(), "Balance".bold());
-        println!("{0:-<60}", "".bright_blue());
-
         for account in accounts_vec {
             check_figure += account.amount;
             let account_type: Vec<&str> = account.account.split(':').collect();
 
             if !current_account_type.eq(account_type[0]) {
                 current_account_type = account_type[0].to_string();
-                println!("{}", current_account_type);
+                table.add_row(row![current_account_type]); // TODO this is supposed to be bold output
             }
 
-            println!(
-                "  {0: <40} {1: >17}",
-                account.account,
-                if account.amount < 0.0 {
-                    format!("{: >1}", money!(account.amount, "USD"))
-                        .to_string()
-                        .red()
-                        .bold()
-                } else if account.amount == 0.0 {
-                    account.amount.to_string().yellow().bold()
-                } else {
-                    format!("{: >1}", money!(account.amount, "USD"))
-                        .to_string()
-                        .bold()
-                }
-            );
+            table.add_row(row![r->account.account, money!(account.amount, "USD")]);
         }
 
-        println!("\n{:-<60}", "".bright_blue());
-        print!("{: <58}", "check");
-
-        if check_figure == 0.0 {
-            println!(" {:<20}\n", check_figure.to_string().bold());
-        } else {
-            println!(" {:<20}\n", format!("{0:.2}", check_figure).red().bold());
-        }
-
-        println!("\n");
+        table.add_empty_row();
+        table.add_row(row!["check", check_figure]);
+        table.printstd();
     }
 
     pub fn print_register_group(self, option: &str, group: Group) {
+        let mut table = Table::new();
+        table.set_format(*format::consts::FORMAT_NO_BORDER_LINE_SEPARATOR);
+        table.set_titles(row!["Date", "Total"]);
+
         let mut group_map = GroupMap::new();
         let filtered_transactions = LedgerFile::filter_transactions_by_option(self, option);
-
-        println!("{0: <10} {1: <23} ", "Date".bold(), "Total".bold());
-        println!("{0:-<100}", "".bright_blue());
 
         for transaction in filtered_transactions {
             let OptionalKeys {
@@ -319,25 +322,16 @@ impl LedgerFile {
             }
         }
 
-        for (k, v) in group_map.group_map.iter() {
-            println!(
-                "{0: <10} {1: <23}",
-                k,
-                format!("{: >1}", money!(v, "USD")).to_string().bold()
-            );
+        for (acct, amount) in group_map.group_map.iter() {
+            table.add_row(row![acct, money!(amount, "USD")]);
         }
+        table.printstd();
     }
 
     pub fn print_register(self, option: &str) {
-        println!(
-            "\n{0: <10} {1: <25} {2: <30} {3: >30}",
-            "Date".bold(),
-            "Description".bold(),
-            "Account".bold(),
-            "Amount".bold()
-        );
-
-        println!("{0:-<100}", "".bright_blue());
+        let mut table = Table::new();
+        table.set_format(*format::consts::FORMAT_NO_BORDER_LINE_SEPARATOR);
+        table.set_titles(row!["Date", "Description", "Account", "Amount"]);
 
         let filtered_transactions = LedgerFile::filter_transactions_by_option(self, option);
 
@@ -346,16 +340,61 @@ impl LedgerFile {
                 account, amount, ..
             } = OptionalKeys::match_optional_keys(&t);
 
-            println!(
-                "{0: <10} {1: <25} {2: <30} {3: >30}",
-                t.date,
-                t.description.bold(),
+            table.add_row(row![t.date, t.description, account, money!(amount, "USD")]);
+        }
+        table.printstd();
+    }
+
+    pub fn print_budget_actual(self, option: &str, group: Group) {
+        let mut table = Table::new();
+        table.set_format(*format::consts::FORMAT_NO_BORDER_LINE_SEPARATOR);
+        table.set_titles(row!["Date", "Budget", "Actual", "Delta"]);
+
+        let mut group_map = GroupMap::new();
+        let filtered_transactions =
+            LedgerFile::filter_income_expense_transactions(self.clone(), option, &group);
+
+        for transaction in filtered_transactions {
+            let OptionalKeys {
+                amount,
                 account,
-                format!("{: >1}", money!(amount, "USD")).to_string().bold(),
-            );
+                transactions,
+                ..
+            } = OptionalKeys::match_optional_keys(&transaction);
+
+            group_map.populate_group_map(account, amount, transactions)
         }
 
-        println!("\n");
+        for (acct, amount) in group_map.group_map.iter() {
+            let b = &Account {
+                account: "".to_string(),
+                amount: 0.0,
+                budget_month: None,
+                budget_year: None,
+            };
+            let account = match self.accounts.iter().find(|x| &x.account == acct) {
+                Some(a) => a,
+                None => b,
+            };
+
+            let budget = match &group {
+                Group::Month => account.budget_month,
+                Group::Year => account.budget_year,
+                Group::None => None,
+            };
+
+            let budget_amount = budget.unwrap_or(0.00);
+
+            let delta = budget_amount - amount;
+
+            table.add_row(row![
+                acct,
+                money!(budget_amount, "USD"),
+                money!(amount, "USD"),
+                money!(delta, "USD")
+            ]);
+        }
+        table.printstd();
     }
 }
 
@@ -366,23 +405,31 @@ fn get_file() -> LedgerFile {
         Err(e) => panic!("{:?}", e),
     };
 
-    return LedgerFile {
+    LedgerFile {
         accounts: vec![
             Account {
                 account: "asset:cash".to_string(),
                 amount: 100.00,
+                budget_month: None,
+                budget_year: None,
             },
             Account {
                 account: "expense:foo".to_string(),
                 amount: 0.00,
+                budget_month: None,
+                budget_year: None,
             },
             Account {
                 account: "expense:bar".to_string(),
                 amount: 0.00,
+                budget_month: None,
+                budget_year: None,
             },
             Account {
                 account: "expense:baz".to_string(),
                 amount: 0.00,
+                budget_month: None,
+                budget_year: None,
             },
         ],
         transactions: vec![
@@ -424,35 +471,11 @@ fn get_file() -> LedgerFile {
                 ]),
             },
         ],
-    };
+    }
 }
 
 #[test]
-fn print_accounts_to_stdout() {
-    let file = get_file();
-    let result = LedgerFile::print_accounts(file);
-
-    assert_eq!(result, ())
-}
-
-#[test]
-fn print_balances_to_stdout() {
-    let file = get_file();
-    let result = LedgerFile::print_balances(file);
-
-    assert_eq!(result, ())
-}
-
-#[test]
-fn print_register_to_stdout() {
-    let file = get_file();
-    let result = LedgerFile::print_register(file, &"".to_string());
-
-    assert_eq!(result, ())
-}
-
-#[test]
-fn flatten_ledgerfile_transactions() {
+fn flatten_ledger_transactions() {
     let file = get_file();
     let result = LedgerFile::flatten_transactions(file);
 
@@ -470,7 +493,7 @@ fn optional_keys() {
             account: "asset:cash".to_string(),
             amount: 10.00,
             offset_account: "expense:foo".to_string(),
-            transactions: vec![]
+            transactions: vec![],
         }
     )
 }
@@ -505,4 +528,25 @@ fn filter_transactions_by_option_42() {
             }
         ]
     )
+}
+
+#[test]
+fn group_map() {
+    let file = get_file();
+    let mut group_map = GroupMap::new();
+    let filtered_transactions = LedgerFile::filter_transactions_by_option(file, &"42".to_string());
+    for transaction in filtered_transactions {
+        let OptionalKeys {
+            amount,
+            account,
+            transactions,
+            ..
+        } = OptionalKeys::match_optional_keys(&transaction);
+
+        group_map.populate_group_map(account, amount, transactions)
+    }
+
+    assert_eq!(group_map.group_map.get("expense:foo"), Some(&42.00));
+    assert_eq!(group_map.group_map.get("asset:cash"), Some(&-42.00));
+    assert_eq!(group_map.group_map.keys().len(), 2);
 }
