@@ -19,11 +19,12 @@ on:
     # branches:
     #   - release
     tags:
-      - 'v[0-9]+.[0-9]+.[0-9]+'
+      - "v[0-9]+.[0-9]+.[0-9]+"
 jobs:
   create-release:
     name: create-release
-    runs-on: ubuntu-latest
+    runs-on:
+      ubuntu-latest
       # env:
     # Set to force version number, e.g., when no tag exists.
     # RUST_LEDGER_VERSION: TEST-0.0.0
@@ -59,7 +60,7 @@ jobs:
 
   build-release:
     name: build-release
-    needs: [ "create-release" ]
+    needs: ["create-release"]
     runs-on: ${{ matrix.os }}
     env:
       # For some builds, we use cross to test on 32-bit and big-endian systems
@@ -72,7 +73,16 @@ jobs:
       RUST_BACKTRACE: 1
     strategy:
       matrix:
-        build: [ linux-gnu, linux-musl, linux-arm, macos, win-msvc, win-gnu, win32-msvc ]
+        build:
+          [
+            linux-gnu,
+            linux-musl,
+            linux-arm,
+            macos,
+            win-msvc,
+            win-gnu,
+            win32-msvc,
+          ]
         include:
           - build: linux-gnu
             os: ubuntu-18.04
@@ -119,7 +129,9 @@ jobs:
       - name: Use Cross
         # if: matrix.os != 'windows-2019'
         run: |
-          cargo install cross
+          # FIXME: to work around bugs in latest cross release, install master.
+          # See: https://github.com/rust-embedded/cross/issues/357
+          cargo install --git https://github.com/rust-embedded/cross
           echo "CARGO=cross" >> $GITHUB_ENV
           echo "TARGET_FLAGS=--target ${{ matrix.target }}" >> $GITHUB_ENV
           echo "TARGET_DIR=./target/${{ matrix.target }}" >> $GITHUB_ENV
