@@ -286,10 +286,10 @@ impl LedgerFile {
 
             if !current_account_type.eq(account_type[0]) {
                 current_account_type = account_type[0].to_string();
-                table.add_row(row![b->current_account_type]); // TODO this is supposed to be bold output
+                table.add_row(row![current_account_type]); // TODO this is supposed to be bold output
             }
 
-            table.add_row(row![account.account, money!(account.amount, "USD")]);
+            table.add_row(row![r->account.account, money!(account.amount, "USD")]);
         }
 
         table.add_empty_row();

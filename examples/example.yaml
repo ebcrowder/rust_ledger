@@ -3,7 +3,7 @@ accounts:
     amount: 1500
   - account: asset:cash_savings
     amount: 2000
-  - account: liability:credit_card_amex
+  - account: liability:cc_amex
     amount: 0
   - account: equity:equity
     amount: -3500
@@ -25,7 +25,7 @@ transactions:
     amount: 455
     description: weekly groceries
     account: expense:grocery
-    offset_account: liability:credit_card_amex
+    offset_account: liability:cc_amex
   - date: 2020-01-01
     amount: 2000
     description: mortage
