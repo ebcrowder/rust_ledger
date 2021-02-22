@@ -16,18 +16,17 @@ name: release
 on:
   push:
     # Enable when testing release infrastructure on a branch.
-    # branches:
-    #   - release
+    branches:
+      - ci/release
     tags:
       - "v[0-9]+.[0-9]+.[0-9]+"
 jobs:
   create-release:
     name: create-release
-    runs-on:
-      ubuntu-latest
-      # env:
-    # Set to force version number, e.g., when no tag exists.
-    # RUST_LEDGER_VERSION: TEST-0.0.0
+    runs-on: ubuntu-latest
+    env:
+      # Set to force version number, e.g., when no tag exists.
+      RUST_LEDGER_VERSION: TEST-0.0.0
     steps:
       - name: Create artifacts directory
         run: mkdir artifacts
@@ -118,6 +117,14 @@ jobs:
         uses: actions/checkout@v2
         with:
           fetch-depth: 1
+      - name: Install packages (Ubuntu)
+        if: matrix.os == 'ubuntu-18.04'
+        run: |
+          ci/ubuntu-install-packages
+      - name: Install packages (macOS)
+        if: matrix.os == 'macos-latest'
+        run: |
+          ci/macos-install-packages
       - name: Install Rust
         uses: actions-rs/toolchain@v1
         with:
@@ -125,13 +132,10 @@ jobs:
           profile: minimal
           override: true
           target: ${{ matrix.target }}
-
       - name: Use Cross
         # if: matrix.os != 'windows-2019'
         run: |
-          # FIXME: to work around bugs in latest cross release, install master.
-          # See: https://github.com/rust-embedded/cross/issues/357
-          cargo install --git https://github.com/rust-embedded/cross
+          cargo install cross
           echo "CARGO=cross" >> $GITHUB_ENV
           echo "TARGET_FLAGS=--target ${{ matrix.target }}" >> $GITHUB_ENV
           echo "TARGET_DIR=./target/${{ matrix.target }}" >> $GITHUB_ENV
@@ -174,7 +178,7 @@ jobs:
       - name: Build archive
         shell: bash
         run: |
-          outdir="${{ env.TARGET_DIR }}"
+          outdir="$(ci/cargo-out-dir "${{ env.TARGET_DIR }}")"
           staging="rust_ledger-${{ env.RELEASE_VERSION }}-${{ matrix.target }}"
           mkdir -p "$staging"/{complete,doc}
 
