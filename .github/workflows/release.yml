@@ -1,4 +1,4 @@
-# This was borrowed from `ripgrep`:
+# As with most of my rust projects, this was borrowed from `ripgrep`:
 #
 # The way this works is a little weird. But basically, the create-release job
 # runs purely to initialize the GitHub release itself. Once done, the upload
@@ -11,21 +11,19 @@
 # created release.
 #
 # The key here is that we create the release only once.
-
 name: release
 on:
   push:
     # Enable when testing release infrastructure on a branch.
     # branches:
-    #   - release
+    #   - ci
     tags:
       - "v[0-9]+.[0-9]+.[0-9]+"
 jobs:
   create-release:
     name: create-release
-    runs-on:
-      ubuntu-latest
-      # env:
+    runs-on: ubuntu-latest
+    # env:
     # Set to force version number, e.g., when no tag exists.
     # RUST_LEDGER_VERSION: TEST-0.0.0
     steps:
@@ -73,44 +71,31 @@ jobs:
       RUST_BACKTRACE: 1
     strategy:
       matrix:
-        build:
-          [
-            linux-gnu,
-            linux-musl,
-            linux-arm,
-            macos,
-            win-msvc,
-            win-gnu,
-            win32-msvc,
-          ]
+        build: [linux-gnu, linux-musl, linux-arm, macos, win-gnu, win32-msvc]
         include:
           - build: linux-gnu
-            os: ubuntu-18.04
-            rust: stable
+            os: ubuntu-latest
+            rust: nightly
             target: x86_64-unknown-linux-gnu
           - build: linux-musl
-            os: ubuntu-18.04
-            rust: stable
+            os: ubuntu-latest
+            rust: nightly
             target: x86_64-unknown-linux-musl
           - build: linux-arm
-            os: ubuntu-18.04
-            rust: stable
+            os: ubuntu-latest
+            rust: nightly
             target: arm-unknown-linux-gnueabihf
           - build: macos
             os: macos-latest
-            rust: stable
+            rust: nightly
             target: x86_64-apple-darwin
-          - build: win-msvc
-            os: windows-2019
-            rust: stable
-            target: x86_64-pc-windows-msvc
           - build: win-gnu
-            os: windows-2019
-            rust: stable-x86_64-gnu
+            os: windows-latest
+            rust: nightly-x86_64-gnu
             target: x86_64-pc-windows-gnu
           - build: win32-msvc
-            os: windows-2019
-            rust: stable
+            os: windows-latest
+            rust: nightly
             target: i686-pc-windows-msvc
 
     steps:
@@ -127,11 +112,9 @@ jobs:
           target: ${{ matrix.target }}
 
       - name: Use Cross
-        # if: matrix.os != 'windows-2019'
+        # if: matrix.os != 'windows-latest'
         run: |
-          # FIXME: to work around bugs in latest cross release, install master.
-          # See: https://github.com/rust-embedded/cross/issues/357
-          cargo install --git https://github.com/rust-embedded/cross
+          cargo install cross
           echo "CARGO=cross" >> $GITHUB_ENV
           echo "TARGET_FLAGS=--target ${{ matrix.target }}" >> $GITHUB_ENV
           echo "TARGET_DIR=./target/${{ matrix.target }}" >> $GITHUB_ENV
@@ -170,17 +153,14 @@ jobs:
             rustembedded/cross:arm-unknown-linux-gnueabihf \
             arm-linux-gnueabihf-strip \
             /target/arm-unknown-linux-gnueabihf/release/rust_ledger
-
       - name: Build archive
         shell: bash
         run: |
           outdir="${{ env.TARGET_DIR }}"
           staging="rust_ledger-${{ env.RELEASE_VERSION }}-${{ matrix.target }}"
           mkdir -p "$staging"/{complete,doc}
-
           cp -r "$outdir" "$staging/complete/"
-
-          if [ "${{ matrix.os }}" = "windows-2019" ]; then
+          if [ "${{ matrix.os }}" = "windows-latest" ]; then
             cp "target/${{ matrix.target }}/release/rust_ledger.exe" "$staging/"
             7z a "$staging.zip" "$staging"
             echo "ASSET=$staging.zip" >> $GITHUB_ENV
