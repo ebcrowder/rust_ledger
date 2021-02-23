@@ -1,44 +1,194 @@
+# This was borrowed from `ripgrep`:
+#
+# The way this works is a little weird. But basically, the create-release job
+# runs purely to initialize the GitHub release itself. Once done, the upload
+# URL of the release is saved as an artifact.
+#
+# The build-release job runs only once create-release is finished. It gets
+# the release upload URL by downloading the corresponding artifact (which was
+# uploaded by create-release). It then builds the release executables for each
+# supported platform and attaches them as release assets to the previously
+# created release.
+#
+# The key here is that we create the release only once.
+
 name: release
 on:
   push:
+    # Enable when testing release infrastructure on a branch.
     branches:
       - ci
     tags:
-      - v[0-9]+.*
+      - "v[0-9]+.[0-9]+.[0-9]+"
 jobs:
   create-release:
+    name: create-release
     runs-on: ubuntu-latest
+    env:
+      # Set to force version number, e.g., when no tag exists.
+      RUST_LEDGER_VERSION: TEST-0.0.0
     steps:
-      - uses: actions/checkout@v2
-      - uses: taiki-e/create-gh-release-action@v1
+      - name: Create artifacts directory
+        run: mkdir artifacts
+
+      - name: Get the release version from the tag
+        if: env.RUST_LEDGER_VERSION == ''
+        run: |
+          echo "RUST_LEDGER_VERSION=${GITHUB_REF#refs/tags/}" >> $GITHUB_ENV
+          echo "version is: ${{ env.RUST_LEDGER_VERSION }}"
+      - name: Create GitHub release
+        id: release
+        uses: actions/create-release@v1
         env:
-          # (required)
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-  upload-assets:
+        with:
+          tag_name: ${{ env.RUST_LEDGER_VERSION }}
+          release_name: ${{ env.RUST_LEDGER_VERSION }}
+
+      - name: Save release upload URL to artifact
+        run: echo "${{ steps.release.outputs.upload_url }}" > artifacts/release-upload-url
+
+      - name: Save version number to artifact
+        run: echo "${{ env.RUST_LEDGER_VERSION }}" > artifacts/release-version
+
+      - name: Upload artifacts
+        uses: actions/upload-artifact@v1
+        with:
+          name: artifacts
+          path: artifacts
+
+  build-release:
+    name: build-release
+    needs: ["create-release"]
+    runs-on: ${{ matrix.os }}
+    env:
+      # For some builds, we use cross to test on 32-bit and big-endian systems
+      CARGO: cargo
+      # When CARGO is set to CROSS, this is set to `--target matrix.target`.
+      TARGET_FLAGS:
+      # When CARGO is set to CROSS, TARGET_DIR includes matrix.target.
+      TARGET_DIR: ./target
+      # Emit backtraces on panics.
+      RUST_BACKTRACE: 1
     strategy:
       matrix:
-        os:
-          - ubuntu-latest
-          - macos-latest
-          - windows-latest
-    runs-on: ${{ matrix.os }}
+        build:
+          [
+            linux-gnu,
+            linux-musl,
+            linux-arm,
+            macos,
+            win-msvc,
+            win-gnu,
+            win32-msvc,
+          ]
+        include:
+          - build: linux-gnu
+            os: ubuntu-latest
+            rust: stable
+            target: x86_64-unknown-linux-gnu
+          - build: linux-musl
+            os: ubuntu-latest
+            rust: stable
+            target: x86_64-unknown-linux-musl
+          - build: linux-arm
+            os: ubuntu-latest
+            rust: stable
+            target: arm-unknown-linux-gnueabihf
+          - build: macos
+            os: macos-latest
+            rust: stable
+            target: x86_64-apple-darwin
+          - build: win-msvc
+            os: windows-latest
+            rust: stable
+            target: x86_64-pc-windows-msvc
+          - build: win-gnu
+            os: windows-latest
+            rust: stable-x86_64-gnu
+            target: x86_64-pc-windows-gnu
+          - build: win32-msvc
+            os: windows-latest
+            rust: stable
+            target: i686-pc-windows-msvc
+
     steps:
-      - uses: actions/checkout@v2
-      - uses: taiki-e/upload-rust-binary-action@v1
+      - name: Checkout repository
+        uses: actions/checkout@v2
         with:
-          # (required)
-          # Binary name (non-extension portion of filename) to build and upload.
-          bin: rust_ledger
-          # (optional) On which platform to distribute the `.tar.gz` file.
-          # [default value: unix]
-          # [possible values: all, unix, windows, none]
-          tar: unix
-          # (optional) On which platform to distribute the `.zip` file.
-          # [default value: windows]
-          # [possible values: all, unix, windows, none]
-          zip: windows
+          fetch-depth: 1
+      - name: Install Rust
+        uses: actions-rs/toolchain@v1
+        with:
+          toolchain: ${{ matrix.rust }}
+          profile: minimal
+          override: true
+          target: ${{ matrix.target }}
+
+      - name: Use Cross
+        # if: matrix.os != 'windows-latest'
+        run: |
+          cargo install cross
+          echo "CARGO=cross" >> $GITHUB_ENV
+          echo "TARGET_FLAGS=--target ${{ matrix.target }}" >> $GITHUB_ENV
+          echo "TARGET_DIR=./target/${{ matrix.target }}" >> $GITHUB_ENV
+      - name: Show command used for Cargo
+        run: |
+          echo "cargo command is: ${{ env.CARGO }}"
+          echo "target flag is: ${{ env.TARGET_FLAGS }}"
+          echo "target dir is: ${{ env.TARGET_DIR }}"
+      - name: Get release download URL
+        uses: actions/download-artifact@v1
+        with:
+          name: artifacts
+          path: artifacts
+
+      - name: Set release upload URL and release version
+        shell: bash
+        run: |
+          release_upload_url="$(cat artifacts/release-upload-url)"
+          echo "RELEASE_UPLOAD_URL=$release_upload_url" >> $GITHUB_ENV
+          echo "release upload url: $RELEASE_UPLOAD_URL"
+          release_version="$(cat artifacts/release-version)"
+          echo "RELEASE_VERSION=$release_version" >> $GITHUB_ENV
+          echo "release version: $RELEASE_VERSION"
+      - name: Build release binary
+        run: ${{ env.CARGO }} build --verbose --release ${{ env.TARGET_FLAGS }}
+
+      - name: Strip release binary (linux and macos)
+        if: matrix.build == 'linux' || matrix.build == 'macos'
+        run: strip "target/${{ matrix.target }}/release/rust_ledger"
+
+      - name: Strip release binary (arm)
+        if: matrix.build == 'linux-arm'
+        run: |
+          docker run --rm -v \
+            "$PWD/target:/target:Z" \
+            rustembedded/cross:arm-unknown-linux-gnueabihf \
+            arm-linux-gnueabihf-strip \
+            /target/arm-unknown-linux-gnueabihf/release/rust_ledger
+      - name: Build archive
+        shell: bash
+        run: |
+          outdir="${{ env.TARGET_DIR }}"
+          staging="rust_ledger-${{ env.RELEASE_VERSION }}-${{ matrix.target }}"
+          mkdir -p "$staging"/{complete,doc}
+          cp -r "$outdir" "$staging/complete/"
+          if [ "${{ matrix.os }}" = "windows-latest" ]; then
+            cp "target/${{ matrix.target }}/release/rust_ledger.exe" "$staging/"
+            7z a "$staging.zip" "$staging"
+            echo "ASSET=$staging.zip" >> $GITHUB_ENV
+          else
+            cp "target/${{ matrix.target }}/release/rust_ledger" "$staging/"
+            tar czf "$staging.tar.gz" "$staging"
+            echo "ASSET=$staging.tar.gz" >> $GITHUB_ENV
+          fi
+      - name: Upload release archive
+        uses: actions/upload-release-asset@v1.0.1
         env:
-          # (required)
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-          # (optional)
-          CARGO_PROFILE_RELEASE_LTO: true
+        with:
+          upload_url: ${{ env.RELEASE_UPLOAD_URL }}
+          asset_path: ${{ env.ASSET }}
+          asset_name: ${{ env.ASSET }}
+          asset_content_type: application/octet-stream
