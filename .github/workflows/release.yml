@@ -11,22 +11,21 @@
 # created release.
 #
 # The key here is that we create the release only once.
-
 name: release
 on:
   push:
     # Enable when testing release infrastructure on a branch.
-    branches:
-      - ci
+    # branches:
+    #   - ci
     tags:
       - "v[0-9]+.[0-9]+.[0-9]+"
 jobs:
   create-release:
     name: create-release
     runs-on: ubuntu-latest
-    env:
-      # Set to force version number, e.g., when no tag exists.
-      RUST_LEDGER_VERSION: TEST-0.0.0
+    # env:
+    # Set to force version number, e.g., when no tag exists.
+    # RUST_LEDGER_VERSION: TEST-0.0.0
     steps:
       - name: Create artifacts directory
         run: mkdir artifacts
@@ -76,27 +75,27 @@ jobs:
         include:
           - build: linux-gnu
             os: ubuntu-latest
-            rust: stable
+            rust: nightly
             target: x86_64-unknown-linux-gnu
           - build: linux-musl
             os: ubuntu-latest
-            rust: stable
+            rust: nightly
             target: x86_64-unknown-linux-musl
           - build: linux-arm
             os: ubuntu-latest
-            rust: stable
+            rust: nightly
             target: arm-unknown-linux-gnueabihf
           - build: macos
             os: macos-latest
-            rust: stable
+            rust: nightly
             target: x86_64-apple-darwin
           - build: win-gnu
             os: windows-latest
-            rust: stable-x86_64-gnu
+            rust: nightly-x86_64-gnu
             target: x86_64-pc-windows-gnu
           - build: win32-msvc
             os: windows-latest
-            rust: stable
+            rust: nightly
             target: i686-pc-windows-msvc
 
     steps:
