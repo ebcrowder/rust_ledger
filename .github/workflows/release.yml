@@ -27,6 +27,7 @@ jobs:
     env:
       # Set to force version number, e.g., when no tag exists.
       RUST_LEDGER_VERSION: TEST-0.0.0
+      ACTIONS_ALLOW_UNSECURE_COMMANDS: true
     steps:
       - name: Create artifacts directory
         run: mkdir artifacts
