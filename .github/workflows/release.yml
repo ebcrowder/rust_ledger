@@ -1,6 +1,8 @@
 name: release
 on:
   push:
+    branches:
+      - ci
     tags:
       - v[0-9]+.*
 jobs:
