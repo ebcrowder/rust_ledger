@@ -1,8 +1,12 @@
 # .github/workflows/release.yml
 name: release
 on:
-  release:
-    types: [created]
+  push:
+    # Enable when testing release infrastructure on a branch.
+    branches:
+      - ci
+    tags:
+      - "v[0-9]+.[0-9]+.[0-9]+"
 
 jobs:
   release:
