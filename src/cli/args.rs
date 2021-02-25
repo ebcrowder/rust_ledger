@@ -150,11 +150,9 @@ impl Args {
             Args::resolve_ledger_file(self, sub);
             self.options_arg = sub.value_of("option").unwrap_or("").to_string();
             self.group_arg = match sub.value_of("group") {
-                v => match v {
-                    Some("month") => Group::Month,
-                    Some("year") => Group::Year,
-                    _ => Group::None,
-                },
+                Some("month") => Group::Month,
+                Some("year") => Group::Year,
+                _ => Group::None,
             }
         }
 
@@ -162,11 +160,9 @@ impl Args {
             Args::resolve_ledger_file(self, sub);
             self.options_arg = sub.value_of("option").unwrap_or("").to_string();
             self.group_arg = match sub.value_of("group") {
-                v => match v {
-                    Some("month") => Group::Month,
-                    Some("year") => Group::Year,
-                    _ => Group::None,
-                },
+                Some("month") => Group::Month,
+                Some("year") => Group::Year,
+                _ => Group::None,
             }
         }
 
