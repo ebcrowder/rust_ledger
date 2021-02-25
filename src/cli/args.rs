@@ -1,5 +1,6 @@
 extern crate clap;
 
+use crate::error::Error;
 use crate::ledger::Group;
 use clap::{crate_version, App, AppSettings, Arg, ArgMatches, SubCommand};
 
@@ -36,7 +37,7 @@ impl Args {
             Some(f) => String::from(f),
             None => match std::env::var("RLEDGER_FILE") {
                 Ok(p) => p,
-                Err(err) => format!("{}", err),
+                Err(err) => Error::InvalidArg(err.to_string()).to_string(),
             },
         };
     }
@@ -147,46 +148,32 @@ impl Args {
 
         if let Some(sub) = matches.subcommand_matches("register") {
             Args::resolve_ledger_file(self, sub);
-            self.options_arg = match sub.value_of("option") {
-                Some(v) => String::from(v),
-                None => String::from(""),
-            };
+            self.options_arg = sub.value_of("option").unwrap_or("").to_string();
             self.group_arg = match sub.value_of("group") {
-                Some(v) => match v {
-                    "month" => Group::Month,
-                    "year" => Group::Year,
+                v => match v {
+                    Some("month") => Group::Month,
+                    Some("year") => Group::Year,
                     _ => Group::None,
                 },
-                None => Group::None,
-            };
+            }
         }
 
         if let Some(sub) = matches.subcommand_matches("budget") {
             Args::resolve_ledger_file(self, sub);
-            self.options_arg = match sub.value_of("option") {
-                Some(v) => String::from(v),
-                None => String::from(""),
-            };
+            self.options_arg = sub.value_of("option").unwrap_or("").to_string();
             self.group_arg = match sub.value_of("group") {
-                Some(v) => match v {
-                    "month" => Group::Month,
-                    "year" => Group::Year,
+                v => match v {
+                    Some("month") => Group::Month,
+                    Some("year") => Group::Year,
                     _ => Group::None,
                 },
-                None => Group::None,
-            };
+            }
         }
 
         if let Some(sub) = matches.subcommand_matches("csv") {
             Args::resolve_ledger_file(self, sub);
-            self.options_arg = match sub.value_of("csv") {
-                Some(v) => String::from(v),
-                None => String::from(""),
-            };
-            self.offset_arg = match sub.value_of("offset") {
-                Some(v) => String::from(v),
-                None => String::from(""),
-            };
+            self.options_arg = sub.value_of("csv").unwrap_or("").to_string();
+            self.offset_arg = sub.value_of("offset").unwrap_or("").to_string()
         }
 
         if let Some(sub) = matches.subcommand_matches("account") {
