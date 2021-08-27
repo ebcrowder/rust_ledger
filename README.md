@@ -4,7 +4,7 @@
 
 # rust_ledger
 
-command line accounting tool
+command line accounting tool for Linux and macOS
 
 ### Summary
 
@@ -25,15 +25,17 @@ command line accounting tool
 
 `cargo install rust_ledger`
 
-#### Binaries for Linux, macOS, and Windows
+#### Binaries for Linux and macOS
 
-We distribute binaries for the above platforms. See [releases](https://github.com/ebcrowder/rust_ledger/releases) for a complete list by version.
+We distribute binaries for the above platforms. See [releases](https://github.com/ebcrowder/rust_ledger/releases) for a
+complete list by version.
 
 #### Build from Source
 
 Alternatively, clone this repo and do the following:
 
-- If Rust is not installed on your machine, follow the instructions on how to do that here: https://www.rust-lang.org/tools/install
+- If Rust is not installed on your machine, follow the instructions on how to do that
+  here: https://www.rust-lang.org/tools/install
 - run `cargo build --release` to compile the binary
 - go to `/target/release` and copy the `rust_ledger` binary in your path: `/usr/bin`
 
@@ -65,7 +67,8 @@ SUBCOMMANDS:
 
 LEDGER_FILE_PATH (denoted by `-f`) - relative path to location of yaml ledger file
 
-- Optionally, the ledger file path can be set via the environment variable `RLEDGER_FILE` in lieu of specifying whenever the program is invoked.
+- Optionally, the ledger file path can be set via the environment variable `RLEDGER_FILE` in lieu of specifying whenever
+  the program is invoked.
 - If `-f` is provided with a file path the file provided will be used instead of any `RLEDGER_FILE` set.
 
 ```
@@ -86,12 +89,10 @@ export RLEDGER_FILE=$HOME/rledger.yaml
 
 ## rust_ledger `yaml` file format
 
-In lieu of the plain text ledger file format, this project  uses a 
-defined YAML schema. YAML has a relatively clean syntax and is able to
-represent useful data types (lists, etc) natively. Further, parsing `yaml` via
-is easy thanks to tools such as `serde`. These facts allowed me to skip 
-writing a custom parser to support the "ledger" plain text file format and focus
-on implementing functionality.
+In lieu of the plain text ledger file format, this project uses a defined YAML schema. YAML has a relatively clean
+syntax and is able to represent useful data types (lists, etc) natively. Further, parsing `yaml` via is easy thanks to
+tools such as `serde`. These facts allowed me to skip writing a custom parser to support the "ledger" plain text file
+format and focus on implementing functionality.
 
 - example ledger `yaml` file can be found at `examples/example.yaml`
 - rust_ledger utilizes `yaml` files in the following format:
@@ -126,7 +127,8 @@ The ledger format schema is purposely lightweight. The only requirements are as 
 
 ### Transactions
 
-Transactions can be expressed in two different ways. One is a "simplified" format for transactions that only impact two accounts:
+Transactions can be expressed in two different ways. One is a "simplified" format for transactions that only impact two
+accounts:
 
 ```yaml
 - date: 2020-01-01
@@ -136,9 +138,11 @@ Transactions can be expressed in two different ways. One is a "simplified" forma
   account: expense:expense_general
 ```
 
-The sign (debit / credit) associated with the `offset_account` value is the opposite of the sign of the value contained in `amount` field.
+The sign (debit / credit) associated with the `offset_account` value is the opposite of the sign of the value contained
+in `amount` field.
 
-In the above example transaction, since `expense_general` was debited by 200, the `cc_amex` account will be credited by the same amount.
+In the above example transaction, since `expense_general` was debited by 200, the `cc_amex` account will be credited by
+the same amount.
 
 Transactions that involve more than two accounts are expressed in the following manner:
 
@@ -169,7 +173,7 @@ rust_ledger-account
 account module
 
 USAGE:
-    rust_ledger account [OPTIONS]
+    rust_ledger account [OPTIONS] --filename <filename>
 
 FLAGS:
     -h, --help       Prints help information
@@ -203,7 +207,7 @@ rust_ledger-balance
 balance module
 
 USAGE:
-    rust_ledger balance [OPTIONS]
+    rust_ledger balance [OPTIONS] --filename <filename>
 
 FLAGS:
     -h, --help       Prints help information
@@ -244,7 +248,7 @@ rust_ledger-register
 register module
 
 USAGE:
-    rust_ledger register [OPTIONS]
+    rust_ledger register [OPTIONS] --filename <filename>
 
 FLAGS:
     -h, --help       Prints help information
@@ -284,7 +288,7 @@ rust_ledger-budget
 budget module
 
 USAGE:
-    rust_ledger budget [OPTIONS]
+    rust_ledger budget [OPTIONS] --filename <filename>
 
 FLAGS:
     -h, --help       Prints help information
@@ -298,9 +302,9 @@ OPTIONS:
 
 - outputs a report of budgeted and actual values for income statement accounts
 - report can be rolled up via the `group` parameter (`year` or `month`)
-- report can be filtered by `option` parameter. For example, this value could be `2020` 
+- report can be filtered by `option` parameter. For example, this value could be `2020`
   if using a year `group` parameter or `12` (December) if using a `month` group parameter.
-  
+
 example output:
 
 ```
@@ -319,10 +323,11 @@ rust_ledger-csv
 csv module
 
 USAGE:
-    rust_ledger csv [OPTIONS]
+    rust_ledger csv [OPTIONS] --csv <csv> --filename <filename>
 
 FLAGS:
     -h, --help       Prints help information
+    -i, --invert     invert amount for each csv transaction
     -V, --version    Prints version information
 
 OPTIONS:
@@ -332,12 +337,27 @@ OPTIONS:
 ```
 
 - converts `csv` files to `yaml` format expected by `rust_ledger`.
-- should be invoked with `-f`, `-o`, and `s` arguments. These include the rust_ledger file location (unless specified via environment variable),
-  csv file location and account offset, respectively.
-- the account offset (`s` argument) would be the offset transaction that the csv transactions should be posted against.
-- the csv tool will look for existing transactions that have matching `description` fields and will populate the appropriate expense/income accounts
-  for any matches. Non-matches will use a default of `expense:general` or `income:general`, which is determined based on the sign of the `amount` field
-  contained in the transaction.
-- **note** - prior to importing your `csv` file into the tool, you must rename the columns in the first line of the `csv` file in the following schema:
-  `"date","transaction","name","memo","amount"`.
+- should be invoked with `-f` and `-c` arguments. These include the rust_ledger file location (unless specified via
+  environment variable), csv file location and account offset, respectively.
+- the `-i` flag can be used to invert the sign of the "amount" column values that are being imported. This is useful
+  when working with CSV files that represent debits as negative values and credits as positive values.
+- the account offset (`-o` argument) would be the offset transaction that the csv transactions should be posted against.
+- the csv tool will look for existing transactions that have matching `description` fields and will populate the
+  appropriate expense/income accounts for any matches. Non-matches will use a default of `expense:general`
+  or `income:general`, which is determined based on the sign of the `amount` field (or `debit` or `credit`) contained in
+  the transaction.
 
+The CSV tool can import columns with the following case-sensitive names:
+
+- date
+- description
+- name
+- amount
+- debit
+- credit
+
+Often, banks will provide exports in one of two formats: 1) amounts are represented in one column whereby debits and
+credits are identified by negative and positive (or vice-versa) amounts or 2) separate debit and credit columns. The CSV
+import tool can handle both scenarios.
+
+CSV file(s) should have `date`, `description` and `name` columns as they are required fields.

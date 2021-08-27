@@ -8,16 +8,16 @@ pub type Result<T> = result::Result<T, Error>;
 
 #[derive(Debug)]
 pub enum Error {
-    IOError(io::Error),
-    CSVError(csv::Error),
+    IO(io::Error),
+    Csv(csv::Error),
     InvalidArg(String),
 }
 
 impl fmt::Display for Error {
     fn fmt(&self, f: &mut fmt::Formatter) -> fmt::Result {
         match *self {
-            Error::IOError(ref err) => write!(f, "{}", err),
-            Error::CSVError(ref err) => write!(f, "{}", err),
+            Error::IO(ref err) => write!(f, "{}", err),
+            Error::Csv(ref err) => write!(f, "{}", err),
             Error::InvalidArg(ref s) => write!(f, "{}", s),
         }
     }
@@ -25,13 +25,13 @@ impl fmt::Display for Error {
 
 impl From<io::Error> for Error {
     fn from(err: io::Error) -> Error {
-        Error::IOError(err)
+        Error::IO(err)
     }
 }
 
 impl From<csv::Error> for Error {
     fn from(err: csv::Error) -> Error {
-        Error::CSVError(err)
+        Error::Csv(err)
     }
 }
 

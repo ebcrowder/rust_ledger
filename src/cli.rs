@@ -16,6 +16,7 @@ pub fn run() -> Result<()> {
         options_arg,
         offset_arg,
         group_arg,
+        invert_arg,
         command,
     } = matches;
 
@@ -26,10 +27,11 @@ pub fn run() -> Result<()> {
         Command::Register => {
             register::register(ledger_file.as_str(), options_arg.as_str(), group_arg)
         }
-        Command::CSV => csv::csv(
+        Command::Csv => csv::csv(
             ledger_file.as_str(),
             options_arg.as_str(),
             offset_arg.as_str(),
+            invert_arg,
         ),
         Command::None => unreachable!(),
     }

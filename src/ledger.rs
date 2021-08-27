@@ -189,7 +189,7 @@ impl LedgerFile {
                         offset_account,
                         amount,
                         ..
-                    } = OptionalKeys::match_optional_keys(&x);
+                    } = OptionalKeys::match_optional_keys(x);
 
                     x.date.to_string().contains(option)
                         || amount.to_string().contains(option)
@@ -215,7 +215,7 @@ impl LedgerFile {
                 x.date.format(filter_period).to_string() == option
             })
             .filter(|x| {
-                let OptionalKeys { account, .. } = OptionalKeys::match_optional_keys(&x);
+                let OptionalKeys { account, .. } = OptionalKeys::match_optional_keys(x);
                 account.contains("income") || account.contains("expense")
             })
             .collect()
@@ -525,7 +525,7 @@ fn filter_transactions_by_option_42() {
                 description: "summary_transaction".to_string(),
                 offset_account: None,
                 transactions: None,
-            }
+            },
         ]
     )
 }

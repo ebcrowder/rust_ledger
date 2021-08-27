@@ -9,6 +9,7 @@ pub struct Args {
     pub options_arg: String,
     pub group_arg: Group,
     pub offset_arg: String,
+    pub invert_arg: bool,
     pub command: Command,
 }
 
@@ -17,7 +18,7 @@ pub enum Command {
     Balance,
     Budget,
     Register,
-    CSV,
+    Csv,
     None,
 }
 
@@ -28,6 +29,7 @@ impl Args {
             options_arg: String::from(""),
             group_arg: Group::None,
             offset_arg: String::from(""),
+            invert_arg: false,
             command: Command::None,
         }
     }
@@ -55,7 +57,8 @@ impl Args {
                             .short("f")
                             .long("filename")
                             .help("location of ledger file")
-                            .takes_value(true),
+                            .takes_value(true)
+                            .required(true),
                     ),
             )
             .subcommand(
@@ -66,7 +69,8 @@ impl Args {
                             .short("f")
                             .long("filename")
                             .help("location of ledger file")
-                            .takes_value(true),
+                            .takes_value(true)
+                            .required(true),
                     ),
             )
             .subcommand(
@@ -77,7 +81,8 @@ impl Args {
                             .short("f")
                             .long("filename")
                             .help("location of ledger file")
-                            .takes_value(true),
+                            .takes_value(true)
+                            .required(true),
                     )
                     .arg(
                         Arg::with_name("option")
@@ -102,7 +107,8 @@ impl Args {
                             .short("f")
                             .long("filename")
                             .help("location of ledger file")
-                            .takes_value(true),
+                            .takes_value(true)
+                            .required(true),
                     )
                     .arg(
                         Arg::with_name("option")
@@ -127,14 +133,16 @@ impl Args {
                             .short("f")
                             .long("filename")
                             .help("location of ledger file")
-                            .takes_value(true),
+                            .takes_value(true)
+                            .required(true),
                     )
                     .arg(
                         Arg::with_name("csv")
                             .short("c")
                             .long("csv")
                             .help("path of csv file")
-                            .takes_value(true),
+                            .takes_value(true)
+                            .required(true),
                     )
                     .arg(
                         Arg::with_name("offset")
@@ -142,6 +150,13 @@ impl Args {
                             .long("offset")
                             .help("offset account for each csv transaction")
                             .takes_value(true),
+                    )
+                    .arg(
+                        Arg::with_name("invert")
+                            .short("i")
+                            .long("invert")
+                            .help("invert amount for each csv transaction")
+                            .takes_value(false),
                     ),
             )
             .get_matches();
@@ -169,7 +184,8 @@ impl Args {
         if let Some(sub) = matches.subcommand_matches("csv") {
             Args::resolve_ledger_file(self, sub);
             self.options_arg = sub.value_of("csv").unwrap_or("").to_string();
-            self.offset_arg = sub.value_of("offset").unwrap_or("").to_string()
+            self.offset_arg = sub.value_of("offset").unwrap_or("").to_string();
+            self.invert_arg = sub.is_present("invert");
         }
 
         if let Some(sub) = matches.subcommand_matches("account") {
@@ -185,7 +201,7 @@ impl Args {
             Some("balance") => self.command = Command::Balance,
             Some("budget") => self.command = Command::Budget,
             Some("register") => self.command = Command::Register,
-            Some("csv") => self.command = Command::CSV,
+            Some("csv") => self.command = Command::Csv,
             _ => self.command = Command::None,
         };
     }

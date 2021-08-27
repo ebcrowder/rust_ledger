@@ -1,4 +1,4 @@
-# As with most of my rust projects, this was borrowed from `ripgrep`:
+# As with most of my rust projects, this was borrowed from `https://github.com/BurntSushi/ripgrep`:
 #
 # The way this works is a little weird. But basically, the create-release job
 # runs purely to initialize the GitHub release itself. Once done, the upload
@@ -15,8 +15,8 @@ name: release
 on:
   push:
     # Enable when testing release infrastructure on a branch.
-    # branches:
-    #   - ci
+    branches:
+      - csv
     tags:
       - "v[0-9]+.[0-9]+.[0-9]+"
 jobs:
@@ -58,7 +58,7 @@ jobs:
 
   build-release:
     name: build-release
-    needs: ["create-release"]
+    needs: [ "create-release" ]
     runs-on: ${{ matrix.os }}
     env:
       # For some builds, we use cross to test on 32-bit and big-endian systems
@@ -71,32 +71,24 @@ jobs:
       RUST_BACKTRACE: 1
     strategy:
       matrix:
-        build: [linux-gnu, linux-musl, linux-arm, macos, win-gnu, win32-msvc]
+        build: [ linux-gnu, linux-musl, linux-arm, macos ]
         include:
           - build: linux-gnu
             os: ubuntu-latest
-            rust: nightly
+            rust: stable
             target: x86_64-unknown-linux-gnu
           - build: linux-musl
             os: ubuntu-latest
-            rust: nightly
+            rust: stable
             target: x86_64-unknown-linux-musl
           - build: linux-arm
             os: ubuntu-latest
-            rust: nightly
+            rust: stable
             target: arm-unknown-linux-gnueabihf
           - build: macos
             os: macos-latest
-            rust: nightly
+            rust: stable
             target: x86_64-apple-darwin
-          - build: win-gnu
-            os: windows-latest
-            rust: nightly-x86_64-gnu
-            target: x86_64-pc-windows-gnu
-          - build: win32-msvc
-            os: windows-latest
-            rust: nightly
-            target: i686-pc-windows-msvc
 
     steps:
       - name: Checkout repository
@@ -112,7 +104,6 @@ jobs:
           target: ${{ matrix.target }}
 
       - name: Use Cross
-        # if: matrix.os != 'windows-latest'
         run: |
           cargo install cross
           echo "CARGO=cross" >> $GITHUB_ENV
@@ -160,15 +151,9 @@ jobs:
           staging="rust_ledger-${{ env.RELEASE_VERSION }}-${{ matrix.target }}"
           mkdir -p "$staging"/{complete,doc}
           cp -r "$outdir" "$staging/complete/"
-          if [ "${{ matrix.os }}" = "windows-latest" ]; then
-            cp "target/${{ matrix.target }}/release/rust_ledger.exe" "$staging/"
-            7z a "$staging.zip" "$staging"
-            echo "ASSET=$staging.zip" >> $GITHUB_ENV
-          else
-            cp "target/${{ matrix.target }}/release/rust_ledger" "$staging/"
-            tar czf "$staging.tar.gz" "$staging"
-            echo "ASSET=$staging.tar.gz" >> $GITHUB_ENV
-          fi
+          cp "target/${{ matrix.target }}/release/rust_ledger" "$staging/"
+          tar czf "$staging.tar.gz" "$staging"
+          echo "ASSET=$staging.tar.gz" >> $GITHUB_ENV
       - name: Upload release archive
         uses: actions/upload-release-asset@v1.0.1
         env:

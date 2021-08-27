@@ -9,16 +9,35 @@ use std::{
 };
 
 #[derive(Debug, Clone, Deserialize)]
-struct CSV {
+struct Csv {
     date: String,
-    transaction: String,
+    description: String,
     name: String,
-    amount: f64,
+    amount: Option<f64>,
+    debit: Option<f64>,
+    credit: Option<f64>,
 }
 
-impl CSV {
-    fn match_account(self, ledger_file: &LedgerFile) -> String {
-        for match_item in ledger_file.clone().transactions {
+impl Csv {
+    fn determine_amount(&self, invert: bool) -> f64 {
+        if let Some(a) = self.amount {
+            if invert {
+                -a
+            } else {
+                a
+            }
+        } else if let Some(a) = self.debit {
+            a
+        } else if let Some(a) = self.credit {
+            -a
+        } else {
+            // TODO parsing error should be emitted here
+            panic!("csv file must have an account, debit or credit column")
+        }
+    }
+
+    fn match_account(&self, amount: f64, ledger_file: &LedgerFile) -> String {
+        for match_item in &ledger_file.transactions {
             let account = match &match_item.account {
                 None => "".to_string(),
                 Some(name) => name.to_string(),
@@ -28,7 +47,7 @@ impl CSV {
                 return account;
             }
 
-            if self.amount.is_sign_negative() {
+            if amount.is_sign_positive() {
                 return "expense:general".to_string();
             }
         }
@@ -37,12 +56,12 @@ impl CSV {
 }
 
 #[derive(Debug, PartialEq, Serialize, Deserialize)]
-struct CSVOutput {
-    records: Vec<CSVRecord>,
+struct CsvOutput {
+    records: Vec<CsvRecord>,
 }
 
 #[derive(Debug, PartialEq, Serialize, Deserialize)]
-struct CSVRecord {
+struct CsvRecord {
     date: String,
     amount: f64,
     account: String,
@@ -50,9 +69,9 @@ struct CSVRecord {
     description: String,
 }
 
-impl CSVOutput {
-    fn new() -> CSVOutput {
-        CSVOutput {
+impl CsvOutput {
+    fn new() -> CsvOutput {
+        CsvOutput {
             records: Vec::new(),
         }
     }
@@ -66,22 +85,36 @@ impl CSVOutput {
     }
 
     fn write_to_stdout(self) -> Result<(), serde_yaml::Error> {
-        CSVOutput::write(&self, &mut stdout())
+        CsvOutput::write(&self, &mut stdout())
     }
 
-    fn populate_output_vec(&mut self, record: CSV, account: String, offset: &str) {
-        self.records.push(CSVRecord {
+    fn populate_output_vec(
+        &mut self,
+        record: Csv,
+        offset_account: &str,
+        invert: bool,
+        ledger_file: &LedgerFile,
+    ) {
+        let amount = Csv::determine_amount(&record, invert);
+        let account = Csv::match_account(&record, amount, ledger_file);
+
+        self.records.push(CsvRecord {
             date: record.date,
-            amount: -record.amount as f64,
             account,
-            offset_account: offset.to_string(),
+            amount,
+            offset_account: offset_account.to_string(),
             description: record.name.trim().to_string(),
         })
     }
 }
 
 /// convert csv to yaml format
-pub fn csv(ledger_file: &str, csv_file: &str, offset: &str) -> Result<(), Error> {
+pub fn csv(
+    ledger_file: &str,
+    csv_file: &str,
+    offset_account: &str,
+    invert: bool,
+) -> Result<(), Error> {
     // open csv file
     let raw_csv_file = fs::File::open(csv_file)?;
     let mut csv_reader = csv::Reader::from_reader(raw_csv_file);
@@ -90,18 +123,16 @@ pub fn csv(ledger_file: &str, csv_file: &str, offset: &str) -> Result<(), Error>
     let raw_ledger_file = std::fs::File::open(ledger_file)?;
     let deserialized_file: LedgerFile = serde_yaml::from_reader(raw_ledger_file).unwrap();
 
-    let mut csv_output = CSVOutput::new();
+    let mut csv_output = CsvOutput::new();
 
     for result in csv_reader.deserialize() {
-        let record: CSV = result?;
+        let record: Csv = result?;
 
-        let account = CSV::match_account(record.clone(), &deserialized_file);
-
-        csv_output.populate_output_vec(record, account, offset);
+        csv_output.populate_output_vec(record, offset_account, invert, &deserialized_file);
     }
 
     // write csv_output contents to stdout
-    CSVOutput::write_to_stdout(csv_output).unwrap();
+    CsvOutput::write_to_stdout(csv_output).unwrap();
 
     Ok(())
 }
@@ -190,14 +221,17 @@ fn get_file() -> LedgerFile {
 #[test]
 fn account_should_be_expense_general() {
     let file = get_file();
-    let record = CSV {
+    let record = Csv {
         date: "2020-01-01".to_string(),
-        transaction: "twin peaks diner coffee".to_string(),
+        description: "twin peaks diner coffee".to_string(),
         name: "coffee".to_string(),
-        amount: -2.50,
+        amount: Some(-2.50),
+        debit: None,
+        credit: None,
     };
 
-    let result = CSV::match_account(record, &file);
+    let amount = Csv::determine_amount(&record, true);
+    let result = Csv::match_account(&record, amount, &file);
 
     assert_eq!(result, "expense:general");
 }
@@ -207,14 +241,17 @@ fn account_should_be_expense_general() {
 #[test]
 fn account_should_be_income_general() {
     let file = get_file();
-    let record = CSV {
+    let record = Csv {
         date: "2020-01-01".to_string(),
-        transaction: "donuts sold to dale cooper".to_string(),
+        description: "donuts sold to dale cooper".to_string(),
         name: "donuts".to_string(),
-        amount: 2.50,
+        amount: Some(2.50),
+        debit: None,
+        credit: None,
     };
 
-    let result = CSV::match_account(record, &file);
+    let amount = Csv::determine_amount(&record, true);
+    let result = Csv::match_account(&record, amount, &file);
 
     assert_eq!(result, "income:general");
 }
@@ -223,14 +260,17 @@ fn account_should_be_income_general() {
 #[test]
 fn account_should_be_matched_account() {
     let file = get_file();
-    let record = CSV {
+    let record = Csv {
         date: "2020-01-01".to_string(),
-        transaction: "cherry pie sold to dale cooper".to_string(),
+        description: "cherry pie sold to dale cooper".to_string(),
         name: "summary_transaction".to_string(),
-        amount: 2.50,
+        amount: Some(2.50),
+        debit: None,
+        credit: None,
     };
 
-    let result = CSV::match_account(record, &file);
+    let amount = Csv::determine_amount(&record, true);
+    let result = Csv::match_account(&record, amount, &file);
 
     assert_eq!(result, "asset:cash");
 }
@@ -238,24 +278,27 @@ fn account_should_be_matched_account() {
 /// negative `amount` should be expressed as debit
 #[test]
 fn negative_csv_amount_should_be_debit() {
-    let mut csv_output = CSVOutput::new();
+    let file = get_file();
+    let mut csv_output = CsvOutput::new();
     let account = "expense:general".to_string();
     let offset = "liability:amex".to_string();
-    let record = CSV {
+    let record = Csv {
         date: "2020-01-01".to_string(),
-        transaction: "twin peaks diner coffee".to_string(),
+        description: "twin peaks diner coffee".to_string(),
         name: "coffee".to_string(),
-        amount: -2.50,
+        amount: Some(-2.50),
+        debit: None,
+        credit: None,
     };
 
-    csv_output.populate_output_vec(record.clone(), account.clone(), &offset);
+    csv_output.populate_output_vec(record.clone(), &offset, true, &file);
 
-    let mut expected = CSVOutput {
+    let mut expected = CsvOutput {
         records: Vec::new(),
     };
-    expected.records.push(CSVRecord {
+    expected.records.push(CsvRecord {
         date: record.date,
-        amount: -record.amount as f64,
+        amount: -record.amount.unwrap(),
         account,
         offset_account: offset,
         description: record.name.trim().to_string(),
@@ -267,24 +310,91 @@ fn negative_csv_amount_should_be_debit() {
 /// positive `amount` should be expressed as credit
 #[test]
 fn positive_csv_amount_should_be_credit() {
-    let mut csv_output = CSVOutput::new();
+    let file = get_file();
+    let mut csv_output = CsvOutput::new();
     let account = "income:general".to_string();
     let offset = "asset:cash".to_string();
-    let record = CSV {
+    let record = Csv {
         date: "2020-01-01".to_string(),
-        transaction: "coffee sold to dale cooper".to_string(),
+        description: "coffee sold to dale cooper".to_string(),
         name: "coffee".to_string(),
-        amount: 2.50,
+        amount: Some(2.50),
+        debit: None,
+        credit: None,
     };
 
-    csv_output.populate_output_vec(record.clone(), account.clone(), &offset);
+    csv_output.populate_output_vec(record.clone(), &offset, true, &file);
 
-    let mut expected = CSVOutput {
+    let mut expected = CsvOutput {
         records: Vec::new(),
     };
-    expected.records.push(CSVRecord {
+    expected.records.push(CsvRecord {
         date: record.date,
-        amount: -record.amount as f64,
+        amount: -record.amount.unwrap(),
+        account,
+        offset_account: offset,
+        description: record.name.trim().to_string(),
+    });
+
+    assert_eq!(csv_output, expected);
+}
+
+/// optional debits should be handled correctly
+#[test]
+fn should_handle_debits() {
+    let file = get_file();
+    let mut csv_output = CsvOutput::new();
+    let account = "expense:general".to_string();
+    let offset = "liability:amex".to_string();
+    let record = Csv {
+        date: "2020-01-01".to_string(),
+        description: "coffee bought for dale cooper".to_string(),
+        name: "coffee".to_string(),
+        amount: None,
+        debit: Some(2.50),
+        credit: None,
+    };
+
+    csv_output.populate_output_vec(record.clone(), &offset, true, &file);
+
+    let mut expected = CsvOutput {
+        records: Vec::new(),
+    };
+    expected.records.push(CsvRecord {
+        date: record.date,
+        amount: record.debit.unwrap(),
+        account,
+        offset_account: offset,
+        description: record.name.trim().to_string(),
+    });
+
+    assert_eq!(csv_output, expected);
+}
+
+/// optional credits should be handled correctly
+#[test]
+fn should_handle_credits() {
+    let file = get_file();
+    let mut csv_output = CsvOutput::new();
+    let account = "income:general".to_string();
+    let offset = "asset:cash".to_string();
+    let record = Csv {
+        date: "2020-01-01".to_string(),
+        description: "coffee sold to dale cooper".to_string(),
+        name: "coffee".to_string(),
+        amount: None,
+        debit: None,
+        credit: Some(2.50),
+    };
+
+    csv_output.populate_output_vec(record.clone(), &offset, true, &file);
+
+    let mut expected = CsvOutput {
+        records: Vec::new(),
+    };
+    expected.records.push(CsvRecord {
+        date: record.date,
+        amount: -record.credit.unwrap(),
         account,
         offset_account: offset,
         description: record.name.trim().to_string(),
