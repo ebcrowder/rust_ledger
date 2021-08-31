@@ -148,6 +148,7 @@ fn get_file() -> LedgerFile {
     };
 
     LedgerFile {
+        currency: "USD".to_string(),
         accounts: vec![
             Account {
                 account: "asset:cash".to_string(),

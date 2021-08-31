@@ -10,13 +10,14 @@ command line accounting tool for Linux and macOS
 
 - Spiritual port of [ledger](https://github.com/ledger/ledger)
 - Uses double-entry accounting paradigm
+- Supports all [ISO 4217](https://en.wikipedia.org/wiki/ISO_4217) currency formats
 - Uses `yaml` files as data store
 - Includes a tool to convert `csv` files to `yaml` format
-- Small feature set based on typical use cases
+- Small feature set based on typical personal finance use cases
 
 ### Contributing
 
-- See `CODE_OF_CONDUCT.md` for fundamental guidelines
+- See `CODE_OF_CONDUCT.md` for guidelines
 - PRs, issues and feature requests are welcome and encouraged
 
 ### Install
@@ -28,7 +29,7 @@ command line accounting tool for Linux and macOS
 #### Binaries for Linux and macOS
 
 We distribute binaries for the above platforms. See [releases](https://github.com/ebcrowder/rust_ledger/releases) for a
-complete list by version.
+complete list.
 
 #### Build from Source
 
@@ -37,7 +38,7 @@ Alternatively, clone this repo and do the following:
 - If Rust is not installed on your machine, follow the instructions on how to do that
   here: https://www.rust-lang.org/tools/install
 - run `cargo build --release` to compile the binary
-- go to `/target/release` and copy the `rust_ledger` binary in your path: `/usr/bin`
+- copy the `/target/release/rust_ledger` binary to `/usr/bin` or wherever your system maintains application binaries
 
 ### Usage
 
@@ -89,15 +90,25 @@ export RLEDGER_FILE=$HOME/rledger.yaml
 
 ## rust_ledger `yaml` file format
 
-In lieu of the plain text ledger file format, this project uses a defined YAML schema. YAML has a relatively clean
-syntax and is able to represent useful data types (lists, etc) natively. Further, parsing `yaml` via is easy thanks to
-tools such as `serde`. These facts allowed me to skip writing a custom parser to support the "ledger" plain text file
-format and focus on implementing functionality.
+In lieu of the plain text ledger file format, this project uses a defined `yaml` schema. `yaml` has a relatively simple
+syntax and is able to represent useful data types, such as lists, quite easily.
 
-- example ledger `yaml` file can be found at `examples/example.yaml`
-- rust_ledger utilizes `yaml` files in the following format:
+An example ledger `yaml` file can be found at `examples/example.yaml`.
+
+Further, parsing `yaml` via is trivial thanks to tools such as `serde`. This allowed me to skip writing a parser to
+support the `ledger` plain text file format and focus on implementing functionality. Additionally, modern formatting
+tools, such as [prettier](https://prettier.io) can be leveraged to maintain `yaml` files with ease as they are agnostic
+to the schema of the underlying file.
+
+The `ledger` tool has been rewritten in [many](https://github.com/ledger/ledger/wiki/Ports) programming languages.
+Almost all of these ports utilize the original `ledger` plain text format. Above all else, I view `rust_ledger` as an
+experiment in using a different ledger file format while maintaining the core feature set of the original tool.
+
+`rust_ledger` utilizes `yaml` files in the following format:
 
 ```yaml
+currency: USD
+
 accounts:
   - account:
     amount:

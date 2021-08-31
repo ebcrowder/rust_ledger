@@ -1,6 +1,6 @@
 [package]
 name = "rust_ledger"
-version = "0.6.0"
+version = "0.7.0"
 authors = ["Eric Crowder <eric@ebcrowder.dev>"]
 edition = "2018"
 license = "GPL-3.0"
@@ -15,7 +15,7 @@ readme = "README.md"
 serde_yaml = "0.8.17"
 serde = { version = "1.0.123", features = ["derive"] }
 csv = "1.1.5"
-monee = "0.0.6"
+rusty-money = "0.4.1"
 chrono = { version = "0.4.19", features = ["serde"] }
 clap = "2.33.3"
 prettytable-rs = "0.8"

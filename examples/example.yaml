@@ -1,3 +1,5 @@
+currency: USD
+
 accounts:
   - account: asset:cash_checking
     amount: 1500

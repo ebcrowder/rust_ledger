@@ -255,15 +255,6 @@ source = "registry+https://github.com/rust-lang/crates.io-index"
 checksum = "3728d817d99e5ac407411fa471ff9800a778d88a24685968b36824eaf4bee400"
 
 [[package]]
-name = "monee"
-version = "0.0.6"
-source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "215c966660ed064dea5f7cd86552ba60631a2881673805179ea7245363787e6a"
-dependencies = [
- "lazy_static",
-]
-
-[[package]]
 name = "num-integer"
 version = "0.1.43"
 source = "registry+https://github.com/rust-lang/crates.io-index"
@@ -379,17 +370,48 @@ dependencies = [
 ]
 
 [[package]]
+name = "rust_decimal"
+version = "1.15.0"
+source = "registry+https://github.com/rust-lang/crates.io-index"
+checksum = "c5446d1cf2dfe2d6367c8b27f2082bdf011e60e76fa1fcd140047f535156d6e7"
+dependencies = [
+ "arrayvec",
+ "num-traits",
+ "serde",
+]
+
+[[package]]
+name = "rust_decimal_macros"
+version = "1.15.0"
+source = "registry+https://github.com/rust-lang/crates.io-index"
+checksum = "f1927f5f2552e7c5335f2daef329de05f91efd8ec4a71c3ff4066ad45361b1df"
+dependencies = [
+ "quote",
+ "rust_decimal",
+]
+
+[[package]]
 name = "rust_ledger"
-version = "0.6.0"
+version = "0.7.0"
 dependencies = [
  "assert_cmd",
  "chrono",
  "clap",
  "csv",
- "monee",
  "prettytable-rs",
+ "rusty-money",
  "serde",
  "serde_yaml",
+]
+
+[[package]]
+name = "rusty-money"
+version = "0.4.1"
+source = "registry+https://github.com/rust-lang/crates.io-index"
+checksum = "5b28f881005eac7ad8d46b6f075da5f322bd7f4f83a38720fc069694ddadd683"
+dependencies = [
+ "rust_decimal",
+ "rust_decimal_macros",
 ]
 
 [[package]]

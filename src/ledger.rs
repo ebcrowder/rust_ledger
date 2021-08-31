@@ -1,6 +1,6 @@
 use chrono::NaiveDate;
-use monee::*;
 use prettytable::{format, Table};
+use rusty_money::{iso, Money};
 use serde::{de, Deserialize, Deserializer, Serialize};
 use std::collections::HashMap;
 use std::fmt::Display;
@@ -10,6 +10,7 @@ use std::str::FromStr;
 /// and associated structs
 #[derive(Debug, PartialEq, Clone, Serialize, Deserialize)]
 pub struct LedgerFile {
+    pub currency: String,
     pub accounts: Vec<Account>,
     pub transactions: Vec<Transaction>,
 }
@@ -131,6 +132,16 @@ impl GroupMap {
 }
 
 impl LedgerFile {
+    /// obtain ISO 4217 currency for reference
+    fn get_currency(self) -> &'static rusty_money::iso::Currency {
+        let c = self.currency;
+
+        match iso::find(&c) {
+            Some(n) => n,
+            None => rusty_money::iso::USD,
+        }
+    }
+
     /// flatten abbreviated and detailed `LedgerFile` transactions into
     /// a Vec containing individual detailed transactions.
     /// all downstream logic expects this data structure.
@@ -237,6 +248,7 @@ impl LedgerFile {
         table.set_format(*format::consts::FORMAT_NO_BORDER_LINE_SEPARATOR);
         table.set_titles(row!["Account", "Balance"]);
 
+        let currency_code = self.clone().get_currency();
         let mut accounts_vec: Vec<Account> = Vec::new();
         let mut transactions_vec: Vec<Account> = Vec::new();
 
@@ -289,7 +301,8 @@ impl LedgerFile {
                 table.add_row(row![current_account_type]); // TODO this is supposed to be bold output
             }
 
-            table.add_row(row![r->account.account, money!(account.amount, "USD")]);
+            table
+                .add_row(row![r->account.account, Money::from_str(&account.amount.to_string(), currency_code).unwrap()]);
         }
 
         table.add_empty_row();
@@ -302,6 +315,7 @@ impl LedgerFile {
         table.set_format(*format::consts::FORMAT_NO_BORDER_LINE_SEPARATOR);
         table.set_titles(row!["Date", "Total"]);
 
+        let currency_code = self.clone().get_currency();
         let mut group_map = GroupMap::new();
         let filtered_transactions = LedgerFile::filter_transactions_by_option(self, option);
 
@@ -323,7 +337,10 @@ impl LedgerFile {
         }
 
         for (acct, amount) in group_map.group_map.iter() {
-            table.add_row(row![acct, money!(amount, "USD")]);
+            table.add_row(row![
+                acct,
+                Money::from_str(&amount.to_string(), currency_code).unwrap()
+            ]);
         }
         table.printstd();
     }
@@ -333,6 +350,7 @@ impl LedgerFile {
         table.set_format(*format::consts::FORMAT_NO_BORDER_LINE_SEPARATOR);
         table.set_titles(row!["Date", "Description", "Account", "Amount"]);
 
+        let currency_code = self.clone().get_currency();
         let filtered_transactions = LedgerFile::filter_transactions_by_option(self, option);
 
         for t in filtered_transactions {
@@ -340,7 +358,12 @@ impl LedgerFile {
                 account, amount, ..
             } = OptionalKeys::match_optional_keys(&t);
 
-            table.add_row(row![t.date, t.description, account, money!(amount, "USD")]);
+            table.add_row(row![
+                t.date,
+                t.description,
+                account,
+                Money::from_str(&amount.to_string(), currency_code).unwrap()
+            ]);
         }
         table.printstd();
     }
@@ -350,6 +373,7 @@ impl LedgerFile {
         table.set_format(*format::consts::FORMAT_NO_BORDER_LINE_SEPARATOR);
         table.set_titles(row!["Date", "Budget", "Actual", "Delta"]);
 
+        let currency_code = self.clone().get_currency();
         let mut group_map = GroupMap::new();
         let filtered_transactions =
             LedgerFile::filter_income_expense_transactions(self.clone(), option, &group);
@@ -389,9 +413,9 @@ impl LedgerFile {
 
             table.add_row(row![
                 acct,
-                money!(budget_amount, "USD"),
-                money!(amount, "USD"),
-                money!(delta, "USD")
+                Money::from_str(&budget_amount.to_string(), currency_code).unwrap(),
+                Money::from_str(&amount.to_string(), currency_code).unwrap(),
+                Money::from_str(&delta.to_string(), currency_code).unwrap(),
             ]);
         }
         table.printstd();
@@ -406,6 +430,7 @@ fn get_file() -> LedgerFile {
     };
 
     LedgerFile {
+        currency: "USD".to_string(),
         accounts: vec![
             Account {
                 account: "asset:cash".to_string(),
