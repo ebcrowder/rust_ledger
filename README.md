@@ -1,6 +1,5 @@
 ![](https://github.com/ebcrowder/rust-ledger/workflows/rust_ledger/badge.svg)
 [![Latest version](https://img.shields.io/crates/v/rust_ledger.svg)](https://crates.io/crates/rust_ledger)
-[![Documentation](https://docs.rs/rust_ledger/badge.svg)](https://docs.rs/rust_ledger)
 
 # rust_ledger
 
@@ -40,6 +39,10 @@ Alternatively, clone this repo and do the following:
 - run `cargo build --release` to compile the binary
 - copy the `/target/release/rust_ledger` binary to `/usr/bin` or wherever your system maintains application binaries
 
+## Test
+
+- `cargo test`
+
 ### Usage
 
 `rust_ledger --help` will provide a menu of all available commands and optional arguments.
@@ -63,30 +66,6 @@ SUBCOMMANDS:
     help        Prints this message or the help of the given subcommand(s)
     register    register module
 ```
-
-`rust_ledger COMMAND -f LEDGER_FILE_PATH`
-
-LEDGER_FILE_PATH (denoted by `-f`) - relative path to location of yaml ledger file
-
-- Optionally, the ledger file path can be set via the environment variable `RLEDGER_FILE` in lieu of specifying whenever
-  the program is invoked.
-- If `-f` is provided with a file path the file provided will be used instead of any `RLEDGER_FILE` set.
-
-```
-RLEDGER_FILE=~/rledger.yaml rust_ledger balance
-```
-
-`RLEDGER_FILE` can be set as a system or user environment variable.
-
-```
-export RLEDGER_FILE=$HOME/rledger.yaml
-```
-
-### Environment Variables
-
-`RLEDGER_FILE` - Path to rledger file. ex: `RLEDGER_FILE=~/rledger.yaml`
-
-`NO_COLOR` - Disables color output. ex: `NO_COLOR=true`
 
 ## rust_ledger `yaml` file format
 
@@ -130,13 +109,12 @@ transactions:
 
 The ledger format schema is purposely lightweight. The only requirements are as follows:
 
+- the `currency` field should be a [ISO 4217](https://en.wikipedia.org/wiki/ISO_4217) currency code.
 - the `account` field should be expressed in the following format: `account_classification:account_name`.
 - the `amount` field should be a number. It can include up to two (2) decimal points.
 - the `date` field should be in the following format: `YYYY-MM-DD`.
 
-## Features
-
-### Transactions
+## Transactions
 
 Transactions can be expressed in two different ways. One is a "simplified" format for transactions that only impact two
 accounts:
@@ -171,13 +149,17 @@ Transactions that involve more than two accounts are expressed in the following 
 
 Transactions that only involve two accounts can also be expressed in the above format.
 
-## Test
+## Specifying the rust_ledger file path via environment variable
 
-- `cargo test`
+Optionally, the ledger file path can be set via the environment variable `RUST_LEDGER_FILE` in lieu of specifying
+whenever the program is invoked. If `-f` is provided with a file path, the file provided will be used instead of
+any `RUST_LEDGER_FILE` set.
 
 ## API
 
 ### account
+
+Lists all accounts contained within the ledger file.
 
 ```bash
 rust_ledger-account
@@ -193,8 +175,6 @@ FLAGS:
 OPTIONS:
     -f, --filename <filename>    location of ledger file
 ```
-
-- lists accounts
 
 example output:
 
@@ -213,6 +193,8 @@ example output:
 
 ### balance
 
+Lists account balances to date.
+
 ```bash
 rust_ledger-balance
 balance module
@@ -227,8 +209,6 @@ FLAGS:
 OPTIONS:
     -f, --filename <filename>    location of ledger file
 ```
-
-- lists account balances to date
 
 example output:
 
@@ -254,6 +234,8 @@ example output:
 
 ### register
 
+Lists general ledger transactions to date. The output can be filtered by any field via optional parameter.
+
 ```bash
 rust_ledger-register
 register module
@@ -271,8 +253,12 @@ OPTIONS:
     -o, --option <option>        filter output by optional value
 ```
 
-- lists general ledger transactions to date
-- can filter output by any field via optional parameter
+- register report can be optionally rolled up via the `group` parameter (`yearly`, `monthly` or `daily`)
+- if a `group` parameter is specified, a `option` parameter must also be specified to indicate the value to group by.
+  For example, this value could be `2020` if using a `yearly` group parameter or `12` (December) if using a `monthly`
+  group parameter.
+- register report can also be optionally filtered by `option` parameter. All matching `Description`, `Account`
+  or `Amount` values will be included in the output.
 
 example output:
 
@@ -292,14 +278,41 @@ example output:
  2020-01-01 | donut sale to dale | income:general      | $-300.00 
 ```
 
+example output for `rust_ledger -f RUST_LEDGER_FILE -o grocery`:
+
+```bash
+ Date       | Description      | Account             | Amount 
+------------+------------------+---------------------+----------
+ 2019-12-31 | weekly groceries | expense:grocery     | $455.00 
+ 2020-01-01 | grocery store    | expense:general     | $20.00 
+ 2020-01-01 | grocery store    | expense:grocery     | $180.00 
+ 2020-01-01 | grocery store    | asset:cash_checking | -$200.00
+```
+
+example output for `rust_ledger -f RUST_LEDGER_FILE -g yearly -o 2020`:
+
+```bash
+Date / Account      | Total
+---------------------+------------
+2020                |  
+expense:grocery     | $180.00
+expense:mortgage    | $2,000.00
+asset:cash_checking | -$1,900.00
+income:general      | -$300.00
+asset:cash_savings  | -$1,000.00
+expense:general     | $1,020.00
+```
+
 ### budget
+
+Outputs a report of budgeted and actual values for income statement accounts.
 
 ```bash
 rust_ledger-budget 
 budget module
 
 USAGE:
-    rust_ledger budget [OPTIONS] --filename <filename>
+    rust_ledger budget --filename <filename> --group <group> --option <option>
 
 FLAGS:
     -h, --help       Prints help information
@@ -311,20 +324,20 @@ OPTIONS:
     -o, --option <option>        filter output by optional value
 ```
 
-- outputs a report of budgeted and actual values for income statement accounts
-- report can be rolled up via the `group` parameter (`year` or `month`)
-- report can be filtered by `option` parameter. For example, this value could be `2020`
-  if using a year `group` parameter or `12` (December) if using a `month` group parameter.
+- budget report is rolled up via the `group` parameter (`yearly`, `monthly` or `daily`)
+- report is filtered by `option` parameter. For example, this value could be `2020`
+  if using a `yearly` group parameter or `12` (December) if using a `monthly` group parameter.
 
-example output:
+Here is an example output of `rust_ledger budget -f RUST_LEDGER_FILE -g yearly -o 2020`:
 
 ```
-Date             | Budget     | Actual    | Delta
+ Date / Account   | Budget     | Actual    | Delta 
 ------------------+------------+-----------+------------
-expense:grocery  | $6,000.00  | $180.00   | $5,820.00
-expense:mortgage | $24,000.00 | $2,000.00 | $22,000.00
-expense:general  | 0          | $1,020.00 | $-1,020.00
-income:general   | 0          | $-300.00  | $300.00
+ 2020             |            |           |  
+ income:general   | $0.00      | -$300.00  | $300.00 
+ expense:mortgage | $24,000.00 | $2,000.00 | $22,000.00 
+ expense:grocery  | $6,000.00  | $180.00   | $5,820.00 
+ expense:general  | $0.00      | $1,020.00 | -$1,020.00 
 ```
 
 ### csv
@@ -347,7 +360,8 @@ OPTIONS:
     -o, --offset <offset>        offset account for each csv transaction
 ```
 
-- converts `csv` files to `yaml` format expected by `rust_ledger`.
+Converts `csv` files to `yaml` format expected by `rust_ledger`:
+
 - should be invoked with `-f` and `-c` arguments. These include the rust_ledger file location (unless specified via
   environment variable), csv file location and account offset, respectively.
 - the `-i` flag can be used to invert the sign of the "amount" column values that are being imported. This is useful

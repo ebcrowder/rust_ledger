@@ -55,8 +55,9 @@ pub struct TransactionList {
 /// enumerates all possible `group` values for pattern matching
 #[derive(Debug, PartialEq)]
 pub enum Group {
-    Month,
-    Year,
+    Monthly,
+    Yearly,
+    Daily,
     None,
 }
 
@@ -73,12 +74,12 @@ struct OptionalKeys {
 impl OptionalKeys {
     fn match_optional_keys(transaction: &Transaction) -> Self {
         let account = match &transaction.account {
-            None => "optional:account".to_string(),
+            None => "".to_string(),
             Some(name) => name.to_string(),
         };
 
         let offset_account = match &transaction.offset_account {
-            None => "optional:account".to_string(),
+            None => "".to_string(),
             Some(name) => name.to_string(),
         };
 
@@ -99,10 +100,13 @@ impl OptionalKeys {
 }
 
 /// data structure for maintaining summarized register data
-/// keyed by range
+/// via 2D HashMap. The HashMap is keyed by date and the related
+/// values are a HashMap keyed by Account and the related
+/// values are cumulative totals.
+/// e.g. Key: "2020-01-01" -> <Key: "expense:general", Value: 100.00>
 #[derive(Debug, PartialEq)]
 struct GroupMap {
-    group_map: HashMap<String, f64>,
+    group_map: HashMap<String, HashMap<String, f64>>,
 }
 
 impl GroupMap {
@@ -114,18 +118,30 @@ impl GroupMap {
 
     fn populate_group_map(
         &mut self,
-        range: String,
+        date_string: String,
+        account: String,
         amount: f64,
         transactions: Vec<TransactionList>,
     ) {
-        let prev_value = self.group_map.get(&range).unwrap_or(&0.00);
-
-        if amount != 0.00 {
-            let inc_value = prev_value + amount;
-            self.group_map.insert(range, inc_value);
-        } else if !transactions.is_empty() {
+        if amount != 0.00 && !account.is_empty() {
+            let account_ref = self.group_map.get_mut(&date_string);
+            if let Some(r) = account_ref {
+                *r.entry(account).or_insert(0.00) += amount;
+            } else {
+                let mut account_map = HashMap::new();
+                account_map.insert(account, amount);
+                self.group_map.insert(date_string.clone(), account_map);
+            }
+        } else {
             for t in transactions {
-                self.group_map.insert(range.clone(), t.amount);
+                let account_ref = self.group_map.get_mut(&date_string);
+                if let Some(r) = account_ref {
+                    *r.entry(t.account).or_insert(0.00) += amount;
+                } else {
+                    let mut account_map = HashMap::new();
+                    account_map.insert(t.account, t.amount);
+                    self.group_map.insert(date_string.clone(), account_map);
+                }
             }
         }
     }
@@ -133,10 +149,10 @@ impl GroupMap {
 
 impl LedgerFile {
     /// obtain ISO 4217 currency for reference
-    fn get_currency(self) -> &'static rusty_money::iso::Currency {
-        let c = self.currency;
+    fn get_currency(&self) -> &'static rusty_money::iso::Currency {
+        let c = &self.currency;
 
-        match iso::find(&c) {
+        match iso::find(c) {
             Some(n) => n,
             None => rusty_money::iso::USD,
         }
@@ -219,8 +235,9 @@ impl LedgerFile {
             .into_iter()
             .filter(|x| {
                 let filter_period = match group {
-                    Group::Month => "%m",
-                    Group::Year => "%Y",
+                    Group::Yearly => "%Y",
+                    Group::Monthly => "%m",
+                    Group::Daily => "%d",
                     Group::None => "%Y",
                 };
                 x.date.format(filter_period).to_string() == option
@@ -248,7 +265,7 @@ impl LedgerFile {
         table.set_format(*format::consts::FORMAT_NO_BORDER_LINE_SEPARATOR);
         table.set_titles(row!["Account", "Balance"]);
 
-        let currency_code = self.clone().get_currency();
+        let currency_code = self.get_currency();
         let mut accounts_vec: Vec<Account> = Vec::new();
         let mut transactions_vec: Vec<Account> = Vec::new();
 
@@ -298,7 +315,7 @@ impl LedgerFile {
 
             if !current_account_type.eq(account_type[0]) {
                 current_account_type = account_type[0].to_string();
-                table.add_row(row![current_account_type]); // TODO this is supposed to be bold output
+                table.add_row(row![current_account_type]);
             }
 
             table
@@ -313,34 +330,42 @@ impl LedgerFile {
     pub fn print_register_group(self, option: &str, group: Group) {
         let mut table = Table::new();
         table.set_format(*format::consts::FORMAT_NO_BORDER_LINE_SEPARATOR);
-        table.set_titles(row!["Date", "Total"]);
+        table.set_titles(row!["Date / Account", "Total"]);
 
-        let currency_code = self.clone().get_currency();
+        let currency_code = self.get_currency();
         let mut group_map = GroupMap::new();
         let filtered_transactions = LedgerFile::filter_transactions_by_option(self, option);
 
         for transaction in filtered_transactions {
             let OptionalKeys {
                 amount,
+                account,
                 transactions,
                 ..
             } = OptionalKeys::match_optional_keys(&transaction);
 
             let year = transaction.date.format("%Y").to_string();
             let month = transaction.date.format("%Y-%m").to_string();
+            let day = transaction.date.format("%Y-%m-%d").to_string();
 
             match group {
-                Group::Month => group_map.populate_group_map(month, amount, transactions),
-                Group::Year => group_map.populate_group_map(year, amount, transactions),
+                Group::Yearly => group_map.populate_group_map(year, account, amount, transactions),
+                Group::Monthly => {
+                    group_map.populate_group_map(month, account, amount, transactions)
+                }
+                Group::Daily => group_map.populate_group_map(day, account, amount, transactions),
                 Group::None => (),
             }
         }
 
-        for (acct, amount) in group_map.group_map.iter() {
-            table.add_row(row![
-                acct,
-                Money::from_str(&amount.to_string(), currency_code).unwrap()
-            ]);
+        for (date_string, account_map) in group_map.group_map.iter() {
+            table.add_row(row![date_string]);
+            for (account, amount) in account_map.iter() {
+                table.add_row(row![
+                    account,
+                    Money::from_str(&amount.to_string(), currency_code).unwrap()
+                ]);
+            }
         }
         table.printstd();
     }
@@ -350,7 +375,7 @@ impl LedgerFile {
         table.set_format(*format::consts::FORMAT_NO_BORDER_LINE_SEPARATOR);
         table.set_titles(row!["Date", "Description", "Account", "Amount"]);
 
-        let currency_code = self.clone().get_currency();
+        let currency_code = self.get_currency();
         let filtered_transactions = LedgerFile::filter_transactions_by_option(self, option);
 
         for t in filtered_transactions {
@@ -371,9 +396,9 @@ impl LedgerFile {
     pub fn print_budget_actual(self, option: &str, group: Group) {
         let mut table = Table::new();
         table.set_format(*format::consts::FORMAT_NO_BORDER_LINE_SEPARATOR);
-        table.set_titles(row!["Date", "Budget", "Actual", "Delta"]);
+        table.set_titles(row!["Date / Account", "Budget", "Actual", "Delta"]);
 
-        let currency_code = self.clone().get_currency();
+        let currency_code = self.get_currency();
         let mut group_map = GroupMap::new();
         let filtered_transactions =
             LedgerFile::filter_income_expense_transactions(self.clone(), option, &group);
@@ -386,37 +411,51 @@ impl LedgerFile {
                 ..
             } = OptionalKeys::match_optional_keys(&transaction);
 
-            group_map.populate_group_map(account, amount, transactions)
+            let year = transaction.date.format("%Y").to_string();
+            let month = transaction.date.format("%Y-%m").to_string();
+            let day = transaction.date.format("%Y-%m-%d").to_string();
+
+            match group {
+                Group::Yearly => group_map.populate_group_map(year, account, amount, transactions),
+                Group::Monthly => {
+                    group_map.populate_group_map(month, account, amount, transactions)
+                }
+                Group::Daily => group_map.populate_group_map(day, account, amount, transactions),
+                Group::None => (),
+            }
         }
 
-        for (acct, amount) in group_map.group_map.iter() {
-            let b = &Account {
-                account: "".to_string(),
-                amount: 0.0,
-                budget_month: None,
-                budget_year: None,
-            };
-            let account = match self.accounts.iter().find(|x| &x.account == acct) {
-                Some(a) => a,
-                None => b,
-            };
+        for (date_string, account_map) in group_map.group_map.iter() {
+            table.add_row(row![date_string]);
+            for (account, amount) in account_map.iter() {
+                let b = &Account {
+                    account: "".to_string(),
+                    amount: 0.0,
+                    budget_month: None,
+                    budget_year: None,
+                };
+                let matching_account = match self.accounts.iter().find(|x| &x.account == account) {
+                    Some(a) => a,
+                    None => b,
+                };
 
-            let budget = match &group {
-                Group::Month => account.budget_month,
-                Group::Year => account.budget_year,
-                Group::None => None,
-            };
+                let budget = match &group {
+                    Group::Yearly => matching_account.budget_year,
+                    Group::Monthly => matching_account.budget_month,
+                    Group::Daily => None, // not possible to set daily budgets
+                    Group::None => None,
+                };
 
-            let budget_amount = budget.unwrap_or(0.00);
+                let budget_amount = budget.unwrap_or(0.00);
+                let delta = budget_amount - amount;
 
-            let delta = budget_amount - amount;
-
-            table.add_row(row![
-                acct,
-                Money::from_str(&budget_amount.to_string(), currency_code).unwrap(),
-                Money::from_str(&amount.to_string(), currency_code).unwrap(),
-                Money::from_str(&delta.to_string(), currency_code).unwrap(),
-            ]);
+                table.add_row(row![
+                    account,
+                    Money::from_str(&budget_amount.to_string(), currency_code).unwrap(),
+                    Money::from_str(&amount.to_string(), currency_code).unwrap(),
+                    Money::from_str(&delta.to_string(), currency_code).unwrap(),
+                ]);
+            }
         }
         table.printstd();
     }
@@ -568,10 +607,35 @@ fn group_map() {
             ..
         } = OptionalKeys::match_optional_keys(&transaction);
 
-        group_map.populate_group_map(account, amount, transactions)
+        let day = transaction.date.format("%Y-%m-%d").to_string();
+
+        group_map.populate_group_map(day, account, amount, transactions);
     }
 
-    assert_eq!(group_map.group_map.get("expense:foo"), Some(&42.00));
-    assert_eq!(group_map.group_map.get("asset:cash"), Some(&-42.00));
-    assert_eq!(group_map.group_map.keys().len(), 2);
+    assert_eq!(
+        group_map
+            .group_map
+            .get("2020-01-01")
+            .unwrap()
+            .get("expense:foo"),
+        Some(&42.00)
+    );
+    assert_eq!(
+        group_map
+            .group_map
+            .get("2020-01-01")
+            .unwrap()
+            .get("asset:cash"),
+        Some(&-42.00)
+    );
+    assert_eq!(group_map.group_map.keys().count(), 1);
+    assert_eq!(
+        group_map
+            .group_map
+            .get("2020-01-01")
+            .unwrap()
+            .keys()
+            .count(),
+        2
+    );
 }

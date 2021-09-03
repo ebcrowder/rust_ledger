@@ -43,7 +43,7 @@ mod test {
                 "-o",
                 "2020",
                 "-g",
-                "year",
+                "yearly",
             ])
             .assert();
         assert.success();

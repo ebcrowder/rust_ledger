@@ -37,7 +37,7 @@ impl Args {
     fn resolve_ledger_file(&mut self, sub: &ArgMatches) {
         self.ledger_file = match sub.value_of("filename") {
             Some(f) => String::from(f),
-            None => match std::env::var("RLEDGER_FILE") {
+            None => match std::env::var("RUST_LEDGER_FILE") {
                 Ok(p) => p,
                 Err(err) => Error::InvalidArg(err.to_string()).to_string(),
             },
@@ -89,14 +89,17 @@ impl Args {
                             .short("o")
                             .long("option")
                             .help("filter output by optional value")
-                            .takes_value(true),
+                            .takes_value(true)
+                            .required(true),
                     )
                     .arg(
                         Arg::with_name("group")
                             .short("g")
                             .long("group")
                             .help("group budget output by value")
-                            .takes_value(true),
+                            .takes_value(true)
+                            .possible_values(&["daily", "monthly", "yearly"])
+                            .required(true),
                     ),
             )
             .subcommand(
@@ -122,6 +125,7 @@ impl Args {
                             .short("g")
                             .long("group")
                             .help("group register output by value")
+                            .possible_values(&["daily", "monthly", "yearly"])
                             .takes_value(true),
                     ),
             )
@@ -165,8 +169,9 @@ impl Args {
             Args::resolve_ledger_file(self, sub);
             self.options_arg = sub.value_of("option").unwrap_or("").to_string();
             self.group_arg = match sub.value_of("group") {
-                Some("month") => Group::Month,
-                Some("year") => Group::Year,
+                Some("yearly") => Group::Yearly,
+                Some("monthly") => Group::Monthly,
+                Some("daily") => Group::Daily,
                 _ => Group::None,
             }
         }
@@ -175,8 +180,9 @@ impl Args {
             Args::resolve_ledger_file(self, sub);
             self.options_arg = sub.value_of("option").unwrap_or("").to_string();
             self.group_arg = match sub.value_of("group") {
-                Some("month") => Group::Month,
-                Some("year") => Group::Year,
+                Some("yearly") => Group::Yearly,
+                Some("monthly") => Group::Monthly,
+                Some("daily") => Group::Daily,
                 _ => Group::None,
             }
         }
