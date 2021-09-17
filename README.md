@@ -178,7 +178,7 @@ OPTIONS:
 
 example output:
 
-```
+```bash
  Account 
 ----------------------------
  asset:cash_checking 
@@ -212,7 +212,7 @@ OPTIONS:
 
 example output:
 
-```
+```bash
  Account             | Balance 
 ---------------------+------------
  asset               |  
@@ -262,7 +262,7 @@ OPTIONS:
 
 example output:
 
-```
+```bash
  Date       | Description        | Account             | Amount 
 ------------+--------------------+---------------------+------------
  2019-12-31 | weekly groceries   | expense:grocery     | $455.00 
@@ -330,7 +330,7 @@ OPTIONS:
 
 Here is an example output of `rust_ledger budget -f RUST_LEDGER_FILE -g yearly -o 2020`:
 
-```
+```bash
  Date / Account   | Budget     | Actual    | Delta 
 ------------------+------------+-----------+------------
  2020             |            |           |  
