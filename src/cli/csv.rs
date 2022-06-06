@@ -8,10 +8,9 @@ use std::{
     io::{stdout, Write},
 };
 
-#[derive(Debug, Clone, Deserialize)]
+#[derive(Clone, Deserialize)]
 struct Csv {
     date: String,
-    description: String,
     name: String,
     amount: Option<f64>,
     debit: Option<f64>,
@@ -224,7 +223,6 @@ fn account_should_be_expense_general() {
     let file = get_file();
     let record = Csv {
         date: "2020-01-01".to_string(),
-        description: "twin peaks diner coffee".to_string(),
         name: "coffee".to_string(),
         amount: Some(-2.50),
         debit: None,
@@ -244,7 +242,6 @@ fn account_should_be_income_general() {
     let file = get_file();
     let record = Csv {
         date: "2020-01-01".to_string(),
-        description: "donuts sold to dale cooper".to_string(),
         name: "donuts".to_string(),
         amount: Some(2.50),
         debit: None,
@@ -263,7 +260,6 @@ fn account_should_be_matched_account() {
     let file = get_file();
     let record = Csv {
         date: "2020-01-01".to_string(),
-        description: "cherry pie sold to dale cooper".to_string(),
         name: "summary_transaction".to_string(),
         amount: Some(2.50),
         debit: None,
@@ -285,7 +281,6 @@ fn negative_csv_amount_should_be_debit() {
     let offset = "liability:amex".to_string();
     let record = Csv {
         date: "2020-01-01".to_string(),
-        description: "twin peaks diner coffee".to_string(),
         name: "coffee".to_string(),
         amount: Some(-2.50),
         debit: None,
@@ -317,7 +312,6 @@ fn positive_csv_amount_should_be_credit() {
     let offset = "asset:cash".to_string();
     let record = Csv {
         date: "2020-01-01".to_string(),
-        description: "coffee sold to dale cooper".to_string(),
         name: "coffee".to_string(),
         amount: Some(2.50),
         debit: None,
@@ -349,7 +343,6 @@ fn should_handle_debits() {
     let offset = "liability:amex".to_string();
     let record = Csv {
         date: "2020-01-01".to_string(),
-        description: "coffee bought for dale cooper".to_string(),
         name: "coffee".to_string(),
         amount: None,
         debit: Some(2.50),
@@ -381,7 +374,6 @@ fn should_handle_credits() {
     let offset = "asset:cash".to_string();
     let record = Csv {
         date: "2020-01-01".to_string(),
-        description: "coffee sold to dale cooper".to_string(),
         name: "coffee".to_string(),
         amount: None,
         debit: None,
