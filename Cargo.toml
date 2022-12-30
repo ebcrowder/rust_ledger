@@ -18,7 +18,7 @@ csv = "1.1.6"
 rusty-money = "0.4.1"
 chrono = { version = "0.4.19", features = ["serde"] }
 clap = "2.33.3"
-prettytable-rs = "0.8"
+prettytable-rs = "0.10"
 
 [dev-dependencies]
 assert_cmd = "2.0.0"
