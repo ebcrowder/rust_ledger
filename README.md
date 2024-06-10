@@ -7,7 +7,7 @@ command line accounting tool for Linux and macOS
 
 ### Summary
 
-- Spiritual port of [ledger](https://github.com/ledger/ledger)
+- Port of [ledger](https://github.com/ledger/ledger)
 - Uses double-entry accounting paradigm
 - Supports all [ISO 4217](https://en.wikipedia.org/wiki/ISO_4217) currency formats
 - Uses `yaml` files as data store
